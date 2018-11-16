@@ -1,0 +1,151 @@
+---
+title: "Untitled"
+author: "Itamar Faran"
+date: "August 12, 2018"
+output: html_document
+---
+
+Load Packages
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(tidyverse)
+library(matrixcalc)
+
+triangle_to_vector <- function(MATR , diag = FALSE){
+  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
+  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+}
+```
+
+With zero mean
+```{r}
+p <- 10
+n <- 100
+
+mu <- rep(0, p)
+Sigma <- matrix(runif(p^2,-1,1), ncol = p) %>% (function(x) t(x)%*%x)
+is.positive.definite(Sigma)
+
+B <- 1000
+results <- list()
+coeffs <- numeric(B)
+for(b in 1:B){
+  samp <- mvrnorm(n, mu, Sigma)
+  
+  Sigma.est <- t(samp)%*%samp
+
+  x <- triangle_to_vector(Sigma)
+  y <- triangle_to_vector(Sigma.est)
+  
+  results[[b]] <- lm(y ~ 0 + x)
+  coeffs[b] <- results[[b]]$coef
+}
+```
+
+Results
+```{r}
+hist(coeffs)
+hist((coeffs - n)/sd(coeffs))
+
+summary(coeffs)
+sd(coeffs)
+```
+
+With none-zero mean
+```{r}
+mu <- rnorm(p, 0, 10)
+Sigma <- matrix(runif(p^2,-1,1), ncol = p) %>% (function(x) t(x)%*%x)
+is.positive.definite(Sigma)
+
+B <- 1000
+results <- list()
+coeffs <- numeric(B)
+for(b in 1:B){
+  samp <- mvrnorm(n, mu, Sigma)
+  
+  H <- diag(n) - rep(1,n)%*%t(rep(1,n))/n
+  
+  Sigma.est <- t(samp)%*%H%*%samp
+
+  x <- triangle_to_vector(Sigma)
+  y <- triangle_to_vector(Sigma.est)
+  
+  results[[b]] <- lm(y ~ 0 + x)
+  coeffs[b] <- results[[b]]$coef
+}
+```
+
+Results
+```{r}
+hist(coeffs)
+hist((coeffs - n)/sd(coeffs))
+
+summary(coeffs)
+sd(coeffs)
+```
+
+With zero-mean dependent observations
+```{r}
+mu <- rep(0,p)
+Sigma <- matrix(runif(p^2,-1,1), ncol = p) %>% (function(x) t(x)%*%x)
+is.positive.definite(Sigma)
+
+add.dependency <- function(X, rho){
+  Y <- matrix(0, nrow = nrow(X), ncol = ncol(X))
+  Y[1,] <- X[1,]
+  
+  for(i in 2:nrow(X)) Y[i,] <- rho*X[i-1,] + X[i,]
+  return(Y)
+}
+
+B <- 1000
+results <- list()
+coeffs <- numeric(B)
+for(b in 1:B){
+  samp <- add.dependency(mvrnorm(n, mu, Sigma), -0.5)
+  
+  H <- diag(n) - rep(1,n)%*%t(rep(1,n))/n
+  
+  Sigma.est <- t(samp)%*%H%*%samp
+
+  x <- triangle_to_vector(Sigma)
+  y <- triangle_to_vector(Sigma.est)
+  
+  results[[b]] <- lm(y ~ 0 + x)
+  coeffs[b] <- results[[b]]$coef
+}
+```
+
+Results
+```{r}
+hist(coeffs)
+hist((coeffs - n)/sd(coeffs))
+
+summary(coeffs)
+sd(coeffs)
+```
+
+
+
+#Drafts
+```{r}
+p <- 10
+n <- 1000
+
+mu <- runif(p, -1, 1)
+Sigma <- mu%*%t(mu) + diag(rep(1, p))
+is.positive.definite(Sigma)
+
+samp <- mvrnorm(n, mu, Sigma)
+
+mu.est <- colMeans(samp)
+Sigma.est <- mu.est%*%t(mu.est) + diag(rep(1, p))
+Sigma.emp <- t(samp)%*%samp
+
+x <- triangle_to_vector(Sigma.est)
+y <- triangle_to_vector(Sigma.emp)
+
+summary(lm(y ~ 0 + x))
+
+```

@@ -1,0 +1,466 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\epsilon_{i}=\left(X_{i1},X_{i2}\right)\sim N_{2}\left(0,\left(\begin{array}{cc}
+1 & \rho\\
+\rho & 1
+\end{array}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+X_{i} & =\phi X_{i-1}+\epsilon_{i}\\
+X_{0} & =0\\
+ & \left|\phi\right|<1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Find explicit variance
+\end_layout
+
+\begin_layout Standard
+Check also the results of delta method
+\end_layout
+
+\begin_layout Standard
+Do simulations and check for a constant relation
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula $\Theta$
+\end_inset
+
+ correlation matrix, 
+\begin_inset Formula $\tilde{\Theta}=D\Theta D$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $X_{n}^{'}\sim W_{p}\left(T,\tilde{\Theta}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $X_{n}=D_{X_{n}^{'}}^{-\frac{1}{2}}X_{n}^{'}D_{X_{n}^{'}}^{-\frac{1}{2}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Check if this process causes any problem with a regylar correlation matrix
+ (without 
+\begin_inset Formula $\alpha$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+Is there any constant between the delta method and the empiricial covariance?
+\end_layout
+
+\begin_layout Standard
+Check in 
+\begin_inset Quotes eld
+\end_inset
+
+Estimate.Loop2
+\begin_inset Quotes erd
+\end_inset
+
+ what happens when using real 
+\begin_inset Quotes eld
+\end_inset
+
+Tlength
+\begin_inset Quotes erd
+\end_inset
+
+ and not an estimate - DONE
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Try estimating the DF only with the diagonal (Variances and not covariances)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Bivariate 
+\begin_inset Formula $AR\left(1\right)$
+\end_inset
+
+ Model
+\end_layout
+
+\begin_layout Subsection
+Model Parameters
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\epsilon_{t}=\left(X_{t1},X_{t2}\right)\sim N_{2}\left(0,\Sigma\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For ease, assume 
+\begin_inset Formula $\Sigma_{ij}=\rho^{1_{\left\{ i=j\right\} }}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+X_{t},\mu\in & \mathbb{R}^{2}\\
+\phi\in & \left(-1,1\right)^{1}\\
+\\
+X_{t}-\mu & =\phi\left(X_{t-1}-\mu\right)+\epsilon_{t}\\
+X_{0} & =\mu\\
+Y_{t} & =X_{t}-\mu
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Y_{t}=X_{t}-\mu & =\phi\left(X_{t-1}-\mu\right)+\epsilon_{t}=\phi Y_{t-1}+\epsilon_{t}\\
+Y_{t} & =\phi Y_{t-1}+\epsilon_{t}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{ijk} & =Cov\left(Y_{ti},Y_{t-k,j}\right)=Cov\left(X_{ti},X_{t-k,j}\right):\\
+\gamma_{11k} & =Cov\left(Y_{t1},Y_{t-k,1}\right)\\
+\gamma_{12k} & =Cov\left(Y_{t1},Y_{t-k,2}\right)\\
+\gamma_{12k} & =Cov\left(Y_{t2},Y_{t-k,2}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{ij0} & =Cov\left(Y_{ti},Y_{tj}\right)\\
+ & =Cov\left(Y_{ti},\left[\phi Y_{t-1}+\epsilon_{t}\right]_{j}\right)\\
+ & =\phi Cov\left(Y_{ti},Y_{t-1,j}\right)+Cov\left(Y_{ti},\epsilon_{tj}\right)\\
+ & =\phi\gamma_{ij1}+Cov\left(\phi Y_{t-1,i}+\epsilon_{ti},\epsilon_{tj}\right)\\
+ & =\phi\gamma_{ij1}+\phi Cov\left(Y_{t-1,i},\epsilon_{tj}\right)+Cov\left(\epsilon_{ti},\epsilon_{tj}\right)\\
+ & =\phi\gamma_{ij1}+Cov\left(\epsilon_{ti},\epsilon_{tj}\right)=\phi\gamma_{ij1}+\Sigma_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{ij1} & =Cov\left(Y_{ti},Y_{t-1,j}\right)\\
+ & =Cov\left(\phi Y_{t-1,i}+\epsilon_{ti},Y_{t-1,j}\right)\\
+ & =\phi Cov\left(Y_{t-1,i},Y_{t-1,j}\right)+Cov\left(\epsilon_{ti},Y_{t-1,j}\right)\\
+ & =\phi\gamma_{ij0}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{ij0} & =\phi\gamma_{ij1}+\Sigma_{ij}\\
+\gamma_{ij1} & =\phi\gamma_{ij0}\\
+\gamma_{ij0} & =\phi^{2}\gamma_{ij0}+\Sigma_{ij}\\
+\gamma_{ij0}=\frac{1}{1-\phi^{2}}\Sigma_{ij} & ;\,\gamma_{ij1}=\frac{\phi}{1-\phi^{2}}\Sigma_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{ijk} & =Cov\left(Y_{ti},Y_{t-k,j}\right)\\
+ & =Cov\left(\phi Y_{t-1,i}+\epsilon_{ti},Y_{t-k,j}\right)\\
+ & =Cov\left(\phi Y_{t,i}+\epsilon_{ti},Y_{t-\left(k-1\right),j}\right)\\
+ & =\phi Cov\left(Y_{t,i},Y_{t-\left(k-1\right),j}\right)+Cov\left(\epsilon_{ti},Y_{t-\left(k-1\right),j}\right)\\
+ & =\phi\gamma_{ij,k-1}\\
+\gamma_{ijk} & =\phi\gamma_{ij,k-1}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\gamma_{k}=\frac{\phi^{k}}{1-\phi^{2}}\Sigma
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Cov\left(\left(\begin{array}{c}
+X_{11}\\
+X_{12}\\
+X_{21}\\
+X_{22}\\
+\vdots\\
+X_{T1}\\
+X_{T2}
+\end{array}\right)\right)=\frac{1}{1-\phi^{2}}\left(\begin{array}{cccc}
+\Sigma & \phi\Sigma & \cdots & \phi^{T-1}\Sigma\\
+\phi\Sigma & \Sigma & \cdots & \phi^{T-2}\Sigma\\
+\vdots & \vdots & \ddots & \vdots\\
+\phi^{T-1}\Sigma & \phi^{T-2}\Sigma & \cdots & \Sigma
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\mu}=\bar{X}_{T}=\frac{1}{T}\sum_{t=1}^{T}X_{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+E\left[\bar{X}_{T}\right]=\frac{1}{T}\sum_{t=1}^{T}E\left[X_{t}\right]=\mu
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(\bar{X}_{T}\right)=Var\left(\left(\begin{array}{c}
+\bar{X}_{T,1}\\
+\bar{X}_{T,2}
+\end{array}\right)\right)=\left(\begin{array}{cc}
+Var\left(\bar{X}_{T,1}\right) & Cov\left(\bar{X}_{T,1},\bar{X}_{T,2}\right)\\
+Cov\left(\bar{X}_{T,1},\bar{X}_{T,2}\right) & Var\left(\bar{X}_{T,2}\right)
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\bar{X}_{T,i},\bar{X}_{T,j}\right) & =Cov\left(\frac{1}{T}\sum_{t=1}^{T}X_{t,i},\frac{1}{T}\sum_{t=1}^{T}X_{t,j}\right)\\
+ & =\frac{1}{T^{2}}\cdot\sum_{t=1}^{T}\sum_{s=1}^{T}Cov\left(X_{t,i},X_{s,j}\right)\\
+ & =\frac{1}{T^{2}}\cdot\left(T\cdot\gamma_{ij0}+2\left(\left(T-1\right)\gamma_{ij1}+\left(T-2\right)\gamma_{ij2}+...+1\cdot\gamma_{ij,T-1}\right)\right)\\
+ & =\frac{1}{T^{2}}\cdot\left(T\cdot\gamma_{ij0}+2\sum_{k=1}^{T-1}\left(T-k\right)\gamma_{ijk}\right)\\
+ & =\frac{1}{T^{2}}\cdot\left(T\cdot\gamma_{ij0}+2\left(T\sum_{k=1}^{T-1}\gamma_{ijk}-\sum_{k=1}^{T-1}k\gamma_{ijk}\right)\right)\\
+ & =\frac{1}{T^{2}}\frac{1}{1-\phi^{2}}\Sigma_{ij}\cdot\left(T+2\left(T\sum_{k=1}^{T-1}\phi^{k}-\sum_{k=1}^{T-1}k\phi^{k}\right)\right)\\
+ & =\frac{1}{T^{2}}\frac{1}{1-\phi^{2}}\Sigma_{ij}\cdot\left(T+2\left(T\cdot\phi\cdot\frac{1-\phi^{T-1}}{1-\phi}-\frac{\phi-T\phi^{T}+\left(T-1\right)\phi^{T+1}}{\left(1-\phi\right)^{2}}\right)\right)\\
+ & =\frac{1}{T^{2}}\frac{1}{1-\phi^{2}}\Sigma_{ij}\cdot\left(T+\frac{2}{\left(1-\phi\right)^{2}}\left(T\cdot\phi\cdot\left(1-\phi\right)\left(1-\phi^{T-1}\right)-\left(\phi-T\phi^{T}+\left(T-1\right)\phi^{T+1}\right)\right)\right)\\
+ & =\frac{1}{T^{2}}\frac{1}{1-\phi^{2}}\Sigma_{ij}\cdot\left(T+\frac{2}{\left(1-\phi\right)^{2}}\left(T\phi-T\phi^{2}-\cancel{T\phi^{T}}+\cancel{T\phi^{T+1}}-\phi+\cancel{T\phi^{T}}-\cancel{T\phi^{T+1}}+\phi^{T+1}\right)\right)\\
+ & =\frac{1}{T^{2}}\frac{1}{1-\phi^{2}}\Sigma_{ij}\cdot\left(T+\frac{2\phi}{\left(1-\phi\right)^{2}}\left(T\left(1-\phi\right)-\left(1-\phi^{T}\right)\right)\right)\\
+ & =\frac{1}{T}\frac{1}{1-\phi^{2}}\left(1+2\phi\left(\frac{1}{1-\phi}-\frac{1}{T}\frac{1-\phi^{T}}{\left(1-\phi\right)^{2}}\right)\right)\Sigma_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(\sqrt{T}\left(\bar{X}_{T}-\mu\right)\right)=\frac{1}{1-\phi^{2}}\left(1+2\phi\left(\frac{1}{1-\phi}-\frac{1}{T}\frac{1-\phi^{T}}{\left(1-\phi\right)^{2}}\right)\right)\Sigma\longrightarrow\frac{1}{1-\phi^{2}}\left(1+2\frac{\phi}{1-\phi}\right)\Sigma
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{1}{1-\phi^{2}}\left(1+2\frac{\phi}{1-\phi}\right) & =\frac{1}{1-\phi^{2}}\left(\frac{1-\phi}{1-\phi}+\frac{2\phi}{1-\phi}\right)=\frac{1+\phi}{\left(1-\phi^{2}\right)\left(1-\phi\right)}\\
+ & =\frac{1+\phi}{\left(1+\phi\right)\left(1-\phi\right)\left(1-\phi\right)}=\frac{1}{\left(1-\phi\right)^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(\sqrt{T}\left(\bar{X}_{T}-\mu\right)\right)=\frac{1}{1-\phi^{2}}\left(1+2\phi\left(\frac{1}{1-\phi}-\frac{1}{T}\frac{1-\phi^{T}}{\left(1-\phi\right)^{2}}\right)\right)\Sigma\longrightarrow\frac{1}{\left(1-\phi\right)^{2}}\Sigma
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\Sigma}{Var\left(\bar{X}_{T}\right)}\approx\frac{\Sigma}{\frac{1}{T}\frac{1}{\left(1-\phi\right)^{2}}\Sigma}=\left(1-\phi\right)^{2}T
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

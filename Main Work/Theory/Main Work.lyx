@@ -1,0 +1,2086 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-std
+theorems-sec
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Estimating the Difference Between Large Scale Sample Correlation Matrices
+ with Small Sample Size
+\end_layout
+
+\begin_layout Author
+Dr Yuval Benjamini & Itamar Faran
+\begin_inset Newline newline
+\end_inset
+
+The Department of Statistics
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The Hebrew University of Jerusalem ©
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Definitions
+\end_layout
+
+\begin_layout Standard
+.
+\end_layout
+
+\begin_layout Enumerate
+Set 
+\begin_inset Formula $D\subset\mathbb{N}:\,|D|<\infty$
+\end_inset
+
+ and 
+\begin_inset Formula $H\subset\mathbb{N}:\,|H|<\infty$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $D\cap H=\emptyset$
+\end_inset
+
+ and 
+\begin_inset Formula $D\cup H=\{1,2,...,N\}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Define 
+\begin_inset Formula $N_{D}=|D|$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{H}=|H|$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Set 
+\begin_inset Formula $\left\{ \rho_{n}\right\} _{n=1}^{N}\subset M_{p}\left(\left[-1,1\right]\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $p=90$
+\end_inset
+
+.
+ Denote that: 
+\begin_inset Formula 
+\[
+\rho_{nii}=1\,\forall\,i\in\{1,...,p\}\;and\;\rho_{nij}=\rho_{nji}\forall\,i,j\in\{1,...,p\}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Define 
+\begin_inset Formula $\pi:\,(D\cup H)\longrightarrow\{0,1\}$
+\end_inset
+
+ where 
+\begin_inset Formula $\pi(n)=1_{\{n\in D\}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Under the full model, we have 
+\begin_inset Formula $\frac{1}{2}\cdot(p^{2}-p)=\frac{p(p-1)}{2}$
+\end_inset
+
+ unknown parameters.
+\end_layout
+
+\begin_layout Section
+Model Construction
+\end_layout
+
+\begin_layout Standard
+Our model is defined as followed:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\rho_{nij}=\Theta_{ij}\cdot\alpha_{i}^{\pi(n)}\cdot\alpha_{j}^{\pi(n)}+\epsilon_{nij}\:where\:\Theta\in\mathbb{M}_{p}\left(\left[-1,1\right]\right),\,\alpha\in\left[0,1\right]^{p}
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Notice that:
+\end_layout
+
+\begin_layout Itemize
+For 
+\begin_inset Formula $n\in H$
+\end_inset
+
+, 
+\begin_inset Formula $\rho_{nij}=\Theta_{ij}\cdot\alpha_{i}^{0}\cdot\alpha_{j}^{0}+\epsilon_{nij}=\Theta_{ij}+\epsilon_{nij}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+For 
+\begin_inset Formula $n\in D$
+\end_inset
+
+, 
+\begin_inset Formula $\rho_{nij}=\Theta_{ij}\cdot\alpha_{i}^{1}\cdot\alpha_{j}^{1}+\epsilon_{nij}=\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}+\epsilon_{nij}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therefore, 
+\begin_inset Formula $\rho_{n}=\Theta\times(\alpha\alpha^{t})^{\pi(n)}+\mathcal{E}_{n}$
+\end_inset
+
+, where 
+\begin_inset Formula $\times$
+\end_inset
+
+ denotes element-wise multiplaction.
+\end_layout
+
+\begin_layout Standard
+Under this model there are 
+\begin_inset Formula $p+\frac{p(p-1)}{2}$
+\end_inset
+
+ unknown parameters and only 
+\begin_inset Formula $p\,\left(=\left|\alpha\right|\right)$
+\end_inset
+
+ statistical tests.
+\end_layout
+
+\begin_layout Section
+Model Initialization
+\end_layout
+
+\begin_layout Subsection
+Maximizing the Liklihood Function
+\end_layout
+
+\begin_layout Standard
+In order to initialize our model, we assume 
+\begin_inset Formula $\epsilon_{nij}\overset{i.i.d}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+.
+ Under this assumption, maximizing our likelihood function falls to minimizing
+ a square of sums:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+SS\left(\left\{ \rho_{n}\right\} _{n=1}^{N};\Theta,\alpha,\sigma^{2}\right) & =\sum_{n\in H}\sum_{i=1}^{p-1}\sum_{j=i+1}^{p}\left(\Theta_{ij}-\rho_{nij}\right)\cdot\sigma^{-2}\\
+ & +\sum_{n\in D}\sum_{i=1}^{p-1}\sum_{j=i+1}^{p}\left(\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}-\rho_{nij}\right)^{2}\cdot\sigma^{-2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since we assume all errors are homoscedastic, we can omit 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ from the equation and ignore the square errors of our observations from
+ their average.
+\end_layout
+
+\begin_layout Standard
+therefore, we wish to find:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\Theta,\alpha}{argmin}\,\left\{ N_{H}\cdot\sum_{i=1}^{p-1}\sum_{j=i+1}^{p}\left(\Theta_{ij}-\overline{\rho}_{H,\,ij}\right)^{2}+N_{D}\cdot\sum_{i=1}^{p-1}\sum_{j=i+1}^{p}\left(\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}-\overline{\rho}_{D,\,ij}\right)^{2}\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our derivatives are calculated as followed:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\Theta_{ij}}SS & =N_{H}\cdot2\cdot\left(\Theta_{ij}-\overline{\rho}_{H,\,ij}\right)+N_{D}\cdot2\cdot\left(\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}-\overline{\rho}_{D,\,ij}\right)\cdot\alpha_{i}\cdot\alpha_{j}\\
+ & \propto\left(\Theta_{ij}-\overline{\rho}_{H,\,ij}\right)+\frac{N_{D}}{N_{H}}\cdot\left(\Theta_{ij}\cdot\alpha_{i}^{2}\cdot\alpha_{j}^{2}-\overline{\rho}_{D,\,ij}\cdot\alpha_{i}\cdot\alpha_{j}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\alpha_{i}}SS & =\stackrel[\begin{array}{c}
+j=1\\
+j\neq i
+\end{array}]{p}{\sum}2\cdot N_{D}\cdot(\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}-\overline{\rho}_{D,\,ij})\cdot\Theta_{ij}\cdot\alpha_{j}\\
+ & \propto\stackrel[\begin{array}{c}
+j=1\\
+j\neq i
+\end{array}]{p}{\sum}\alpha_{j}\cdot\left(\Theta_{ij}^{2}\cdot\alpha_{i}\cdot\alpha_{j}-\Theta_{ij}\cdot\overline{\rho}_{D,\,ij}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therfore, 
+\begin_inset Formula $\nabla SS:\,\mathbb{R}^{p^{\star}}\longrightarrow\mathbb{R}^{p^{\star}}$
+\end_inset
+
+ where 
+\begin_inset Formula $p^{\star}=dim\left(\left\{ \Theta,\alpha\right\} \right)=p+\frac{p(p-1)}{2}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Standard
+We seek to find 
+\begin_inset Formula $\left\{ \Theta,\alpha\right\} \in\mathbb{R}^{p^{\star}}:\,\nabla SS\left(\left\{ \rho_{n}\right\} _{n=1}^{N};\Theta,\alpha,\sigma^{2}\right)=0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We use numeric methods to calculate 
+\begin_inset Formula $\left\{ \hat{\Theta},\hat{\alpha}\right\} _{mle}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\Theta_{ij}-\overline{\rho}_{H,\,ij}\right)+\frac{N_{D}}{N_{H}}\cdot\left(\Theta_{ij}\cdot\alpha_{i}^{2}\cdot\alpha_{j}^{2}-\overline{\rho}_{D,\,ij}\cdot\alpha_{i}\cdot\alpha_{j}\right)=0\:\forall\:1\leq i<j\leq p
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\stackrel[\begin{array}{c}
+j=1\\
+j\neq i
+\end{array}]{p}{\sum}\alpha_{j}\cdot\left(\Theta_{ij}^{2}\cdot\alpha_{i}\cdot\alpha_{j}-\Theta_{ij}\cdot\overline{\rho}_{D,\,ij}\right)=0\:\forall\:1\leq i\leq p
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+A More Practical Method
+\end_layout
+
+\begin_layout Standard
+Under the assumption that 
+\begin_inset Formula $\epsilon_{nij}\overset{i.i.d}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+, there is a simpler algorithm to estimate 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+0) Initialize the loop:
+\end_layout
+
+\begin_layout Itemize
+Estimate 
+\begin_inset Formula $\Theta_{0}\overset{!}{=}\overline{\rho}_{H}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\Theta_{0}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\alpha_{0}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{\arg\min}\left\{ \left(\Theta_{0}\times\alpha\alpha^{t}-\overline{\rho}_{D}\right)^{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+i) loop step i:
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\alpha_{i-1}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\Theta_{i}\overset{!}{=}\left(N_{H}\cdot\overline{\rho}_{H}+N_{D}\cdot\left(\overline{\rho}_{D}\div\alpha_{i-1}\alpha_{i-1}^{t}\right)\right)/\left(N_{H}+N_{D}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\Theta_{i}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\alpha_{i}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{\arg\min}\left\{ \left(\Theta_{i}\times\alpha\alpha^{t}-\overline{\rho}_{D}\right)^{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+...
+\end_layout
+
+\begin_layout Standard
+Repeat this procedure until convergence: 
+\begin_inset Formula $||\alpha_{i-1}-\alpha_{i}||<\varepsilon$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Results
+\end_layout
+
+\begin_layout Standard
+The estimation method detailed in 
+\series bold
+3.2
+\series default
+ is efficient and brings a convergence rather quickly (about 11 loops for
+ 
+\begin_inset Formula $p=90$
+\end_inset
+
+, less than one minute on a typical PC).
+ Expiramenting with simulations show that the estimate for 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ is relatively unbiased, while 
+\begin_inset Formula $\hat{\Theta}$
+\end_inset
+
+ has a small bias, probably resulting from dividing the mean correlation
+ matrix with 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ instead of dividing each observation with 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ and then calculating the mean (Jensen Ineqaulity: 
+\begin_inset Formula $\psi\left(E\left[X\right]\right)\leq E\left[\psi\left(X\right)\right]$
+\end_inset
+
+ for 
+\begin_inset Formula $\psi$
+\end_inset
+
+ a convex function).
+ However, this bias is not very large and doesn't affect much our next steps
+ in the study, as will be explained later on.
+\end_layout
+
+\begin_layout Standard
+The main problem of this estimation method is it's assumptions that 
+\begin_inset Newline linebreak
+\end_inset
+
+
+\begin_inset Formula $Cov\left(\rho_{nij},\rho_{nkl}\right)=0\,\forall\,n,i,j,k,l$
+\end_inset
+
+: The sample correlation matrix is a function of the sample covariance matrix,
+ which has inner-dependence between it's elements, therefore so does the
+ correlation matrix.
+ This will later on interfere with our hypothesis testing, since it can
+ be shown in simulations that:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(\hat{\alpha}_{j}\right)\gg-\left[\left(\nabla_{\alpha}^{2}SS\left(\left\{ \rho_{n}\right\} _{n=1}^{N};\Theta,\alpha,\sigma^{2}\right)\right)^{-1}\right]_{jj}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Removing (Some of) the Assumptions on the Errors
+\end_layout
+
+\begin_layout Subsection
+Lemma I: The Whishart distribution and it's inner covariances
+\end_layout
+
+\begin_layout Subsubsection
+The Covariance Estimate Matrix
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $\left\{ Z_{n}\right\} _{n=1}^{N}\,\overset{iid}{\sim}\,N_{p}\left(0,\Sigma\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We define 
+\begin_inset Formula $Y=\stackrel[n=1]{N}{\sum}\,Z_{n}\cdot Z_{n}^{t}\,\sim W_{p}\left(N,\Sigma\right)$
+\end_inset
+
+; 
+\begin_inset Formula $Y\in\mathbb{M}_{P}(\mathbb{R})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We are intrested in finding 
+\begin_inset Formula $Cov\left(Y_{ij},Y_{kl}\right)\,\forall\,(i,j,k,l)\in\left\{ 1,...,P\right\} {}^{4}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(Y_{ij},Y_{kl}\right) & =Cov\left(\sum_{n=1}^{N}Z_{ni}\cdot Z_{nj},\sum_{m=1}^{N}Z_{mk}\cdot Z_{ml}\right)\\
+ & =\sum_{n=1}^{N}\sum_{m=1}^{N}cov\left(Z_{ni}\cdot Z_{nj},Z_{mk}\cdot Z_{ml}\right)
+\end{align*}
+
+\end_inset
+
+denote 
+\begin_inset Formula $Z_{ni}\bot Z_{mj}\,\forall\,n\neq m,\,\forall\,i,j$
+\end_inset
+
+ and that 
+\begin_inset Formula $Z_{n}\overset{d}{=}Z_{m}\,\forall\,m,n$
+\end_inset
+
+, then:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Rightarrow & Cov(Y_{ij},Y_{kl})=\sum_{n=1}^{N}Cov(Z_{ni}\cdot Z_{nj},Z_{nk}\cdot Z_{nl})\\
+ & =N\cdot\left(E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]-E\left[Z_{ni}Z_{nj}\right]\cdot E\left[Z_{nk}Z_{nl}\right]\right)
+\end{align*}
+
+\end_inset
+
+Since 
+\begin_inset Formula $E\left[Z_{ni}\right]=0\,\forall\,i$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+E\left[Z_{ni}Z_{nj}\right]=E\left[Z_{ni}Z_{nj}\right]-\underset{=0}{E\left[Z_{ni}\right]\cdot E\left[Z_{nj}\right]}=Cov\left(Z_{ni,}Z_{nj}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Rightarrow & E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]-E\left[Z_{ni}Z_{nj}\right]\cdot E\left[Z_{nk}Z_{nl}\right]\\
+ & =E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]-Cov\left(Z_{ni},Z_{nj}\right)\cdot Cov\left(Z_{nk},Z_{nl}\right)\\
+ & =E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]-\Sigma_{ij}\cdot\Sigma_{kl}\,\forall n
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using Isserlis' theorem, we denote 
+\begin_inset Formula 
+\begin{align*}
+E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]= & E\left[Z_{ni}\cdot Z_{nj}\right]\cdot E\left[Z_{nk}\cdot Z_{nl}\right]\\
+ & +E\left[Z_{ni}\cdot Z_{nk}\right]\cdot E\left[Z_{nj}\cdot Z_{nl}\right]\\
+ & +E\left[Z_{ni}\cdot Z_{nl}\right]\cdot E\left[Z_{nj}\cdot Z_{nk}\right]
+\end{align*}
+
+\end_inset
+
+We noted that 
+\begin_inset Formula $E\left[Z_{ni}Z_{nj}\right]=Cov\left(Z_{ni,}Z_{nj}\right)$
+\end_inset
+
+, therefore 
+\begin_inset Formula 
+\[
+E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]=\Sigma_{ij}\cdot\Sigma_{kl}+\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, we can express 
+\begin_inset Formula $Cov\left(Y_{ij},Y_{kl}\right)$
+\end_inset
+
+: 
+\begin_inset Formula 
+\begin{align*}
+Cov\left(Y_{ij},Y_{kl}\right) & =\sum_{n=1}^{N}\left(E\left[Z_{ni}Z_{nj}Z_{nk}Z_{nl}\right]-\Sigma_{ij}\cdot\Sigma_{kl}\right)\\
+ & =N\cdot\left(\Sigma_{ij}\cdot\Sigma_{kl}+\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}-\Sigma_{ij}\cdot\Sigma_{kl}\right)\\
+ & =N\cdot\left(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}\right)\\
+\Rightarrow & Cov(Y_{ij},Y_{kl})=N\cdot\left(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+The Correlation Estimate Matrix
+\end_layout
+
+\begin_layout Subsubsection*
+The Case of a Known 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\Lambda\in\mathbb{M}_{p}\left(\mathbb{R}\right):\,\Lambda_{ii}=1\,\forall\,i,\,\left|\Lambda_{ij}\right|\leq1,\,\lambda_{ij}=\lambda_{ji}\,\forall\,i\neq j,\,\Lambda\,is\,positive-definite$
+\end_inset
+
+ be the correlation matrix.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $D_{\Sigma}\in\mathbb{M}_{p}\left(\mathbb{R}\right):\,D_{\Sigma,ii}=\Sigma_{ii}>0\,\forall\,i,D_{\Sigma,ij}=0\,\forall\,i\neq j.$
+\end_inset
+
+ Notice that 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+ is also positive definite.
+\end_layout
+
+\begin_layout Standard
+We know that :
+\begin_inset Formula 
+\[
+\Sigma=D_{\Sigma}^{\nicefrac{1}{2}}\cdot\Lambda\cdot D_{\Sigma}^{\nicefrac{1}{2}}\Longleftrightarrow\Lambda=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\nicefrac{1}{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula 
+\begin{align*}
+ & S\sim W_{P}(n,\Sigma)\\
+\Rightarrow & n\cdot\bar{S}\coloneqq n\cdot\frac{S}{n}\sim W_{P}\left(n,D_{\Sigma}^{\nicefrac{1}{2}}\cdot\Lambda\cdot D_{\Sigma}^{\nicefrac{1}{2}}\right)\\
+\Rightarrow & n\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{S}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\sim W_{P}\left(n,\Lambda\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Rightarrow E\left[D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{S}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\right] & =D_{\Sigma}^{-\nicefrac{1}{2}}\cdot E\left[\frac{S}{n}\right]\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\\
+ & =D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\nicefrac{1}{2}}=\Lambda
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For a known 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+, define 
+\begin_inset Formula 
+\[
+R=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{S}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\Rightarrow n\cdot R\sim W_{p}(n,\Lambda)\Rightarrow E\left[R\right]=\Lambda
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But since 
+\begin_inset Formula $n\cdot R\sim W_{P}(n,\Lambda)$
+\end_inset
+
+, we know that:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(R_{ij},R_{kl}\right) & =n^{-2}\cdot Cov\left(n\cdot R_{ij},n\cdot R_{kl}\right)\\
+ & =n^{-2}\cdot n\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})\\
+ & =n^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+The Case of an Unknown 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, we have 
+\begin_inset Formula $\Sigma=D_{\Sigma}^{\nicefrac{1}{2}}\Lambda D_{\Sigma}^{\nicefrac{1}{2}}$
+\end_inset
+
+, 
+\begin_inset Formula $S\sim W_{P}(n,\Sigma)$
+\end_inset
+
+ and 
+\begin_inset Formula $R=D_{S}^{-\nicefrac{1}{2}}SD_{S}^{-\nicefrac{1}{2}}$
+\end_inset
+
+.
+ Note that now, the diagonal of 
+\begin_inset Formula $R$
+\end_inset
+
+ is 
+\bar under
+determine
+\bar default
+ and the triangles of 
+\begin_inset Formula $R$
+\end_inset
+
+ have a smaller variance than the case with a known 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+, since we divide the elements of 
+\begin_inset Formula $S$
+\end_inset
+
+ with elements of 
+\begin_inset Formula $S$
+\end_inset
+
+ itself: 
+\begin_inset Formula $R_{ij}=\frac{S_{ij}}{\sqrt{S_{ii}S_{jj}}}$
+\end_inset
+
+.
+ Using simulations, it is easy to see that 
+\begin_inset Formula $\left|Cov\left(R_{ij},R_{kl}\right)\right|\ll n^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})$
+\end_inset
+
+.
+ In order to find 
+\begin_inset Formula $Cov\left(R_{ij},R_{kl}\right)$
+\end_inset
+
+, the delta method was used:
+\end_layout
+
+\begin_layout Lemma
+The Delta Method
+\end_layout
+
+\begin_layout Lemma
+Let 
+\begin_inset Formula $\left\{ X_{i}\right\} _{i=1}^{n}:\,X_{i}\in\mathbb{R}^{d}$
+\end_inset
+
+ be iid RV's and let 
+\begin_inset Formula $\bar{X}_{n}\rightsquigarrow N_{d}\left(\mu,\Sigma_{n}\right)$
+\end_inset
+
+.
+ Then
+\begin_inset Formula 
+\[
+g\left(\bar{X}_{n}\right)\rightsquigarrow N_{d}\left(g\left(\mu\right),\nabla g\left(\mu\right)^{t}\Sigma_{n}\nabla g\left(\mu\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Implementation: 
+\series default
+Let 
+\begin_inset Formula $X\in\mathbb{M}_{n\times4}\left(\mathbb{R}\right):\,\left\{ X_{i\cdot}\right\} _{i=1}^{n}\overset{iid}{\sim}N_{4}\left(0,\Sigma\right)$
+\end_inset
+
+ and define 
+\begin_inset Formula 
+\begin{align*}
+\xi_{n} & =n^{-1}\left(\begin{array}{ccccccccc}
+X_{\cdot1}^{t}X_{\cdot1} & X_{\cdot1}^{t}X_{\cdot2} & \cdots & X_{\cdot1}^{t}X_{\cdot4} & X_{\cdot2}^{t}X_{\cdot2} & \cdots & X_{\cdot2}^{t}X_{\cdot4} & \cdots & X_{\cdot4}^{t}X_{\cdot4}\end{array}\right)\\
+ & =\left(\begin{array}{ccccccccc}
+\hat{\Sigma}_{11} & \hat{\Sigma}_{12} & \cdots & \hat{\Sigma}_{14} & \hat{\Sigma}_{22} & \cdots & \hat{\Sigma}_{24} & \cdots & \hat{\Sigma}_{44}\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the Wishart theory written in 4.1.1, notice that 
+\begin_inset Formula $X_{\cdot k}^{t}X_{\cdot l}=\stackrel[i=1]{n}{\sum}X_{ik}X_{il}$
+\end_inset
+
+ is a sum of iid RVs with 
+\begin_inset Formula $E\left[X_{ik}X_{il}\right]=n\Sigma_{kl}$
+\end_inset
+
+ and 
+\begin_inset Formula $Var\left(X_{ik}X_{il}\right)=(\Sigma_{kk}\cdot\Sigma_{ll}+\Sigma_{kl}^{2})$
+\end_inset
+
+, both finite, therefore we can imply the C.L.T on 
+\begin_inset Formula $\xi_{n}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\xi_{n}\rightsquigarrow N_{10}\left(\left(\begin{array}{c}
+\Sigma_{11}\\
+\Sigma_{12}\\
+\vdots\\
+\Sigma_{44}
+\end{array}\right),\Sigma^{\star}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With 
+\begin_inset Formula $\Sigma^{\star}$
+\end_inset
+
+ as described in 4.1.1.
+\end_layout
+
+\begin_layout Standard
+Now define 
+\begin_inset Formula $g:\,\mathbb{R}^{10}\mapsto\mathbb{R}^{6}:$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g\left(E\left[\xi_{n}\right]\right)=\left(\begin{array}{cccccc}
+\frac{\Sigma_{12}}{\sqrt{\Sigma_{11}\Sigma_{22}}} & \frac{\Sigma_{13}}{\sqrt{\Sigma_{11}\Sigma_{33}}} & \frac{\Sigma_{14}}{\sqrt{\Sigma_{11}\Sigma_{44}}} & \frac{\Sigma_{23}}{\sqrt{\Sigma_{22}\Sigma_{33}}} & \frac{\Sigma_{24}}{\sqrt{\Sigma_{22}\Sigma_{44}}} & \frac{\Sigma_{34}}{\sqrt{\Sigma_{33}\Sigma_{44}}}\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then 
+\begin_inset Formula $Var\left(g\left(\xi_{n}\right)\right)=\underset{6\times10}{\left[\nabla g\left(E\left[\xi_{n}\right]\right)\right]^{t}}\underset{10\times10}{\Sigma^{\star}}\underset{10\times6}{\left[\nabla g\left(E\left[\xi_{n}\right]\right)\right]}$
+\end_inset
+
+.
+ This results with the expression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\hat{\rho}_{ij},\hat{\rho}_{kl}\right) & \propto\frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)\\
+ & \quad-\boldsymbol{\rho_{kl}}\left(\rho_{ik}\cdot\rho_{jk}+\rho_{il}\cdot\rho_{jl}\right)+\left(\rho_{ik}\rho_{jl}+\rho_{il}\rho_{jk}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Or in our context, 
+\begin_inset Formula $R=D_{S}^{-\nicefrac{1}{2}}SD_{S}^{-\nicefrac{1}{2}}$
+\end_inset
+
+, 
+\begin_inset Formula $E\left[R\right]\simeq\Lambda$
+\end_inset
+
+ and 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(R_{ij},R_{kl}\right) & \propto\frac{\boldsymbol{\Lambda_{ij}}\boldsymbol{\Lambda_{kl}}}{2}\left(\Lambda_{ik}^{2}+\Lambda_{il}^{2}+\Lambda_{jk}^{2}+\Lambda_{jl}^{2}\right)-\boldsymbol{\Lambda_{ij}}\left(\Lambda_{ik}\Lambda_{il}+\Lambda_{jk}\Lambda_{jl}\right)\\
+ & \quad-\boldsymbol{\Lambda_{kl}}\left(\Lambda_{ik}\cdot\Lambda_{jk}+\Lambda_{il}\cdot\Lambda_{jl}\right)+\left(\Lambda_{ik}\Lambda_{jl}+\Lambda_{il}\Lambda_{jk}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This result is robust in simulations.
+\end_layout
+
+\begin_layout Subsection
+Revising the Model
+\end_layout
+
+\begin_layout Standard
+As before, our model is as follows: 
+\begin_inset Formula $\rho_{n}=\Theta\times(\alpha\alpha^{t})^{\pi(n)}+\mathcal{E}_{n}$
+\end_inset
+
+, where: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{E}_{n}=\left[\begin{array}{ccccc}
+0 & \epsilon_{n12} & \epsilon_{n13} & \ldots & \epsilon_{n1p}\\
+\epsilon_{n12} & 0 & \epsilon_{n23}\\
+\epsilon_{n13} & \epsilon_{n23} & 0 &  & \vdots\\
+\vdots &  &  & \ddots\\
+\epsilon_{n1p} &  & \ldots &  & 0
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Previously, we assumed that 
+\begin_inset Formula $\epsilon_{nij}\overset{iid}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Implying the theorem described in 4.1.2, we assume the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+ & Cov\left(\epsilon_{nij},\epsilon_{nkl}\right)\propto\\
+ & \frac{\boldsymbol{\Lambda_{ij}}\boldsymbol{\Lambda_{kl}}}{2}\left(\Lambda_{ik}^{2}+\Lambda_{il}^{2}+\Lambda_{jk}^{2}+\Lambda_{jl}^{2}\right)-\boldsymbol{\Lambda_{ij}}\left(\Lambda_{ik}\Lambda_{il}+\Lambda_{jk}\Lambda_{jl}\right)\\
+ & -\boldsymbol{\Lambda_{kl}}\left(\Lambda_{ik}\cdot\Lambda_{jk}+\Lambda_{il}\cdot\Lambda_{jl}\right)+\left(\Lambda_{ik}\Lambda_{jl}+\Lambda_{il}\Lambda_{jk}\right)\\
+= & \left(\alpha_{i}\alpha_{j}\alpha_{k}\alpha_{l}\right)^{\pi(n)}\cdot[\frac{\boldsymbol{\Theta_{ij}}\boldsymbol{\Theta_{kl}}}{2}\left(\Theta_{ik}^{2}\cdot\left(\alpha_{i}\alpha_{k}\right)^{2\pi(n)}+\Theta_{il}^{2}\cdot\left(\alpha_{i}\alpha_{l}\right)^{2\pi(n)}+\Theta_{jk}^{2}\cdot\left(\alpha_{j}\alpha_{k}\right)^{2\pi(n)}+\Theta_{jl}^{2}\cdot\left(\alpha_{j}\alpha_{l}\right)^{2\pi(n)}\right)\\
+ & -\boldsymbol{\Theta_{ij}}\left(\Theta_{ik}\Theta_{il}\cdot\alpha_{i}^{2\pi(n)}+\Theta_{jk}\Theta_{jl}\cdot\alpha_{j}^{2\pi(n)}\right)-\boldsymbol{\Theta_{kl}}\left(\Theta_{ik}\cdot\Theta_{jk}\cdot\alpha_{k}^{2\pi(n)}+\Theta_{il}\cdot\Theta_{jl}\cdot\alpha_{l}^{2\pi(n)}\right)\\
+ & +\left(\Theta_{ik}\Theta_{jl}+\Theta_{il}\Theta_{jk}\right)]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $C_{\pi\left(n\right)}\left(ij,kl\right)\coloneqq Cov(\epsilon_{nij},\epsilon_{nkl})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our model extends as such:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\rho_{nij}=\Theta_{ij}\cdot\alpha_{i}^{\pi(n)}\cdot\alpha_{j}^{\pi(n)}+\epsilon_{nij}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\epsilon_{nij}\bot\epsilon_{mkl}\,\text{\forall}\,n\neq m,\,\forall\,i,j,k,l$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $E\left[\rho_{nij}\right]=\Theta_{ij}\cdot\left(\alpha_{i}\alpha_{j}\right)^{\pi(n)}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Var(\rho_{nij})\propto\sigma_{\pi\left(n\right)}^{2}\cdot C_{\pi\left(n\right)}\left(ij,ij\right)=\left(1-\Theta_{ij}^{2}\left(\alpha_{i}\alpha_{j}\right)^{2\pi\left(n\right)}\right)^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Cov(\rho_{nij},\rho_{mkl})=\sigma_{\pi\left(n\right)}^{2}\cdot C_{\pi\left(n\right)}\left(ij,kl\right)\cdot1_{\{n=m\}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\sigma^{2}=(\sigma_{0}^{2},\sigma_{1}^{2})$
+\end_inset
+
+ is a vector of two unkown parameters (For now we assume that 
+\begin_inset Formula $\sigma_{0}^{2}=\sigma_{1}^{2}=1$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Subsection
+Re-Estimating the Parameters
+\end_layout
+
+\begin_layout Standard
+We noted that 
+\begin_inset Formula $\rho_{n}\in M_{p}(\mathbb{R})$
+\end_inset
+
+ as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\rho_{n}=\left[\begin{array}{ccc}
+\rho_{n11} & \cdots & \rho_{n1p}\\
+\vdots & \ddots & \vdots\\
+\rho_{np1} & \cdots & \rho_{npp}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Define 
+\begin_inset Formula $X_{n}\,=\,(\rho_{n,1,2},\rho_{n,1,3},...,\rho_{n,1,p},\rho_{n,2,3},...,\rho_{n,2,p},\rho_{n,3,4},...,\rho_{n,p-1,p})$
+\end_inset
+
+ (the lower triangle of 
+\begin_inset Formula $\rho_{n}$
+\end_inset
+
+) and set 
+\begin_inset Formula $f\,:\,\mathbb{N}\longmapsto\mathbb{N}^{2}$
+\end_inset
+
+ such that:
+\begin_inset Formula 
+\[
+x_{n,1}=\rho_{n,\,f(1)},\,x_{n,2}=\rho_{n,\,f(2)},\,...\,x_{n,i}=\rho_{n,\,f(i)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For example, 
+\begin_inset Formula $f(1)\,=(1,2),\,f(2)\,=(1,3),\,f(p-1)\,=(1,p),\,f(p)\,=(2,1)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $f$
+\end_inset
+
+ is calculated in R.
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $m=|X_{n}|\,\Rightarrow\,m=\frac{p(p-1)}{2}$
+\end_inset
+
+, so 
+\begin_inset Formula $X_{n}\sim N_{m}(\mu_{\pi(n)},\,\Sigma_{\pi(n)})$
+\end_inset
+
+ where:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mu_{\pi(n),i}=E\left[x_{n,i}\right]=E\left[\rho_{n,f(i)}\right]=\Theta_{f(i)}\cdot\left(\alpha_{f(i)_{1}}\alpha_{f(i)_{2}}\right)^{\pi(n)}\eqqcolon\left[g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right]_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Sigma_{\pi(n),i,j} & =Cov\left(x_{n,i},\,x_{n,j}\right)=Cov\left(\rho_{n,f(i)},\,\rho_{n,f(j)}\right)\\
+ & =\sigma_{\pi\left(n\right)}^{2}\cdot C_{\pi\left(n\right)}\left(f\left(i\right),f\left(j\right)\right)\cdot1_{\{n=m\}}\eqqcolon\left[g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right]_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $X_{n}\sim N_{m}(g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right),\,g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right))$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+f_{X_{n}}(x_{n})=(2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{-\frac{1}{2}}\cdot\exp\left[-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+ & \mathcal{L}\left(\left\{ X_{n}\right\} _{n=1}^{N};\,\Theta,\,\alpha\right)=\prod_{n\in h}f_{X_{n}}\left(x_{n}\right)\cdot\prod_{n\in D}f_{X_{n}}\left(x_{n}\right)\\
+ & =const\left(m,\,N_{H},\,N_{D}\right)\cdot\det\left(g_{2}^{0}\left(\Theta,\alpha\right)\right)^{-\frac{N_{H}}{2}}\cdot\det\left(g_{2}^{1}\left(\Theta,\alpha\right)\right)^{-\frac{N_{D}}{2}}\\
+ & \quad\cdot\exp\left[-\frac{1}{2}\cdot\left(\underset{n\in H}{\sum}||x_{n}-g_{1}^{0}||_{g_{2}^{0}}^{2}+\underset{n\in D}{\sum}||x_{n}-g_{1}^{1}||_{g_{2}^{1}}^{2}\right)\right]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therefore,
+\begin_inset Formula 
+\[
+\ell\left(\left\{ X_{n}\right\} _{n=1}^{N};\,\Theta,\,\alpha\right)=const\left(m,\,N_{H},\,N_{D}\right)-\frac{1}{2}\cdot\left(N_{H}\cdot\ln\det\left(g_{2}^{0}\right)+N_{D}\cdot\ln\det\left(g_{2}^{1}\right)+\underset{n\in H}{\sum}||x_{n}-g_{1}^{0}||_{g_{2}^{0}}^{2}+\underset{n\in D}{\sum}||x_{n}-g_{1}^{1}||_{g_{2}^{1}}^{2}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+Let 
+\begin_inset Formula $X\in\mathbb{M}_{n\times p}\left(\mathbb{R}\right)$
+\end_inset
+
+ and we wish to find an easy calculation for 
+\begin_inset Formula $\underset{i}{\sum}||X_{i\cdot}^{t}-\mu||_{\Sigma}^{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula 
+\[
+\sum_{i}||X_{i\cdot}^{t}-\mu||_{\Sigma}^{2}=\sum_{i}\underset{1\times p}{\left(X_{i\cdot}-\mu^{t}\right)}\underset{p\times p}{\Sigma^{-1}}\underset{p\times1}{\left(X_{i\cdot}^{t}-\mu\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+Note that for 
+\begin_inset Formula $\underset{n\times p}{A}\underset{p\times p}{B}\underset{p\times n}{C}$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+\left(A\cdot B\cdot C\right)_{ij}=\left(A\cdot B\right)_{i\cdot}\cdot C_{\cdot j}=A_{i\cdot}\cdot B\cdot C_{\cdot j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+Denote that 
+\begin_inset Formula $\underset{n\times1}{1_{n}}\underset{1\times p}{\mu^{t}}\in\mathbb{M}_{n\times p}\left(\mathbb{R}\right)$
+\end_inset
+
+ and that 
+\begin_inset Formula $1_{n}\mu^{t}=\left(\begin{array}{ccc}
+\cdots & \mu^{t} & \cdots\\
+\cdots & \mu^{t} & \cdots\\
+ & \vdots\\
+\cdots & \mu^{t} & \cdots
+\end{array}\right)$
+\end_inset
+
+.
+ Then 
+\begin_inset Formula $\left(X_{i\cdot}-\mu^{t}\right)=\left(X-1_{n}\mu^{t}\right)_{i\cdot}$
+\end_inset
+
+.
+ Inserting 
+\begin_inset Formula $A=\left(X-1_{n}\mu^{t}\right),\,B=\Sigma^{-1},\,C=\left(X-1_{n}\mu^{t}\right)^{t}$
+\end_inset
+
+ we get that:
+\begin_inset Formula 
+\[
+\left(\left(X-1_{n}\mu^{t}\right)\Sigma^{-1}\left(X-1_{n}\mu^{t}\right)^{t}\right)_{ij}=\left(X_{i\cdot}-\mu^{t}\right)\Sigma^{-1}\left(X_{j\cdot}^{t}-\mu\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+Since we are interested only in the sum of the diagonal (when 
+\begin_inset Formula $i=j$
+\end_inset
+
+), we can see that:
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula 
+\[
+\underset{i}{\sum}||X_{i\cdot}^{t}-\mu||_{\Sigma}=tr\left(\left(X-1_{n}\mu^{t}\right)\cdot\Sigma^{-1}\cdot\left(X-1_{n}\mu^{t}\right)^{t}\right)=tr\left(\left(X-1_{n}\mu^{t}\right)\cdot\Sigma^{-1}\cdot\left(X^{t}-\mu1_{n}^{t}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Constructing the log likelihood for estimation
+\end_layout
+
+\begin_layout Standard
+Our log likelihood function is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\ell\left(\left\{ X_{n}\right\} _{n=1}^{N};\,\Theta,\,\alpha\right)\, & \propto\left(-1\right)\cdot\left(N_{H}\cdot\ln\det(g_{2}^{0})+N_{D}\cdot\ln\det(g_{2}^{1})+\underset{n\in H}{\sum}||x_{n}-g_{1}^{0}||_{g_{2}^{0}}^{2}+\underset{n\in D}{\sum}||x_{n}-g_{1}^{1}||_{g_{2}^{1}}^{2}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+but we have that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{n\in H}||x_{n}-\mu_{0}||_{\Sigma_{0}}^{2} & =tr\left(\left(X_{H}-1_{N_{H}}\mu_{0}^{t}\right)\cdot\Sigma_{0}^{-1}\cdot\left(X_{H}-1_{N_{H}}\mu_{0}^{t}\right)^{t}\right)\\
+\sum_{n\in D}||x_{n}-\mu_{1}||_{\Sigma_{1}}^{2} & =tr\left(\left(X_{D}-1_{N_{D}}\mu_{1}^{t}\right)\cdot\Sigma_{1}^{-1}\cdot\left(X_{D}-1_{N_{D}}\mu_{1}^{t}\right)^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, our function for optimisation (minimum) is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\underset{\Theta,\alpha\in\left[-1,1\right]^{p^{\star}}}{\arg\min} & N_{H}\cdot\ln\det\left(g_{2}^{0}\left(\Theta,\alpha\right)\right)+N_{D}\cdot\ln\det\left(g_{2}^{1}\left(\Theta,\alpha\right)\right)\\
+ & +tr\left(\left(X_{H}-1_{N_{H}}g_{1}^{0}\left(\Theta,\alpha\right)^{t}\right)\cdot g_{2}^{0}\left(\Theta,\alpha\right)^{-1}\cdot\left(X_{H}-1_{N_{H}}g_{1}^{0}\left(\Theta,\alpha\right)^{t}\right)^{t}\right)\\
+ & +tr\left(\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta,\alpha\right)^{t}\right)\cdot g_{2}^{1}\left(\Theta,\alpha\right)^{-1}\cdot\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta,\alpha\right)^{t}\right)^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Estimating the Full Model
+\end_layout
+
+\begin_layout Standard
+We wish to minimize 
+\begin_inset Formula $-\ell$
+\end_inset
+
+ over 
+\begin_inset Formula $\Theta,\alpha$
+\end_inset
+
+, however this is a difficult task.
+ Note that our final objective is to conduct hypothesis tests only on 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ based on it's assymptotical variance 
+\begin_inset Formula $-\left(\nabla_{\alpha}^{2}\ell\left(X;\Theta,\alpha\right)\right)^{-1}$
+\end_inset
+
+ therefore we are required to find the maximum of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ over 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Therefore, we will simplify the problem by an iteration process, with 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ maximized using the MLE method and 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ maximized using the Moments method, which is also assymptoticly unbiased.
+ Another problem occures when calculating 
+\begin_inset Formula $g_{2}^{\pi}$
+\end_inset
+
+: using the delta method, the expression we derived for 
+\begin_inset Formula $Cov\left(\rho_{nij},\rho_{nkl}\right)$
+\end_inset
+
+ has 
+\begin_inset Formula $N$
+\end_inset
+
+ its denomenator, with 
+\begin_inset Formula $N$
+\end_inset
+
+ the number of iid RVs used to estimate the sample covariance matrix.
+ However, in our case our matrices are based on time-series that refute
+ the independence assumption, therefore our 
+\series bold
+Effective-N
+\series default
+ is smaller than T (time-series length), and is unkown.
+ We resolve this problem by estimating the Effective-N, as described in
+ the algorithm.
+\end_layout
+
+\begin_layout Standard
+The method goes as follows:
+\end_layout
+
+\begin_layout Standard
+0) Initialize the loop using the estimates found at 
+\series bold
+3.2
+\end_layout
+
+\begin_layout Standard
+i) Loop step i:
+\end_layout
+
+\begin_layout Itemize
+Estimate the 
+\series bold
+Effective-N
+\series default
+(
+\begin_inset Formula $\eqqcolon E_{N}$
+\end_inset
+
+) using the BLUE estimate for a simple linear model 
+\begin_inset Formula $C_{ij,kl}=E_{N}\cdot\widehat{Cov}\left(\rho_{nij},\rho_{nkl}\right)+\epsilon_{nij}$
+\end_inset
+
+, e.g.
+ the best constant the explains the estimated covariance using the theoretical
+ covariance.
+ if 
+\begin_inset Formula $E_{N}$
+\end_inset
+
+ is larger the 
+\begin_inset Formula $c\cdot T$
+\end_inset
+
+ with T the length of the time series and 
+\begin_inset Formula $c\in\left(0,1\right)$
+\end_inset
+
+, truncate it.
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\alpha_{i-1}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\Theta_{i}\overset{!}{=}\left(N_{H}\cdot\overline{\rho}_{H}+N_{D}\cdot\left(\overline{\rho}_{D}\div\alpha_{i-1}\alpha_{i-1}^{t}\right)\right)/\left(N_{H}+N_{D}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\Theta_{i}$
+\end_inset
+
+, estimate:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\alpha_{i}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{\arg\min}\left\{ N_{D}\cdot\ln\det\left(\frac{g_{2}^{1}\left(\Theta,\alpha\right)}{E_{N}}\right)+tr\left(\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta_{i},\alpha\right)^{t}\right)\cdot\left(\frac{g_{2}^{1}\left(\Theta_{i},\alpha\right)}{E_{N}}\right)^{-1}\cdot\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta_{i},\alpha\right)^{t}\right)^{t}\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In practice, in order to save computational run time, the spectral decomposition
+ of 
+\begin_inset Formula $g_{2}^{1}\left(\Theta,\alpha\right)$
+\end_inset
+
+ is used.
+ Denote 
+\begin_inset Formula $\frac{g_{2}^{1}\left(\Theta,\alpha\right)}{E_{N}}=UDU^{t}$
+\end_inset
+
+, then the maximization function is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\alpha_{i}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{\arg\min}\left\{ N_{D}\cdot\sum_{i}\ln D_{ii}+tr\left(\left[\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta_{i},\alpha\right)^{t}\right)U\right]D^{-1}\cdot\left[\left(X_{D}-1_{N_{D}}g_{1}^{1}\left(\Theta_{i},\alpha\right)^{t}\right)U\right]^{t}\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Continue until the model is stable: 
+\begin_inset Formula $\left[\dim\left(\alpha\right)^{-1}\cdot||\hat{\alpha}_{i}-\hat{\alpha}_{i-1}||\leq\epsilon\right]$
+\end_inset
+
+ and the optimization has reached full convergence for 
+\begin_inset Formula $I$
+\end_inset
+
+ times in a row (default I is 3).
+\end_layout
+
+\begin_layout Standard
+This model doesn't affect 
+\begin_inset Formula $\hat{\Theta}$
+\end_inset
+
+'s dispersion much, but it severly reduces 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+'s dispersion.
+ Moreover, in simulations it is seen that we kept 
+\begin_inset Formula $\hat{\Theta}$
+\end_inset
+
+ unbiased, and together with using the MLE method on 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+, 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ is kept unbiased and consistent.
+ Most improtantly, we have 
+\begin_inset Formula $-\left(\nabla_{\alpha}^{2}\ell\left(X;\Theta,\alpha\right)\right)^{-1}$
+\end_inset
+
+ at 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+'s optimum.
+\end_layout
+
+\begin_layout Subsection
+Estimation of the 
+\begin_inset Formula $E_{N}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $A,B\in\mathbb{M}_{p}\left(\mathbb{R}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $A,B$
+\end_inset
+
+ are symmetric positive-definite matrix with 
+\begin_inset Formula $A=\frac{B}{\nu}$
+\end_inset
+
+ for some constant 
+\begin_inset Formula $\nu$
+\end_inset
+
+.
+ Define 
+\begin_inset Formula $a\in\mathbb{R}^{\frac{p\left(p-1\right)}{2}}$
+\end_inset
+
+ the lower triangle of 
+\begin_inset Formula $a$
+\end_inset
+
+ and define 
+\begin_inset Formula $b$
+\end_inset
+
+ similairly.
+ Then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+a & =\frac{b}{\nu}\\
+b & =\nu a
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finding 
+\begin_inset Formula $\nu$
+\end_inset
+
+ is found by calculating the projection of 
+\begin_inset Formula $b$
+\end_inset
+
+ on 
+\begin_inset Formula $a$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\nu}=\frac{a^{t}b}{a^{t}a}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In our case, 
+\begin_inset Formula $A$
+\end_inset
+
+ is the 
+\bar under
+empirical
+\bar default
+ covariance matrix of 
+\begin_inset Formula $\rho_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ is the 
+\bar under
+estimated
+\bar default
+ covariance matrix of 
+\begin_inset Formula $\rho_{n}$
+\end_inset
+
+, using the delta method.
+ 
+\begin_inset Formula $\nu$
+\end_inset
+
+ is the Degrees of Freedom, which are unkown.
+ Therefore, in order to find an 
+\series bold
+unbiased
+\series default
+ estimate of the model's d.f., we need to project the estimated covariance
+ matrix over the empirical covariance matrix.
+\end_layout
+
+\begin_layout Standard
+The other way around yields an upperway bias:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+a & =\nu^{-1}b\\
+\widehat{\left(\nu^{-1}\right)} & =\frac{b^{t}a}{b^{t}b}\\
+\hat{\nu} & =\frac{1}{\widehat{\left(\nu^{-1}\right)}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And since 
+\begin_inset Formula $f\left(u\right)=\frac{1}{u}$
+\end_inset
+
+ is convex function over 
+\begin_inset Formula $u>0$
+\end_inset
+
+, from Jensen inequality we get:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+E\left[\hat{\nu}\right]=E\left[\frac{1}{\widehat{\left(\nu^{-1}\right)}}\right]\geq\frac{1}{E\left[\widehat{\left(\nu^{-1}\right)}\right]}=\frac{1}{\nu^{-1}}=\nu
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Hypothesis Testing
+\end_layout
+
+\begin_layout Standard
+Now Define 
+\begin_inset Formula $H_{0,i}:\:\alpha_{i}=1$
+\end_inset
+
+ vs.
+ 
+\begin_inset Formula $H_{1,i}:\:\alpha_{i}<1$
+\end_inset
+
+ then we can build 
+\begin_inset Formula $p$
+\end_inset
+
+ T-test:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Tval_{i}=\frac{\hat{\alpha}_{i}-1}{\sqrt{-\left(\nabla_{\alpha}^{2}\ell\left(X;\Theta,\alpha\right)\right)_{ii}^{-1}}}\sim T_{E_{N}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that in order to conduct the T-test, the DF of the T-value is needed,
+ yet it is unkown.
+ One option is to use the Effective-N, yet remember that 
+\begin_inset Formula $E_{n}$
+\end_inset
+
+ is estimated from the data.
+ The other option is to use the assymptotical distribution of the T-value:
+ 
+\begin_inset Formula $Tval_{i}\rightsquigarrow N\left(0,1\right)$
+\end_inset
+
+.
+ We can conduct 
+\begin_inset Formula $p$
+\end_inset
+
+ T-tests on 
+\begin_inset Formula $\left\{ \alpha_{i}\right\} _{i=1}^{p}$
+\end_inset
+
+ while preservering the FWER or FDR at a rate lower then some given 
+\begin_inset Formula $q$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Results in simulations
+\end_layout
+
+\begin_layout Standard
+As said in 
+\series bold
+4.5
+\series default
+, the estimates that result from this model are unbiased and have lower
+ dispersion around the true parameters.
+ However, it still has a missing evaluation of 
+\begin_inset Formula $Var\left(\hat{\alpha}\right)$
+\end_inset
+
+.
+ As it appears in the simulations,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\widehat{SD}\left(\hat{\alpha}_{i}\right)}{SD\left(\hat{\alpha}_{i}\right)}=\sqrt{\frac{\frac{1}{B-1}\sum_{b=1}^{B}\left(\hat{\alpha}_{bi}-\bar{\hat{\alpha}}_{Bi}\right)^{2}}{-\left(\nabla_{\alpha}^{2}\ell\left(X;\Theta,\alpha\right)\right)_{ii}^{-1}}}\in\left(1.5,2\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That is, the empiric standard deviation of 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ is about twice as large from the model's estimation.
+ It is still unclear wether this ratio (~2) is fixed or is it a function
+ of the model's parameters.
+ If it is fixed, then it will be possible to use the corrected T-value 
+\begin_inset Formula $Tval_{i}^{\star}\coloneqq\frac{1}{2}Tval_{i}$
+\end_inset
+
+ in order to conduct hypothesis testing.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Correction of the MLE Model
+\end_layout
+
+\begin_layout Standard
+Under the MLE theory, 
+\begin_inset Formula $I\left(\theta\right)=E\left[\nabla\ell\left(\theta\right)^{t}\nabla\ell\left(\theta\right)\right]=-E\left[\nabla^{2}\ell\left(\theta\right)\right]$
+\end_inset
+
+.
+ However, when the model is mispecified, they differ.
+ Then, the variance of 
+\begin_inset Formula $\hat{\theta}_{mle}$
+\end_inset
+
+ is approximated by 
+\begin_inset Formula $\hat{J}^{-1}\hat{V}\hat{J}^{-1}$
+\end_inset
+
+ where 
+\begin_inset Formula $\hat{J}\coloneqq-\nabla^{2}\ell\left(\hat{\theta}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\hat{V}$
+\end_inset
+
+ is the estimator of 
+\begin_inset Formula $E\left[\nabla\ell\left(\theta\right)^{t}\nabla\ell\left(\theta\right)\right]$
+\end_inset
+
+.
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ can be esimated by 
+\begin_inset Formula 
+\[
+\hat{V}=\frac{1}{N}\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In our case, 
+\begin_inset Formula $\ell_{n}\left(\hat{\theta}\right)=\ln f_{\left(\hat{\Theta},\hat{\alpha}\right)}\left(X_{n}=x_{n}\right)$
+\end_inset
+
+ where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+f_{X_{n}}(x_{n}) & =(2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{-\frac{1}{2}}\cdot\exp\left[-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right]\\
+\ln f_{X_{n}}(x_{n}) & =\ln\left((2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{-\frac{1}{2}}\cdot\exp\left[-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right]\right)\\
+ & =-\frac{m}{2}\ln(2\pi)-\frac{1}{2}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\\
+\nabla_{\alpha}\ln f_{X_{n}}(x_{n}) & =-\frac{1}{2}\left(\nabla_{\alpha}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)+\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+denote 
+\begin_inset Formula $\psi=\nabla_{\alpha}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\xi_{n}=\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}$
+\end_inset
+
+ then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\left(\psi\psi^{t}+\xi_{n}\psi^{t}+\psi\xi_{n}^{t}+\xi_{n}\xi_{n}^{t}\right)\\
+ & =\frac{1}{4}\left(\psi\psi^{t}+\left(\psi\xi_{n}^{t}\right)^{t}+\psi\xi_{n}^{t}+\xi_{n}\xi_{n}^{t}\right)\\
+\frac{1}{N}\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\psi\psi^{t}+\frac{1}{4N}\left(\left(\psi\sum_{n=1}^{N}\xi_{n}^{t}\right)^{t}+\psi\sum_{n=1}^{N}\xi_{n}^{t}+\sum_{n=1}^{N}\xi_{n}\xi_{n}^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+###Try with p=4 and do many simulations###
+\end_layout
+
+\begin_layout Standard
+###Find what's the problem with the SD estimate - is it some function?
+\end_layout
+
+\begin_layout Standard
+Maybe it's in the 
+\begin_inset Formula $E_{N}$
+\end_inset
+
+ estimation###
+\end_layout
+
+\begin_layout Standard
+###explain on 
+\begin_inset Formula $E_{N}$
+\end_inset
+
+, maybe scetch a proof, and test it alone###
+\end_layout
+
+\begin_layout Standard
+###Ask Yossi Rinot About AR DF's###
+\end_layout
+
+\begin_layout Standard
+###Find efficient algorithm for inverting positive-definite matrix - check
+ cholesky decomposition###
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,106 @@
+---
+title: "Untitled"
+author: '305316390'
+date: "24 March 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Begin with loading need functions and libraries
+```{r}
+library(dplyr)
+library(corrplot)
+library(R.matlab)
+
+force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+vector_to_triangle <- function(VECT){
+  m <- length(VECT)
+  p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
+  p <- p[which( (p==round(p))&p==abs(p) )]
+  if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+  pelet <- matrix(0, ncol = p, nrow = p)
+  pelet[lower.tri(pelet)] <- VECT
+  pelet <- pelet+t(pelet)
+  diag(pelet) <- 1
+  return(pelet)
+}
+
+triangle_to_vector <- function(MATR , diag = FALSE){
+  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
+  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+}
+Fisher_Z <- function(r) 0.5*log((1+r)/(1-r))
+```
+
+Load data anc clean from NA's
+```{r}
+link <- "C:/Users/Itamar/Google Drive/Documents/#My Documents/Study/99 Other/Binyamini/Code/NMDA_all_data_AAL90.mat"
+Real.dta <- readMat(link)
+
+which.drop <- which(is.na(Real.dta$group.all[1,,1]), arr.ind = TRUE)
+p <- dim(Real.dta$group.all)[1] - length(which.drop)
+
+All.data <- array(dim = c(p, p, dim(Real.dta$group.all)[3]))
+
+#Clean data from unknown coloumns
+for(i in 1:dim(All.data)[3]){
+  All.data[,,i] <- force_symmetry(Real.dta$group.all[-which.drop,-which.drop,i])
+}
+dim(All.data)
+
+#Some observations still have NAs. Remove those observations:
+healthy.Real_t <- All.data[,,Real.dta$CONTROLS]
+healthy.Real <- healthy.Real_t[,,-unique(which(is.na(healthy.Real_t), arr.ind = TRUE)[,3])]
+
+sick.Real_t <- All.data[,,Real.dta$NMDA]
+sick.Real <- sick.Real_t[,,-unique(which(is.na(sick.Real_t), arr.ind = TRUE)[,3])]
+
+#Now, are all matrices good to go?
+abind(healthy.Real, sick.Real) %>% apply(3, is.positive.definite) %>% all()
+sum(is.na(healthy.Real)) + sum(is.na(sick.Real))
+
+rm(healthy.Real_t, sick.Real_t, Real.dta, i, which.drop)
+```
+
+Take lower triangle of each matrix, Use fisher's transofrmation on each element, then calculate difference:
+```{r}
+healthy.fisher <- apply(healthy.Real, 3, triangle_to_vector) %>% Fisher_Z()
+sick.fisher <- apply(sick.Real, 3, triangle_to_vector) %>% Fisher_Z()
+
+difference <- rowMeans(sick.fisher) - rowMeans(healthy.fisher)
+```
+
+Build variance for each difference
+```{r}
+tn <- function(tVect) {
+  if(any(tVect <= 3)) stop("There are t<=3")
+  sum(1/(length(tVect)^2 * (tVect - 3)))
+}
+
+Nh <- ncol(healthy.fisher)
+Nd <- ncol(sick.fisher)
+
+#Assume all time series from the length
+t <- 255
+Zvals <- difference / sqrt(tn(rep(t, Nh)) + tn(rep(t, Nd)))
+
+hist(pnorm(Zvals))
+
+pvals <- p.adjust(pnorm(Zvals), method = "holm")
+hist(pvals)
+
+threshold <- 0.01
+sum(pvals < threshold)
+mean(pvals < threshold)
+
+pvalMatr <- vector_to_triangle(pvals)
+
+corrplot(pvalMatr-1, method = "color", is.corr = FALSE, type = "upper")
+corrplot((pvalMatr<threshold), method = "color", is.corr = FALSE, type = "upper",
+         col = c("blue", "white", "red"))
+
+which((pvalMatr<threshold), arr.ind = TRUE)
+```

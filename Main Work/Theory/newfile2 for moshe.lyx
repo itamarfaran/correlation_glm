@@ -1,0 +1,741 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Comparision of Large Correlation Matrices with Small Sample Sizes
+\end_layout
+
+\begin_layout Author
+Dr.
+ Yuval Binjamini & Itamar Faran
+\begin_inset Newline newline
+\end_inset
+
+The Department of Statistics
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The Hebrew University,
+\begin_inset Newline newline
+\end_inset
+
+Jerusalem, IL
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Denote by 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ the sample of sick subjects and 
+\begin_inset Formula $N_{H}$
+\end_inset
+
+ the sample of healthy subjects.
+ For each subject, we observe an empiric correlation matrix 
+\begin_inset Formula $\rho_{n}^{H},\rho_{n}^{D}$
+\end_inset
+
+ based on a 
+\begin_inset Formula $T$
+\end_inset
+
+ lengthed time series from an fMRI procedure.
+ Denote by 
+\begin_inset Formula $\Lambda_{H}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Lambda_{D}$
+\end_inset
+
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+real
+\begin_inset Quotes erd
+\end_inset
+
+, unkown parameters of 
+\begin_inset Formula $\rho_{n}^{H}$
+\end_inset
+
+ and 
+\begin_inset Formula $\rho_{n}^{D}$
+\end_inset
+
+, respectivly.
+ we wish to find which elements are different from one another, or which
+ 
+\begin_inset Formula $\Lambda_{H,ij}\neq\Lambda_{D,ij}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+From now on, denote by 
+\begin_inset Formula $t2v$
+\end_inset
+
+ (shortcut for 
+\begin_inset Quotes eld
+\end_inset
+
+triangle to vector
+\begin_inset Quotes erd
+\end_inset
+
+) a function that takes a symmetrical matrix and transforms it's triangle
+ into a vector, and 
+\begin_inset Formula $v2t$
+\end_inset
+
+ does the opposite:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+t2v\left(\left[\begin{array}{cccc}
+1 & x_{12} & x_{13} & x_{14}\\
+x_{12} & 1 & x_{23} & x_{24}\\
+x_{13} & x_{23} & 1 & x_{34}\\
+x_{14} & x_{24} & x_{34} & 1
+\end{array}\right]\right)=\left[\begin{array}{c}
+x_{12}\\
+x_{13}\\
+x_{14}\\
+x_{23}\\
+x_{24}\\
+x_{34}
+\end{array}\right]\qquad v2t\left(\left[\begin{array}{c}
+x_{12}\\
+x_{13}\\
+x_{14}\\
+x_{23}\\
+x_{24}\\
+x_{34}
+\end{array}\right]\right)=\left[\begin{array}{cccc}
+1 & x_{12} & x_{13} & x_{14}\\
+x_{12} & 1 & x_{23} & x_{24}\\
+x_{13} & x_{23} & 1 & x_{34}\\
+x_{14} & x_{24} & x_{34} & 1
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Multi-Normal Model
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $\left\{ X_{i}\right\} _{i=1}^{n}\overset{iid}{\sim}N_{p}\left(\mu,\Sigma\right)$
+\end_inset
+
+, meaning 
+\begin_inset Formula $X_{i}\in\mathbb{R}^{p}$
+\end_inset
+
+ with mean vector 
+\begin_inset Formula $\mu\in\mathbb{R}^{p}$
+\end_inset
+
+ and variance matrix 
+\begin_inset Formula $\Sigma\in\mathbb{M}_{p}\left(\mathbb{R}\right)$
+\end_inset
+
+.
+ Then the log-likelihood function of this model is proportional to:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ell\left(x;\mu,\Sigma\right)=-\left(n\ln\det\left(\Sigma\right)+\sum_{i=1}^{n}\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+we wish to maximize 
+\begin_inset Formula $\ell$
+\end_inset
+
+, meaning we wish to find:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\mu,\Sigma}{\arg\min}\left\{ n\ln\det\Sigma+\sum_{i=1}^{n}\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With 2 populations, the log-likelihood function is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\mu,\Sigma}{\arg\min}\left\{ N_{x}\ln\det\Sigma_{x}+N_{y}\ln\det\Sigma_{y}+\sum_{i=1}^{N_{x}}\left(x_{i}-\mu_{x}\right)^{t}\Sigma_{x}^{-1}\left(x_{i}-\mu_{x}\right)+\sum_{i=1}^{N_{y}}\left(y_{i}-\mu_{y}\right)^{t}\Sigma_{y}^{-1}\left(y_{i}-\mu_{y}\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Initial Model
+\end_layout
+
+\begin_layout Standard
+Suppose that 
+\begin_inset Formula $\Lambda_{H}=\Theta\in\mathbb{M}_{p}\left(\left[-1,1\right]\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ a positive-definite correlation matrix, and 
+\begin_inset Formula $\Lambda_{D}=\Theta\times\alpha\alpha^{t}$
+\end_inset
+
+ for 
+\begin_inset Formula $\alpha\in\left[0,1\right]^{p}$
+\end_inset
+
+, where 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\times$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ indicates element-wise multiplication, Meaning:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Lambda_{H,ij}=\Theta_{ij},\;\Lambda_{D,ij}=\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All our models will be built the next way:
+\end_layout
+
+\begin_layout Itemize
+For healthy subjects:
+\begin_inset Formula $\rho_{n,ij}^{H}=\Theta_{ij}+\epsilon_{nij}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+For sick subjects:
+\begin_inset Formula $\rho_{n,ij}^{D}=\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}+\epsilon_{nij}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Define by 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+Model 1
+\series default
+
+\begin_inset Quotes erd
+\end_inset
+
+ the model which implies 
+\begin_inset Formula $\epsilon_{nij}\overset{iid}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+.Then the multi-normal model falls to:
+\end_layout
+
+\begin_layout Standard
+Denote by 
+\begin_inset Formula $x_{i}^{H}=t2v\left(\rho_{i}^{H}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $x_{i}^{D}=t2v\left(\rho_{i}^{D}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $g_{1}^{H}=t2v\left(\Theta\right)$
+\end_inset
+
+, 
+\begin_inset Formula $g_{1}^{D}=t2v\left(\Theta\times\alpha\alpha^{t}\right)$
+\end_inset
+
+.
+ Then the objective function is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\Theta,\alpha,\sigma^{2}}{\arg\min}\left\{ N_{H}^{2}\ln\sigma^{2}+N_{D}^{2}\ln\sigma^{2}+\sigma^{-2}\left(\sum_{i=1}^{N_{H}}||x_{i}^{H}-g_{1}^{H}||+\sum_{i=1}^{N_{D}}||x_{i}^{D}-g_{1}^{D}||\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and our parameters of interest:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\Theta,\alpha}{\arg\min}\left\{ \sum_{i=1}^{N_{H}}||x_{i}-g_{1}^{H}||+\sum_{i=1}^{N_{D}}||x_{i}-g_{1}^{D}||\right\} \eqqcolon\underset{\Theta,\alpha}{\arg\min}f_{1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This a 
+\begin_inset Quotes eld
+\end_inset
+
+simple
+\begin_inset Quotes erd
+\end_inset
+
+ problem with a simple algorithm to compute:
+\end_layout
+
+\begin_layout Standard
+Under the assumption that 
+\begin_inset Formula $\epsilon_{nij}\overset{i.i.d}{\sim}N(0,\sigma^{2})$
+\end_inset
+
+, there is a simpler algorithm to estimate 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Subsection
+Optimization Problem I
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+Define 
+\begin_inset Formula $\bar{\rho}_{D}=N_{D}^{-1}\sum_{n=1}^{N_{D}}\rho_{n}^{D}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{\rho}_{H}=N_{H}^{-1}\sum_{n=1}^{N_{D}}\rho_{n}^{H}$
+\end_inset
+
+ the mean matrices.
+\end_layout
+
+\begin_layout Plain Layout
+0) Initialize the loop:
+\end_layout
+
+\begin_layout Itemize
+Estimate 
+\begin_inset Formula $\Theta_{0}\overset{!}{=}\overline{\rho}_{H}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\Theta_{0}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\alpha_{0}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{argmax}\left\{ \left(\Theta_{0}\times\alpha\alpha^{t}-\overline{\rho}_{D}\right)^{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+i) loop step i:
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\alpha_{i-1}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\Theta_{i}\overset{!}{=}\left(N_{H}\cdot\overline{\rho}_{H}+N_{D}\cdot\left(\overline{\rho}_{D}\div\alpha_{i-1}\alpha_{i-1}^{t}\right)\right)/\left(N_{H}+N_{D}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Conditional on 
+\begin_inset Formula $\Theta_{i}$
+\end_inset
+
+, estimate 
+\begin_inset Formula $\alpha_{i}\overset{!}{=}\underset{\alpha\in\mathbb{R}^{p}}{\arg\min}\left\{ \left(\Theta_{i}\times\alpha\alpha^{t}-\overline{\rho}_{D}\right)^{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\begin_layout Plain Layout
+Repeat this procedure until convergence: 
+\begin_inset Formula $||\alpha_{i-1}-\alpha_{i}||,||\Theta_{i-1}-\Theta_{i}||<\varepsilon$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This algorithm produces an unbiased, consistent estimator for both 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Full Model
+\end_layout
+
+\begin_layout Standard
+The assumption that 
+\begin_inset Formula $\epsilon_{nij}\overset{iid}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+ is unrealistic since it is obvious that 
+\begin_inset Formula $Cov\left(\rho_{nij},\rho_{nkl}\right)\neq0$
+\end_inset
+
+ (The sample correlation matrix is a function of the sample covariance matrix,
+ which has inner covariances between it's elements).
+\end_layout
+
+\begin_layout Standard
+Using the Delta Method, we derived that, for some simple 
+\begin_inset Formula $\rho$
+\end_inset
+
+ sample correlation matrix, the covariance of its elements is given:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\hat{\rho}_{ij},\hat{\rho}_{kl}\right) & =\frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)\\
+ & \quad-\boldsymbol{\rho_{kl}}\left(\rho_{ik}\cdot\rho_{jk}+\rho_{il}\cdot\rho_{jl}\right)+\left(\rho_{ik}\rho_{jl}+\rho_{il}\rho_{jk}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now back to our problem.
+\end_layout
+
+\begin_layout Standard
+So we already said that 
+\begin_inset Formula $E\left[\rho_{nij}^{H}\right]=\Theta_{ij}$
+\end_inset
+
+ and 
+\begin_inset Formula $E\left[\rho_{nij}^{D}\right]=\Theta_{ij}\cdot\alpha_{i}\cdot\alpha_{j}$
+\end_inset
+
+, but now we add another parameterization:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\rho_{nij}^{H},\rho_{nkl}^{H}\right) & \propto\frac{\boldsymbol{\Theta_{ij}}\boldsymbol{\Theta_{kl}}}{2}\left(\Theta_{ik}^{2}+\Theta_{il}^{2}+\Theta_{jk}^{2}+\Theta_{jl}^{2}\right)-\boldsymbol{\Theta_{ij}}\left(\Theta_{ik}\Theta_{il}+\Theta_{jk}\Theta_{jl}\right)\\
+ & \quad-\boldsymbol{\Theta_{kl}}\left(\Theta_{ik}\cdot\Theta_{jk}+\Theta_{il}\cdot\Theta_{jl}\right)+\left(\Theta_{ik}\Theta_{jl}+\Theta_{il}\Theta_{jk}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\rho_{nij}^{D},\rho_{nkl}^{D}\right) & \propto\left(\alpha_{i}\alpha_{j}\alpha_{k}\alpha_{l}\right)\cdot[\frac{\boldsymbol{\Theta_{ij}}\boldsymbol{\Theta_{kl}}}{2}\left(\Theta_{ik}^{2}\cdot\left(\alpha_{i}\alpha_{k}\right)^{2}+\Theta_{il}^{2}\cdot\left(\alpha_{i}\alpha_{l}\right)^{2}+\Theta_{jk}^{2}\cdot\left(\alpha_{j}\alpha_{k}\right)^{2}+\Theta_{jl}^{2}\cdot\left(\alpha_{j}\alpha_{l}\right)^{2}\right)\\
+ & -\boldsymbol{\Theta_{ij}}\left(\Theta_{ik}\Theta_{il}\cdot\alpha_{i}^{2}+\Theta_{jk}\Theta_{jl}\cdot\alpha_{j}^{2}\right)-\boldsymbol{\Theta_{kl}}\left(\Theta_{ik}\cdot\Theta_{jk}\cdot\alpha_{k}^{2}+\Theta_{il}\cdot\Theta_{jl}\cdot\alpha_{l}^{2}\right)+\left(\Theta_{ik}\Theta_{jl}+\Theta_{il}\Theta_{jk}\right)]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Denote all this equations with 
+\begin_inset Formula $g_{2}^{H}$
+\end_inset
+
+ and 
+\begin_inset Formula $g_{2}^{D}$
+\end_inset
+
+.
+ Now our objective function is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{array}{c}
+\underset{\Theta,\alpha}{\arg\min}\{N_{H}\ln\det g_{2}^{H}+N_{D}\ln\det g_{2}^{D}+\sum_{i=1}^{N_{H}}\left(x_{i}^{H}-g_{1}^{H}\right)^{t}\left(g_{2}^{H}\right)^{-1}\left(x_{i}^{H}-g_{1}^{H}\right)\\
++\sum_{i=1}^{N_{y}}\left(x_{i}^{D}-g_{1}^{D}\right)^{t}\left(g_{2}^{H}\right)^{-1}\left(x_{i}^{D}-g_{1}^{D}\right)\}\\
+\eqqcolon\underset{\Theta,\alpha}{\arg\min f_{2}}
+\end{array}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which is, as can be seen, very difficult.
+\end_layout
+
+\begin_layout Section
+Problems with Optimization
+\end_layout
+
+\begin_layout Standard
+We know how to find 
+\begin_inset Formula $\arg\min f_{1}\eqqcolon\left(\hat{\Theta}_{1},\hat{\alpha}_{1}\right)$
+\end_inset
+
+.
+ However, we need to find 
+\begin_inset Formula $-\left(\nabla^{2}\ell\left(\rho;\Theta,\alpha\right)\right)^{-1}$
+\end_inset
+
+ in order to conduct hypothesis testing, and we need it to be positive definite
+ - so we need to find the minimum of 
+\begin_inset Formula $f_{2}$
+\end_inset
+
+.
+ Currently, we are starting to search for a minimum using the 'optim' function
+ in 
+\begin_inset CommandInset href
+LatexCommand href
+name "'optim' function in R"
+target "http://stat.ethz.ch/R-manual/R-devel/library/stats/html/optim.html"
+
+\end_inset
+
+, with initial parameters 
+\begin_inset Formula $\left(\hat{\Theta}_{1},\hat{\alpha}_{1}\right)$
+\end_inset
+
+.
+ Under the Nelder and Mead method, the optimization doesn't converge, and
+ under other methods, the function's paramaters go to an area with 
+\begin_inset Formula $\Theta\times\alpha\alpha^{t}$
+\end_inset
+
+ not positive definite - which prevents computing 
+\begin_inset Formula $g_{2}^{H}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+So our main problem is that we want to restrict the searching for an area
+ with only positive definite matrices:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{\Theta,\alpha}{\arg\min f_{2}}\;s.t.\;d^{t}\Theta d>0,\,d^{t}\left(\Theta\times\alpha\alpha^{t}\right)d>0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

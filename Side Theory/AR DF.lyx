@@ -1,0 +1,1257 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Degrees of Freedom in an AR(1) Model
+\end_layout
+
+\begin_layout Author
+Itamar Faran
+\begin_inset Newline newline
+\end_inset
+
+The Department of Statistics
+\begin_inset Newline newline
+\end_inset
+
+The Hebrew University of Jerusalem
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $AR\left(1\right)$
+\end_inset
+
+Model:
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $X_{0}=\mu$
+\end_inset
+
+ and 
+\begin_inset Formula $\left(X_{t}-\mu\right)=\phi\left(X_{t-1}-\mu\right)+\epsilon_{t}$
+\end_inset
+
+ with 
+\begin_inset Formula $\left\{ \epsilon_{t}\right\} _{t=1}^{T}\overset{iid}{\sim}N\left(0,\sigma^{2}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\left|\phi\right|<1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+The Expected Value
+\end_layout
+
+\begin_layout Standard
+1) We have 
+\begin_inset Formula $X_{0}=\mu$
+\end_inset
+
+ and 
+\begin_inset Formula 
+\begin{align*}
+E\left[X_{1}-\mu\right] & =E\left[\phi\left(X_{0}-\mu\right)+\epsilon_{t}\right]\\
+ & =\phi\left(E\left[X_{0}\right]-\mu\right)+E\left[\epsilon_{t}\right]\\
+ & =\phi\left(\mu-\mu\right)+0=0\\
+E\left[X_{1}\right] & =\mu
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+2) Assume 
+\begin_inset Formula $E\left[X_{t}\right]=\mu$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+3) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+E\left[X_{t+1}\right] & =E\left[X_{t+1}-\mu\right]+\mu\\
+ & =E\left[\phi\left(X_{t}-\mu\right)+\epsilon_{t}\right]+\mu\\
+ & =\phi\left(E\left[X_{t}\right]-\mu\right)+E\left[\epsilon_{t}\right]+\mu\\
+ & =\mu
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus 
+\begin_inset Formula $E\left[X_{t}\right]=\mu\,\forall\,t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Covariance
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $Y_{t}=X_{t}-\mu$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assuming stationarity (
+\begin_inset Formula $\left|\phi\right|<1$
+\end_inset
+
+) then:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+E\left[Y_{t}Y_{t-k}\right]=E\left[\left(X_{t}-\mu\right)\left(X_{t-k}-\mu\right)\right]\eqqcolon\gamma_{k}\,\forall\,t,k
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{0} & =E\left[Y_{t}Y_{t}\right]=E\left[Y_{t}\left(\phi Y_{t-1}+\epsilon_{t}\right)\right]\\
+ & =\phi E\left[Y_{t}Y_{t-1}\right]+E\left[Y_{t}\epsilon_{t}\right]\\
+ & =\phi\gamma_{1}+E\left[\left(\phi Y_{t-1}+\epsilon_{t}\right)\epsilon_{t}\right]\\
+ & =\phi\gamma_{1}+\phi E\left[Y_{t-1}\epsilon_{t}\right]+E\left[\epsilon_{t}\epsilon_{t}\right]\\
+ & =\phi\gamma_{1}+\phi E\left[Y_{t-1}\right]E\left[\epsilon_{t}\right]+\sigma^{2}\\
+ & =\phi\gamma_{1}+\sigma^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{1} & =E\left[Y_{t}Y_{t-1}\right]=E\left[\left(\phi Y_{t-1}+\epsilon_{t}\right)Y_{t-1}\right]\\
+ & =\phi E\left[Y_{t-1}Y_{t-1}\right]+E\left[\epsilon_{t}Y_{t-1}\right]\\
+ & =\phi\gamma_{0}+E\left[\epsilon_{t}\right]E\left[Y_{t-1}\right]\\
+ & =\phi\gamma_{0}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{0} & =\phi\gamma_{1}+\sigma^{2}\\
+\gamma_{1} & =\phi\gamma_{0}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{0} & =\phi^{2}\gamma_{0}+\sigma^{2}\\
+\gamma_{0} & =\frac{\sigma^{2}}{1-\phi^{2}}\\
+\gamma_{1} & =\frac{\phi\sigma^{2}}{1-\phi^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma_{k+1} & =E\left[Y_{t}Y_{t-k-1}\right]=E\left[\left(\phi Y_{t-1}+\epsilon_{t}\right)Y_{t-k-1}\right]\\
+ & =E\left[\phi Y_{t-1}Y_{t-k-1}+\epsilon_{t}Y_{t-k-1}\right]\\
+ & =\phi E\left[Y_{t-1}Y_{\left(t-1\right)-k}\right]+E\left[\epsilon_{t}Y_{t-k-1}\right]\\
+ & =\phi\gamma_{k}+E\left[\epsilon_{t}\right]E\left[Y_{t-k-1}\right]\\
+ & =\phi\gamma_{k}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $\gamma_{0}=\frac{\sigma^{2}}{1-\phi^{2}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\gamma_{1}=\phi\frac{\sigma^{2}}{1-\phi^{2}}$
+\end_inset
+
+ we get that 
+\begin_inset Formula $\gamma_{k}=\phi^{k}\frac{\sigma^{2}}{1-\phi^{2}}$
+\end_inset
+
+ And 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\rho_{k} & =Corr\left(X_{t},X_{t-k}\right)=\frac{Cov\left(X_{t},X_{t-k}\right)}{\sqrt{Var\left(X_{t}\right)Var\left(X_{t-k}\right)}}\\
+ & =\frac{\gamma_{k}}{\sqrt{\gamma_{0}^{2}}}=\frac{\gamma_{k}}{\gamma_{0}}=\frac{\phi^{k}\frac{\sigma^{2}}{1-\phi^{2}}}{\frac{\sigma^{2}}{1-\phi^{2}}}=\phi^{k}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, 
+\begin_inset Formula $\gamma_{k}=\phi^{k}\gamma_{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Estimation of the Mean
+\end_layout
+
+\begin_layout Standard
+Now let 
+\begin_inset Formula $\hat{\mu}=\bar{X}_{T}$
+\end_inset
+
+.
+ We have that 
+\begin_inset Formula 
+\[
+E\left[\bar{X}_{T}\right]=E\left[T^{-1}\sum_{t}X_{t}\right]=T^{-1}\sum_{t}E\left[X_{t}\right]=T^{-1}\sum_{t}\mu=\mu
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+However, the variance is much trickier.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $X\in\mathbb{R}^{T}$
+\end_inset
+
+ with 
+\begin_inset Formula $Var\left(X\right)=\Sigma$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{\Sigma}=\frac{1}{\gamma_{0}}\Sigma$
+\end_inset
+
+.
+ As we saw earlier,
+\begin_inset Formula 
+\[
+\tilde{\Sigma}_{ij}=\phi^{\left|i-j\right|}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then 
+\begin_inset Formula $\bar{X}_{T}=T^{-1}\boldsymbol{1}_{T}^{t}X$
+\end_inset
+
+ and 
+\begin_inset Formula 
+\begin{align*}
+Var\left(T^{-1}\boldsymbol{1}_{T}^{t}X\right) & =T^{-2}\boldsymbol{1}_{T}^{t}Var\left(X\right)\boldsymbol{1}_{T}\\
+ & =T^{-2}\sum_{i}\sum_{j}\Sigma_{ij}\\
+ & =\frac{\gamma_{0}}{T^{2}}\sum_{i}\sum_{j}\phi^{\left|i-j\right|}\\
+ & =\frac{\gamma_{0}}{T^{2}}\left(1\cdot T+2\sum_{i=1}^{T-1}\sum_{j=i+1}^{T}\phi^{j-i}\right)\\
+ & =\frac{\gamma_{0}}{T^{2}}\left(T+2\left(\left(T-1\right)\phi+\left(T-2\right)\phi^{2}+\left(T-3\right)\phi^{3}+...+\phi^{T-1}\right)\right)\\
+ & =\frac{\gamma_{0}}{T}\left(1+2\sum_{i=1}^{T-1}\frac{T-i}{T}\phi^{i}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{i=1}^{T-1}\frac{T-i}{T}\phi^{i} & =\sum_{i=1}^{T-1}\left(1-\frac{i}{T}\right)\phi^{i}\\
+ & =\sum_{i=1}^{T-1}\phi^{i}-\frac{1}{T}\sum_{i=1}^{T-1}i\phi^{i}\\
+ & =\frac{\phi\left(1-\phi^{T-1}\right)}{1-\phi}-\frac{\phi-T\phi^{T}+\left(T-1\right)\phi^{T+1}}{T\left(1-\phi\right)^{2}}\\
+ & =\frac{T\left(1-\phi\right)\phi\left(1-\phi^{T-1}\right)-\phi+T\phi^{T}-\left(T-1\right)\phi^{T+1}}{T\left(1-\phi\right)^{2}}\\
+ & =\phi\frac{T\left(1-\phi^{T-1}-\phi+\phi^{T}\right)-1+T\phi^{T-1}-T\phi^{T}+\phi^{T}}{T\left(1-\phi\right)^{2}}\\
+ & =\phi\frac{T-\cancel{T\phi^{T-1}}-T\phi+\cancel{T\phi^{T}}-1+\cancel{T\phi^{T-1}}-\cancel{T\phi^{T}}+\phi^{T}}{T\left(1-\phi\right)^{2}}\\
+ & =\phi\frac{T-T\phi-1+\phi^{T}}{T\left(1-\phi\right)^{2}}=\phi\frac{T\left(1-\phi\right)-\left(1-\phi^{T}\right)}{T\left(1-\phi\right)^{2}}\\
+ & =\phi\left(\frac{1}{1-\phi}-\frac{1-\phi^{T}}{T\left(1-\phi\right)^{2}}\right)=\frac{\phi}{1-\phi}\left(1-\frac{1}{T}\cdot\frac{1-\phi^{T}}{1-\phi}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(T^{-1}\boldsymbol{1}_{T}^{t}X\right) & =\frac{\gamma_{0}}{T}\left(1+2\sum_{i=1}^{T-1}\frac{T-i}{T}\phi^{i}\right)\\
+ & =\frac{\gamma_{0}}{T}\left(1+2\phi\frac{T\left(1-\phi\right)-\left(1-\phi^{T}\right)}{T\left(1-\phi\right)^{2}}\right)\\
+ & =\frac{\gamma_{0}}{T}\cdot\frac{T\left(1-\phi\right)^{2}+2\phi\left(T\left(1-\phi\right)-\left(1-\phi^{T}\right)\right)}{T\left(1-\phi\right)^{2}}\\
+ & =\frac{\gamma_{0}}{T}\cdot\frac{T-\cancel{2T\phi}+\widetilde{T\phi^{2}}+\cancel{2T\phi}-\widetilde{2T\phi^{2}}-2\phi+2\phi^{T+1}}{T\left(1-\phi\right)^{2}}\\
+ & =\frac{\gamma_{0}}{T}\cdot\frac{T\left(1-\phi^{2}\right)-2\phi\left(1-\phi^{T}\right)}{T\left(1-\phi\right)^{2}}\\
+ & =\frac{\gamma_{0}}{T}\cdot\left(\frac{1-\phi^{2}}{\left(1-\phi\right)^{2}}-2\phi\frac{\left(1-\phi^{T}\right)}{T\left(1-\phi\right)^{2}}\right)\\
+ & =\frac{\gamma_{0}}{T\left(1-\phi\right)^{2}}\cdot\left(1-\phi^{2}-2\phi\frac{\left(1-\phi^{T}\right)}{T}\right)\\
+ & =\frac{\frac{\sigma^{2}}{1-\phi^{2}}}{T\left(1-\phi\right)^{2}}\cdot\left(\left(1-\phi^{2}\right)-2\phi\frac{\left(1-\phi^{T}\right)}{T}\right)\\
+ & =\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)\approx\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For a large 
+\begin_inset Formula $T$
+\end_inset
+
+.
+ Then 
+\begin_inset Formula 
+\begin{align*}
+\bar{X}_{T} & \rightsquigarrow N\left(\mu,\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}\cdot\left(1-2\frac{\phi\left(1-\phi^{T}\right)}{T\left(1-\phi^{2}\right)}\right)\right)\\
+\sqrt{T}\left(\bar{X}_{T}-\mu\right) & \overset{d}{\longrightarrow}N\left(0,\frac{\sigma^{2}}{\left(1-\phi\right)^{2}}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Model's Degrees of Freedom
+\end_layout
+
+\begin_layout Standard
+Efron's definition of the D.F.
+ of a model is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+DF=n-\frac{1}{\sigma^{2}}\sum_{i=1}^{n}Cov\left(Y_{i},\hat{Y}_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the linear model, with 
+\begin_inset Formula $\hat{Y}=HY$
+\end_inset
+
+ then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{i=1}^{n}Cov\left(Y_{i},\hat{Y}_{i}\right) & =\sum_{i=1}^{n}Cov\left(Y_{i},\left(HY\right)_{i}\right)\\
+ & =\sum_{i=1}^{n}Cov\left(Y_{i},\sum_{j=1}^{n}H_{ij}Y_{j}\right)\\
+ & =\sum_{i=1}^{n}\sum_{j=1}^{n}H_{ij}Cov\left(Y_{i},Y_{j}\right)\\
+ & =\sigma^{2}\sum_{i=1}^{n}\sum_{j=1}^{n}H_{ij}\boldsymbol{1}_{\left\{ i=j\right\} }\\
+ & =\sigma^{2}\sum_{i=1}^{n}H_{ii}=\sigma^{2}\cdot tr\left(H\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+n-tr\left(H\right) & =n-tr\left(X\left(X^{t}X\right)^{-1}X^{t}\right)\\
+ & =n-tr\left(X^{t}X\left(X^{t}X\right)^{-1}\right)\\
+ & =n-tr\left(I_{p}\right)=n-p
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For a simple model 
+\begin_inset Formula $\hat{X}_{t}=\bar{X}_{T}$
+\end_inset
+
+ with 
+\begin_inset Formula $\left\{ X_{t}\right\} _{t=1}^{T}\sim i.i.d.$
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T-\frac{\sum_{t=1}^{T}Cov\left(X_{t},\bar{X}_{T}\right)}{Var\left(X_{t}\right)} & =T-\frac{\sum_{t=1}^{T}\frac{1}{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)}{Var\left(X_{t}\right)}\\
+ & =T-\frac{1}{T\cdot Var\left(X_{t}\right)}\sum_{t=1}^{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+ & =T-\frac{1}{T\cdot Var\left(X_{t}\right)}\sum_{t=1}^{T}\sum_{s=1}^{T}1_{\left\{ s=t\right\} }Var\left(X_{t}\right)\\
+ & =T-\frac{1}{T\cdot Var\left(X_{t}\right)}\sum_{t=1}^{T}Var\left(X_{t}\right)\\
+ & =T-\frac{1}{T\cdot Var\left(X_{t}\right)}\cdot T\cdot Var\left(X_{t}\right)=T-1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Just as expected.
+ Now assume that in 
+\bar under
+our
+\bar default
+ model 
+\begin_inset Formula $\hat{X}_{t}=\hat{\mu}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{t=1}^{T}Cov\left(X_{t},\bar{X}_{T}\right) & =\sum_{t=1}^{T}\frac{1}{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+ & =\frac{1}{T}\sum_{t=1}^{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+ & =\frac{1}{T}\boldsymbol{1}^{t}\Sigma\boldsymbol{1}\\
+ & =\frac{1}{T}\cdot T^{2}\cdot Var\left(\bar{X}_{T}\right)\\
+ & =T\cdot Var\left(\bar{X}_{T}\right)\\
+ & =T\cdot\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)\\
+ & =\frac{\sigma^{2}}{\left(1-\phi\right)^{2}}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)\longrightarrow\frac{\sigma^{2}}{\left(1-\phi\right)^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+T-\frac{\sum_{t=1}^{T}Cov\left(X_{t},\bar{X}_{T}\right)}{\gamma_{0}} & =T-\frac{\frac{\sigma^{2}}{\left(1-\phi\right)^{2}}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)}{\frac{\sigma^{2}}{1-\phi^{2}}}\\
+ & =T-\frac{1-\phi^{2}}{\left(1-\phi\right)^{2}}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)\\
+ & =T-\frac{1+\phi}{1-\phi}\cdot\left(1-2\phi\frac{1-\phi^{T}}{\left(1-\phi^{2}\right)T}\right)\\
+ & =T-\left(\frac{1+\phi}{1-\phi}-2\phi\cdot\frac{1-\phi^{T}}{\left(1-\phi\right)^{2}T}\right)\\
+ & \approx T-\frac{1+\phi}{1-\phi}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assume that 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is known, then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(X_{t},\hat{X}_{t}\right) & =\phi Cov\left(X_{t},X_{t-1}\right)+\left(1-\phi\right)Cov\left(X_{t},\bar{X}_{T}\right)\\
+ & =\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+\sum_{t=1}^{T}Cov\left(X_{t},\hat{X}_{t}\right) & =T\cdot\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\sum_{t=1}^{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+ & =T\cdot\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\boldsymbol{1}^{t}\Sigma\boldsymbol{1}\\
+ & =T\cdot\left(\phi\gamma_{1}+\left(1-\phi\right)Var\left(\bar{X}_{T}\right)\right)\\
+ & \approx T\cdot\left(\phi\gamma_{1}+\left(1-\phi\right)\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}\right)\\
+ & =\sigma^{2}T\cdot\left(\frac{\phi^{2}}{1-\phi^{2}}+\frac{1-\phi}{T\left(1-\phi\right)^{2}}\right)\\
+ & =T\cdot\frac{\sigma^{2}}{1-\phi}\left(\frac{\phi^{2}}{1+\phi}+\frac{1}{T}\right)\\
+DF & \approx\frac{T}{1-\phi}\left(\frac{\phi^{2}}{1+\phi}+\frac{1}{T}\right)=\frac{\phi^{2}}{1-\phi^{2}}\cdot T+\frac{1}{1-\phi}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which makes no sense at all since when 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+ we should get 
+\begin_inset Formula $D.F=T-1$
+\end_inset
+
+, not 
+\begin_inset Formula $0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Lets try again:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{1}{T}\sum_{t=1}^{T}Cov\left(X_{t},\hat{X}_{t}\right) & =\phi\gamma_{1}+\left(1-\phi\right)Var\left(\bar{X}_{T}\right)\\
+ & =\phi\gamma_{1}+\frac{\left(1-\phi\right)\sigma^{2}}{T\left(1-\phi\right)^{2}}\cdot\left(1-2\frac{\phi\left(1-\phi^{T}\right)}{T\left(1-\phi^{2}\right)}\right)\\
+ & =\phi\gamma_{1}+\frac{\sigma^{2}}{T\left(1-\phi\right)}-2\sigma^{2}\frac{\phi\left(1-\phi^{T}\right)}{T^{2}\left(1-\phi\right)\left(1-\phi^{2}\right)}\\
+ & =\sigma^{2}\left(\frac{\phi^{2}}{\left(1-\phi\right)\left(1+\phi\right)}+\frac{1}{T\left(1-\phi\right)}-2\frac{\phi\left(1-\phi^{T}\right)}{T^{2}\left(1-\phi\right)^{2}\left(1+\phi\right)}\right)\\
+ & =\frac{\sigma^{2}}{T^{2}\left(1-\phi\right)}\left(\frac{\phi^{2}}{1+\phi}T^{2}+T-2\phi\frac{1-\phi^{T}}{\left(1-\phi\right)\left(1+\phi\right)}\right)\\
+ & =\frac{\sigma^{2}}{\left(1-\phi\right)\left(1-\phi^{2}\right)}\left(\left(1-\phi\right)\phi^{2}+\left(1-\phi\right)\left(1+\phi\right)\frac{1}{T}-2\phi\left(1-\phi^{T}\right)\frac{1}{T^{2}}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+T-\left(\frac{\phi^{2}}{1-\phi^{2}}T+\frac{1}{1-\phi}\right)=\frac{1-2\phi^{2}}{1-\phi^{2}}\cdot T-\frac{1}{1-\phi}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\phi$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DF
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\infty$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\frac{1}{\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\frac{\sqrt{2}}{1+\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{2}{3}\left(T-1\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $0$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $T-1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $2\left(\frac{T}{3}-1\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{1}{\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\sqrt{2}}{1-\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\infty$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Model's Degrees of Freedom
+\end_layout
+
+\begin_layout Standard
+Efron's definition of the D.F.
+ of a model is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+DF=\frac{1}{\sigma^{2}}\sum_{i=1}^{n}Cov\left(Y_{i},\hat{Y}_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the linear model, with 
+\begin_inset Formula $\hat{Y}=HY$
+\end_inset
+
+ then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{i=1}^{n}Cov\left(Y_{i},\hat{Y}_{i}\right) & =\sum_{i=1}^{n}Cov\left(Y_{i},\left(HY\right)_{i}\right)\\
+ & =\sum_{i=1}^{n}Cov\left(Y_{i},\sum_{j=1}^{n}H_{ij}Y_{j}\right)\\
+ & =\sum_{i=1}^{n}\sum_{j=1}^{n}H_{ij}Cov\left(Y_{i},Y_{j}\right)\\
+ & =\sigma^{2}\sum_{i=1}^{n}\sum_{j=1}^{n}H_{ij}\boldsymbol{1}_{\left\{ i=j\right\} }\\
+ & =\sigma^{2}\sum_{i=1}^{n}H_{ii}=\sigma^{2}\cdot tr\left(H\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In our model,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\hat{Y}_{t} & =\hat{\phi}Y_{t-1}\\
+\hat{X}_{t} & =\hat{\phi}\left(X_{t-1}-\hat{\mu}\right)+\hat{\mu}\\
+ & =\hat{\phi}X_{t-1}+\left(1-\hat{\phi}\right)\hat{\mu}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(X_{t},\hat{X}_{t}\right) & =Cov\left(X_{t},\hat{\phi}X_{t-1}+\left(1-\hat{\phi}\right)\hat{\mu}\right)\\
+ & =Cov\left(X_{t},\hat{\phi}X_{t-1}\right)+Cov\left(X_{t},\hat{\mu}-\hat{\phi}\hat{\mu}\right)\\
+ & =Cov\left(X_{t},\hat{\phi}X_{t-1}\right)+Cov\left(X_{t},\hat{\mu}\right)-Cov\left(X_{t},\hat{\phi}\hat{\mu}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assume that 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is known, then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(X_{t},\hat{X}_{t}\right) & =\phi Cov\left(X_{t},X_{t-1}\right)+\left(1-\phi\right)Cov\left(X_{t},\bar{X}_{T}\right)\\
+ & =\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+\sum_{t=1}^{T}Cov\left(X_{t},\hat{X}_{t}\right) & =T\cdot\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\sum_{t=1}^{T}\sum_{s=1}^{T}Cov\left(X_{t},X_{s}\right)\\
+ & =T\cdot\phi\gamma_{1}+\left(1-\phi\right)\frac{1}{T}\boldsymbol{1}^{t}\Sigma\boldsymbol{1}\\
+ & =T\cdot\left(\phi\gamma_{1}+\left(1-\phi\right)Var\left(\bar{X}_{T}\right)\right)\\
+ & \approx T\cdot\left(\phi\gamma_{1}+\left(1-\phi\right)\frac{\sigma^{2}}{T\left(1-\phi\right)^{2}}\right)\\
+ & =\sigma^{2}T\cdot\left(\frac{\phi^{2}}{1-\phi^{2}}+\frac{1-\phi}{T\left(1-\phi\right)^{2}}\right)\\
+ & =T\cdot\frac{\sigma^{2}}{1-\phi}\left(\frac{\phi^{2}}{1+\phi}+\frac{1}{T}\right)\\
+DF & \approx\frac{T}{1-\phi}\left(\frac{\phi^{2}}{1+\phi}+\frac{1}{T}\right)=\frac{\phi^{2}}{1-\phi^{2}}\cdot T+\frac{1}{1-\phi}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which makes no sense at all since when 
+\begin_inset Formula $\phi=0$
+\end_inset
+
+ we should get 
+\begin_inset Formula $D.F=T-1$
+\end_inset
+
+, not 
+\begin_inset Formula $0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Lets try again:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{1}{T}\sum_{t=1}^{T}Cov\left(X_{t},\hat{X}_{t}\right) & =\phi\gamma_{1}+\left(1-\phi\right)Var\left(\bar{X}_{T}\right)\\
+ & =\phi\gamma_{1}+\frac{\left(1-\phi\right)\sigma^{2}}{T\left(1-\phi\right)^{2}}\cdot\left(1-2\frac{\phi\left(1-\phi^{T}\right)}{T\left(1-\phi^{2}\right)}\right)\\
+ & =\phi\gamma_{1}+\frac{\sigma^{2}}{T\left(1-\phi\right)}-2\sigma^{2}\frac{\phi\left(1-\phi^{T}\right)}{T^{2}\left(1-\phi\right)\left(1-\phi^{2}\right)}\\
+ & =\sigma^{2}\left(\frac{\phi^{2}}{\left(1-\phi\right)\left(1+\phi\right)}+\frac{1}{T\left(1-\phi\right)}-2\frac{\phi\left(1-\phi^{T}\right)}{T^{2}\left(1-\phi\right)^{2}\left(1+\phi\right)}\right)\\
+ & =\frac{\sigma^{2}}{T^{2}\left(1-\phi\right)}\left(\frac{\phi^{2}}{1+\phi}T^{2}+T-2\phi\frac{1-\phi^{T}}{\left(1-\phi\right)\left(1+\phi\right)}\right)\\
+ & =\frac{\sigma^{2}}{\left(1-\phi\right)\left(1-\phi^{2}\right)}\left(\left(1-\phi\right)\phi^{2}+\left(1-\phi\right)\left(1+\phi\right)\frac{1}{T}-2\phi\left(1-\phi^{T}\right)\frac{1}{T^{2}}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+T-\left(\frac{\phi^{2}}{1-\phi^{2}}T+\frac{1}{1-\phi}\right)=\frac{1-2\phi^{2}}{1-\phi^{2}}\cdot T-\frac{1}{1-\phi}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\phi$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DF
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\infty$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\frac{1}{\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\frac{\sqrt{2}}{1+\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{2}{3}\left(T-1\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $0$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $T-1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $2\left(\frac{T}{3}-1\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{1}{\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\sqrt{2}}{1-\sqrt{2}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $1$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-\infty$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

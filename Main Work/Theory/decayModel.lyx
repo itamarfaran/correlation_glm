@@ -1,0 +1,606 @@
+#LyX file created by tex2lyx 2.2
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin C:/Users/Itamar/Desktop/
+\textclass article
+\begin_preamble
+\usepackage{babel}
+
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding iso8859-15
+\fontencoding T1
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Abstract
+The goal of this note is to propose a model that would efficiently characterize columnwise changes between two groups of sample covariance matrices. 
+\end_layout
+
+\begin_layout Section
+Setup
+\end_layout
+
+\begin_layout Standard
+The data consists of a set of resting-state brain images collected for two groups of individuals.˙Let the function 
+\begin_inset Formula $\pi:\{1,...,n\}\to\{0,1\}$
+\end_inset
+
+ describe the phenotype of an individual corrosponding to control (0) group or disease (1). The brain image of each individual is first preprocessed into 
+\begin_inset Formula $K\approx50$
+\end_inset
+
+ time-series of length T=155, each time-series corrosponding to the mean BOLD signal in a predetermined brain region. Let 
+\begin_inset Formula $Y_{i}$
+\end_inset
+
+ denote this matrix 
+\begin_inset Formula $K\times T$
+\end_inset
+
+ matrix. For individual 
+\begin_inset Formula $i$
+\end_inset
+
+, let 
+\begin_inset Formula $\tilde{C^{i}}=corr(Y_{i})$
+\end_inset
+
+ correspond to the 
+\begin_inset Formula $K\times K$
+\end_inset
+
+ corrlation matrix. We restrict the analysis for the non-diagonal elements of 
+\begin_inset Formula $\tilde{C^{i}}$
+\end_inset
+
+, and for better normality apply Fisher's z-transformation to those values, 
+\begin_inset Formula \[
+C^{i}=(\rho{}_{jk}^{i})=z(\tilde{C_{jk}^{i}}),\qquad z(r)=\frac{1}{2}ln\left(\frac{1+r}{1-r}\right).
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Unrestricted model
+\end_layout
+
+\begin_layout Standard
+The classical model for analyzing this data is the unrestricted mean model. Under this model, the correlation for each popuation is parameterized
+\end_layout
+
+\begin_layout Standard
+with a separate mean parameter: 
+\begin_inset Formula \[
+E[C_{jk}^{i}]=\begin{cases}
+\begin{array}{cc}
+\theta_{jk}^{0} & i\ s.t.\:\pi(i)=0\\
+\theta_{jk}^{1} & i\ s.t.\:\pi(i)=1.
+\end{array}\end{cases}
+\]
+\end_inset
+
+We are really interested in estimating 
+\begin_inset Formula \[
+\delta_{jk}=\theta_{jk}^{0}-\theta_{jk}^{1}.
+\]
+\end_inset
+
+Because we have multiple correlation coefficients from each group, this is a classic two-sample design. Parameteric and non-parametric estimators
+\end_layout
+
+\begin_layout Standard
+and tests can be derived for each 
+\begin_inset Formula $(j,k)$
+\end_inset
+
+ pair using the two sample ḋifference and variance:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \[
+m_{jk}=m_{Djk}-m_{Hjk}=n_{D}^{-1}\sum_{i\in D}\rho{}_{jk}^{i}-n_{H}^{-1}\sum_{i\in H}\rho{}_{jk}^{i}\qquad s_{jk}^{2}=n_{D}^{-1}\sum_{i\in D}(\rho_{jk}^{i}-m_{Djk})^{2}+n_{H}^{-1}\sum_{i\in H}(\rho_{jk}^{i}-m_{Hjk})^{2}.
+\]
+\end_inset
+
+In particular, the t-statistic for each 
+\begin_inset Formula $(j,k)$
+\end_inset
+
+ pair is the ratio of these quantities: 
+\begin_inset Formula \[
+t_{jk}=\frac{m_{jk}}{\sqrt{s_{jk}^{2}}}.
+\]
+\end_inset
+
+The unrestricted model requires strong multiplicity corrections that can under-power a typical study. For each region-pair, the unrestricted model makes a separate inferential statement. With even a relatively small parcilation of the brian into regions(say 
+\begin_inset Formula $K=50$
+\end_inset
+
+), the number of hypotheses to test (or parameters to estimate) can be large (
+\begin_inset Formula $K(K-1)/2>1000),$
+\end_inset
+
+ and the necessairy multiplicity corrections can hide any set of interesting result. In particular, the current model paired with standard multiplicity corrections does not take into account the clues as to where we expect changes to happen in the data.
+\end_layout
+
+\begin_layout Subsection
+Restricted model
+\end_layout
+
+\begin_layout Standard
+One way to reduce the complexity of the model is to make stronger modeling assumptions. Instead of searching for pair-wise change in conectivity, we will instead search for individual regions whose connectivity to all other regions changes. We will further assume that the changes of connectivity in the desease group are proportional to the baseline connectivity in the healthy group; large connectivity will display larger decays in correlation, whereas low connectivity will see smaller decay. These two assumptions reduce the number of parameters quantifying connectivity change to 
+\begin_inset Formula $K$
+\end_inset
+
+, a single parameter for each region.
+\end_layout
+
+\begin_layout Standard
+The restricted model postulates a vector of decay parameters 
+\begin_inset Formula $\alpha\in R^{K},\ \alpha_{j}\in[0,1]$
+\end_inset
+
+ describing the (proportional) change in correlation between the disease and the control groups. Let 
+\begin_inset Formula $\theta_{jk}$
+\end_inset
+
+ describe the correlation between regions 
+\begin_inset Formula $j\neq k$
+\end_inset
+
+ in the control population. Then the expression for the desease population correlation is 
+\begin_inset Formula $\theta_{jk}\alpha_{j}\alpha_{k}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+More precisely, we form the following model for 
+\begin_inset Formula $\rho_{jk}^{i}$
+\end_inset
+
+ , the Fisherized correlation between regions 
+\begin_inset Formula $j\neq k$
+\end_inset
+
+ in individual 
+\begin_inset Formula $i$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\rho_{jk}^{i}=\theta_{jk}\cdot\alpha_{j}^{\pi(i)}\cdot\alpha_{k}^{\pi(i)}+\epsilon_{jk}^{i},\qquad\epsilon_{jk}^{i}\stackrel{\cdot}{\sim}N(0,\sigma_{\epsilon}^{2}).\label{eq:restricted}
+\end{equation}
+\end_inset
+
+Here 
+\begin_inset Formula $\theta_{jk}$
+\end_inset
+
+ specifies the mean connectivity of the control between regions
+\begin_inset Formula $j$
+\end_inset
+
+ and 
+\begin_inset Formula $k$
+\end_inset
+
+; 
+\begin_inset Formula $\epsilon_{jk}^{i}$
+\end_inset
+
+ is the random noise from calculating the correlation. We are interested in 
+\begin_inset Formula $\alpha_{j}\in[0,1]$
+\end_inset
+
+, which parametrizes the decay in connectivity of region 
+\begin_inset Formula $j$
+\end_inset
+
+ with other regions in disease compared to the healthy baseline connectivity. The effect of the 
+\begin_inset Formula $\alpha's$
+\end_inset
+
+ vanishes in the control group where 
+\begin_inset Formula $\pi(i)=0$
+\end_inset
+
+. We can write this model in vectorized form as follows: 
+\begin_inset Formula \begin{equation}
+C^{i}=\Theta\times[\alpha\alpha']^{\pi(i)}+\epsilon^{i},
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\times$
+\end_inset
+
+ stands for an element-wise multiplication.
+\end_layout
+
+\begin_layout Subsubsection
+Estimating the correaltion matrix 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ and the decay vector 
+\begin_inset Formula $\alpha.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our main interest in this model is solving for 
+\begin_inset Formula $\alpha.$
+\end_inset
+
+ An important property of the model is that the greater 
+\begin_inset Formula $\theta_{jk}$
+\end_inset
+
+ is, the better we can estimate 
+\begin_inset Formula $\alpha_{j}$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha_{k}$
+\end_inset
+
+. Note that given a vector 
+\begin_inset Formula $\alpha,$
+\end_inset
+
+ each parameter of 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ is separably solvable. Further note that initial values for 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ can be computed directly from the matrix of the control group.
+\end_layout
+
+\begin_layout Standard
+We assume that the errors are Gaussian with equal variance, so the maximum-likelihood estimator for 
+\begin_inset Formula $(\Theta,\alpha)$
+\end_inset
+
+ is the value that minimizes the square-error loss:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\hat{(\Theta,\alpha)}_{ML}=\arg\min_{\Theta,\alpha}\left\{ \sum_{i\in H}\sum_{j<k}\left(\theta_{jk}-\rho_{jk}^{i}\right)^{2}/\sigma_{\epsilon}^{2}+\sum_{i\in D}\sum_{j<k}\left(\theta_{jk}\cdot\alpha_{j}\alpha_{k}'-\rho_{jk}^{i}\right)^{2}/\sigma_{\epsilon}^{2}\right\} .
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This minimization can be rewritten to depend on the sufficient statistics 
+\begin_inset Formula $\bar{\rho}_{jk}^{H}=\frac{1}{n_{H}}\sum_{i\in H}\rho_{jk}^{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{\rho}_{jk}^{D}=\frac{1}{n_{H}}\sum_{i\in D}\rho_{jk}^{i}$
+\end_inset
+
+, and does not depend on the variance parameter:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\hat{(\Theta,\alpha)}_{ML}=\arg\min_{\Theta,\alpha}\left\{ \sum_{j<k}n_{H}\left(\theta_{jk}-\bar{\rho}_{jk}^{H}\right)^{2}+\sum_{j<k}n_{D}\left(\theta_{jk}\cdot\alpha_{j}\alpha_{k}'-\bar{\rho}_{jk}^{D}\right)^{2}\right\} .
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although the minimization is not guaranteed to be jointly convex for (
+\begin_inset Formula $\Theta,\alpha)$
+\end_inset
+
+, the penalty is convex in each parameter vector separately and is differentiable, so is expected to behave well under iterative gradient descent algorithms. The gradient is composed of the following partial derivatives:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\frac{\partial\ell}{\partial\theta_{jk}}=\frac{1}{\sigma_{\epsilon}^{2}}[2n_{H}(\theta_{jk}-\bar{\rho}_{jk}^{H})+2n_{D}(\theta_{jk}\cdot\alpha_{j}^{2}\alpha_{k}^{2}-\bar{\rho}_{jk}^{H}\cdot\alpha_{j}\alpha_{k})],\label{eq:partial1}
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\frac{\partial\ell}{\partial\alpha_{j}}=\frac{2n_{D}}{\sigma_{\epsilon}^{2}}\sum_{1\leq k\leq n,k\neq j}\left(\theta_{jk}^{2}\alpha_{j}\alpha_{k}^{2}-\bar{\rho}_{jk}^{D}\theta_{jk}\alpha_{k}\right).\label{eq:partial2}
+\end{equation}
+\end_inset
+
+As a starting point for the algorithms, we initialize 
+\begin_inset Formula $\hat{\theta_{jk}}=\bar{\rho}_{jk}^{H}$
+\end_inset
+
+ following the method-of-moments principle, and 
+\begin_inset Formula $\hat{\alpha}=(1,...,1).$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Inference for 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and 
+\begin_inset Formula $\Theta$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We suggest making inferential statements regarding 
+\begin_inset Formula $\alpha,$
+\end_inset
+
+ 
+\begin_inset Formula $\Theta,$
+\end_inset
+
+ and their functionals based on the mutlivariate asymptotic normality of the MLEs. This requires estimating Fisher's information matrix, an integral version of the likelihood Hessian. Here is a brief reminder, with a fuller exposition of the method can be found in CITEP[AllOfStatsiticspage133].
+\end_layout
+
+\begin_layout Standard
+For simplified notation, denote by 
+\begin_inset Formula $\eta\in R^{p}$
+\end_inset
+
+ the full parameter vector composed of the upper-triangle of 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ and
+\begin_inset Formula $\alpha$
+\end_inset
+
+. Let 
+\begin_inset Formula $\eta^{*}$
+\end_inset
+
+ be the true vector of parameters generating the data, and 
+\begin_inset Formula $\eta_{ML}$
+\end_inset
+
+ the maximum likelihood vector. With enough samples, 
+\begin_inset Formula $\eta_{ML}-\eta^{*}$
+\end_inset
+
+ is asymptotically multivariate-normal around 
+\begin_inset Formula $\mathbf{0},$
+\end_inset
+
+ with a covariance matrix equivalent to the Fisher information evaluated at the estimated parameter:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \[
+(\eta_{ML}-\eta^{*})\stackrel{\cdot}{\sim}N(\mathbf{0},\ I^{-1}(\eta_{ML})).
+\]
+\end_inset
+
+Fisher's information matrix can be derived analytically by taking the expectation of the Hessian matrix of the likelihood: 
+\begin_inset Formula \[
+I(\eta_{ML})_{nm}=-E_{\eta_{ML}}[H_{nm}],\quad H_{nm}=\frac{\partial^{2}\ell(X,\eta)}{\partial\eta_{n}\partial\eta_{m}}.
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Fisher information matrix for our restricted model 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:restricted"
+
+\end_inset
+
+ can be found by taking the second partial derivative from equations 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:partial1"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:partial2"
+
+\end_inset
+
+, and taking expectations: 
+\end_layout
+
+\begin_layout Itemize
+
+\begin_inset Formula $-E\left[\frac{\partial^{2}\ell(X,\eta)}{\partial\alpha_{j}^{2}}\right]=E\left[\frac{2n_{D}}{\sigma_{\epsilon}^{2}}\sum_{k\neq j}\theta_{jk}^{2}\alpha_{k}^{2}\right]=\frac{2n_{D}}{\sigma_{\epsilon}^{2}}\sum_{k\neq j}\theta_{jk}^{2}\alpha_{k}^{2}.$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\begin_inset Formula $-E\left[\frac{\partial^{2}\ell(X,\eta)}{\partial\theta_{jk}^{2}}\right]=E\left[\frac{2}{\sigma_{\epsilon}^{2}}\left(2n+n_{D}\alpha_{j}^{2}\alpha_{k}^{2}\right)\right]=\frac{2}{\sigma_{\epsilon}^{2}}\left(n_{H}+n_{D}\alpha_{j}^{2}\alpha_{k}^{2}\right).$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\begin_inset Formula $-E\left[\frac{\partial^{2}\ell(X,\eta)}{\partial\alpha_{j}\partial\theta_{jk}}\right]=E\left[\frac{2n_{D}\alpha_{k}}{\sigma_{\epsilon}^{2}}(2\theta_{jk}\alpha_{j}\alpha_{k}-\bar{\rho}_{jk}^{D})\right]=\frac{2n_{D}\alpha_{k}}{\sigma_{\epsilon}^{2}}\left[2\theta_{jk}\alpha_{j}\alpha_{k}-E[\bar{\rho}_{jk}^{D}]\right]=\frac{2n_{D}\alpha_{k}}{\sigma_{\epsilon}^{2}}\theta_{jk}\alpha_{j}\alpha_{k}$
+\end_inset
+
+, where the expectation 
+\begin_inset Formula $E[\bar{\rho}_{jk}^{D}]=\theta_{jk}\alpha_{j}\alpha_{k}$
+\end_inset
+
+ follows from the restricted model evaluated at 
+\begin_inset Formula $\eta_{ML}$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Itemize
+
+\begin_inset Formula $-E\left[\frac{\partial^{2}\ell(X,\eta)}{\partial\alpha_{j}\partial\alpha_{k}}\right]=E\left[\frac{2n_{D}\theta_{jk}}{\sigma_{\epsilon}^{2}}(2\theta_{jk}\alpha_{j}\alpha_{k}-\bar{\rho}_{jk}^{D})\right]=\frac{2n_{D}\theta_{jk}}{\sigma_{\epsilon}^{2}}\left[2\theta_{jk}\alpha_{j}\alpha_{k}-E[\bar{\rho}_{jk}^{D}]\right]=\frac{2n_{D}\theta_{jk}}{\sigma_{\epsilon}^{2}}\theta_{jk}\alpha_{j}\alpha_{k},$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\begin_inset Formula $-E\left[\frac{\partial^{2}\ell(X,\eta)}{\partial\theta_{jk}\partial\theta_{j'k'}}\right]=0$
+\end_inset
+
+ for 
+\begin_inset Formula $(j,k)\neq(j',k')$
+\end_inset
+
+. 
+\end_layout
+
+\begin_layout Subsection
+Restricted model with correlated errors
+\end_layout
+
+\begin_layout Standard
+In practice, entries of estimated covariance or correlation matrices are often strongly correlated. We therefor add a covariance matrix that accomodates these correlations. As before, let 
+\begin_inset Formula $\theta_{jk}$
+\end_inset
+
+ and 
+\begin_inset Formula $\theta_{jk}\alpha_{j}\alpha_{k}$
+\end_inset
+
+ and describe the correlation between regions 
+\begin_inset Formula $j\neq k$
+\end_inset
+
+ in the control and case populations, and write:
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Formula \begin{equation}
+\rho_{jk}^{i}=\theta_{jk}\cdot\alpha_{j}^{\pi(i)}\cdot\alpha_{k}^{\pi(i)}+\epsilon_{jk}^{i}.\label{eq:restricted-1}
+\end{equation}
+\end_inset
+
+However, for the vectorized residual vectors 
+\begin_inset Formula $\epsilon^{i}=(\epsilon_{jk}^{i})_{j<k}$
+\end_inset
+
+ , we no longer assume that it originates from an iid Gaussian distribution. Rather, assume 
+\begin_inset Formula \[
+\epsilon^{i}\sim N(\mathbf{\mathbf{0,\Sigma_{\pi(i)}).}}
+\]
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

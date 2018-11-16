@@ -1,0 +1,336 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\left\{ X_{i}\right\} _{i=1}^{n}\overset{i.i.d}{\sim}U\left(0,\theta\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f_{X_{i}}\left(x\right)=\frac{1}{\theta}\cdot1_{\left\{ x<\theta\right\} }
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+L\left(X;\theta\right)=\frac{1}{\theta^{n}}\cdot1_{\left\{ \max x_{i}<\theta\right\} }
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\theta}_{mle}=\max x_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\bar{X}_{n}\overset{!}{=}\frac{\theta}{2}\Rightarrow\hat{\theta}_{mom}=2\bar{X}_{n}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+P\left(\max X_{i}<x\right)=P\left(X_{i}<x\,\forall\,i\right)=P\left(X_{1}<x\right)^{n}=\left(\frac{x}{\theta}\right)^{n}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f_{\max X_{i}}\left(x\right)=\frac{n}{\theta}\left(\frac{x}{\theta}\right)^{n-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+E\left[\max X_{i}\right] & =\stackrel[0]{\theta}{\int}x\cdot\frac{n}{\theta}\left(\frac{x}{\theta}\right)^{n-1}dx\\
+ & =\stackrel[0]{\theta}{\int}\frac{n}{\theta^{n}}x^{n}dx\\
+ & =\frac{n}{\theta^{n}\left(n+1\right)}\stackrel[0]{\theta}{\int}\left(n+1\right)x^{n}dx\\
+ & =\frac{n}{\theta^{n}\left(n+1\right)}\cdot x^{n+1}|_{0}^{\theta}\\
+ & =\frac{n\theta^{n+1}}{\left(n+1\right)\theta^{n}}\\
+ & =\frac{n}{n+1}\theta\\
+\Rightarrow & \hat{\theta}_{mle}=\frac{n+1}{n}\max x_{i}\\
+E\left[\frac{n+1}{n}\max x_{i}\right] & =\frac{n+1}{n}E\left[\max x_{i}\right]\\
+ & =\frac{n+1}{n}\cdot\frac{n}{n+1}\theta\\
+ & =\theta
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+E\left[\max x_{i}^{2}\right] & =\stackrel[0]{\theta}{\int}x^{2}\cdot\frac{n}{\theta}\left(\frac{x}{\theta}\right)^{n-1}dx\\
+ & =\frac{n}{\theta^{n}}\stackrel[0]{\theta}{\int}x^{n+1}dx\\
+ & =\frac{n}{\left(n+2\right)\theta^{n}}\stackrel[0]{\theta}{\int}\left(n+2\right)x^{n+1}dx\\
+ & =\frac{n}{\left(n+2\right)\theta^{n}}\cdot x^{n+2}|_{0}^{\theta}\\
+ & =\frac{n\theta^{n+2}}{\left(n+2\right)\theta^{n}}\\
+ & =\frac{n}{\left(n+2\right)}\theta^{2}\\
+E\left[\left(\frac{n+1}{n}\max x_{i}\right)^{2}\right] & =\left(\frac{n+1}{n}\right)^{2}\cdot E\left[\max x_{i}^{2}\right]\\
+ & =\left(\frac{n+1}{n}\right)^{2}\frac{n}{\left(n+2\right)}\theta^{2}\\
+ & =\frac{\left(n+1\right)^{2}}{n\left(n+2\right)}\theta^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\theta}_{mle}\right) & =\frac{\left(n+1\right)^{2}}{n\left(n+2\right)}\theta^{2}-\theta^{2}\\
+ & =\left(\frac{\left(n+1\right)^{2}}{n\left(n+2\right)}-1\right)\theta^{2}
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\hat{\theta}_{mle}=\frac{n+1}{n}\max x_{i},\:E\left[\hat{\theta}_{mle}\right]=\theta,\:Var\left(\hat{\theta}_{mle}\right)=\left(\frac{\left(n+1\right)^{2}}{n\left(n+2\right)}-1\right)\theta^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+E\left[\hat{\theta}_{mom}\right] & =E\left[2\bar{X}_{n}\right]\\
+ & =2E\left[n^{-1}\stackrel[i=1]{n}{\sum}x_{i}\right]\\
+ & =2n^{-1}\stackrel[i=1]{n}{\sum}E\left[x_{i}\right]\\
+ & =2n^{-1}\stackrel[i=1]{n}{\sum}\frac{\theta}{2}\\
+ & =\theta
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\theta}_{mom}\right) & =Var\left(2\bar{X}_{n}\right)\\
+ & =4Var\left(n^{-1}\stackrel[i=1]{n}{\sum}x_{i}\right)\\
+ & =4n^{-2}\stackrel[i=1]{n}{\sum}Var\left(x_{i}\right)\\
+ & =4n^{-2}\stackrel[i=1]{n}{\sum}\frac{\theta^{2}}{12}\\
+ & =\frac{\theta^{2}}{3n}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\hat{\theta}_{mom}=2\bar{X}_{n},\:E\left[\hat{\theta}_{mom}\right]=\theta,\:Var\left(\hat{\theta}_{mom}\right)=\frac{\theta^{2}}{3n}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\theta}_{mle}\right)-Var\left(\hat{\theta}_{mom}\right) & =\frac{\left(n+1\right)^{2}}{n\left(n+2\right)}-1-\frac{1}{3n}\\
+ & =\frac{3\left(n+1\right)^{2}}{3n\left(n+2\right)}-\frac{3n\left(n+2\right)}{3n\left(n+2\right)}-\frac{\left(n+2\right)}{3n\left(n+2\right)}\\
+ & =\frac{3\left(n+1\right)^{2}-3n\left(n+2\right)-\left(n+2\right)}{3n\left(n+2\right)}\\
+ & \propto3\left(n+1\right)^{2}-3n\left(n+2\right)-\left(n+2\right)\\
+ & =3\left(n^{2}+2n+1\right)-3\left(n^{2}+2n\right)-\left(n+2\right)\\
+ & =3n^{2}+6n+3-3n^{2}-6n-n-2\\
+ & =1-n
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\Rightarrow Var\left(\hat{\theta}_{mle}\right)<Var\left(\hat{\theta}_{mom}\right)\,\forall\,n>1
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P\left(\left|\max x_{i}-\theta\right|<\epsilon\right) & =P\left(\theta-\epsilon<\max x_{i}<\theta+\epsilon\right)\\
+ & =P\left(\max x_{i}>\theta-\epsilon\right)\\
+ & =1-P\left(\max x_{i}\leq\theta-\epsilon\right)\\
+ & =1-F_{\max x_{i}}\left(\theta-\epsilon\right)\\
+ & =1-\left(\frac{\theta-\epsilon}{\theta}\right)^{n}\\
+ & =1-\left(1-\frac{\epsilon}{\theta}\right)^{n}\\
+ & \underset{n\rightarrow\infty}{\longrightarrow}1-0=1
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+\Rightarrow & \max x_{i}\overset{\mathbb{P}}{\longrightarrow}\theta\\
+\Rightarrow & \left(\frac{n+1}{n}\right)\max x_{i}=\hat{\theta}_{mle}\overset{\mathbb{P}}{\longrightarrow}\theta
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P\left(\left|\max x_{i}-\theta\right|<\epsilon\right) & =P\left(\theta-\epsilon<\max x_{i}<\theta+\epsilon\right)\\
+ & =P\left(\max x_{i}>\theta-\epsilon\right)\\
+ & =1-P\left(\max x_{i}\leq\theta-\epsilon\right)\\
+ & =1-F_{\max x_{i}}\left(\theta-\epsilon\right)\\
+ & =1-\left(\frac{\theta-\epsilon}{\theta}\right)^{n}\\
+ & =1-\left(1-\frac{\epsilon}{\theta}\right)^{n}\\
+P\left(\left|\max x_{i}-\theta\right|>\epsilon\right) & =1-P\left(\left|\max x_{i}-\theta\right|<\epsilon\right)\\
+ & =\left(1-\frac{\epsilon}{\theta}\right)^{n}\underset{n\rightarrow\infty}{\longrightarrow}0\,\forall\,0<\epsilon<\theta
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P\left(\left|2\bar{X}_{n}-\theta\right|<\epsilon\right) & =P\left(\theta-\epsilon<2\bar{X}_{n}<\theta+\epsilon\right)\\
+ & =P\left(\frac{\theta-\epsilon-\theta}{\theta/\sqrt{3n}}<\frac{2\bar{X}_{n}-\theta}{\theta/\sqrt{3n}}<\frac{\theta+\epsilon-\theta}{\theta/\sqrt{3n}}\right)\\
+ & =P\left(\frac{-\epsilon\sqrt{3n}}{\theta}<Z_{\bar{X}_{n}}<\frac{\epsilon\sqrt{3n}}{\theta}\right)\\
+ & \underset{n\rightarrow\infty}{\longrightarrow}\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)-\Phi\left(\frac{-\epsilon\sqrt{3n}}{\theta}\right)\\
+ & =\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)-\left(1-\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)\right)\\
+ & =2\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)-1\\
+P\left(\left|2\bar{X}_{n}-\theta\right|>\epsilon\right) & =1-P\left(\left|2\bar{X}_{n}-\theta\right|<\epsilon\right)\\
+ & \underset{n\rightarrow\infty}{\longrightarrow}1-\left(2\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)-1\right)\\
+ & =2\left(1-\Phi\left(\frac{\epsilon\sqrt{3n}}{\theta}\right)\right)\\
+ & =2\cdot\Phi\left(-\frac{\epsilon\sqrt{3n}}{\theta}\right)\underset{n\rightarrow\infty}{\longrightarrow}0\,\forall\,\epsilon>0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

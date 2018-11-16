@@ -1,0 +1,194 @@
+---
+title: "Untitled"
+author: "Itamar Faran"
+date: "23 April 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(matrixcalc)
+library(MASS)
+
+#Force symmetry on non-symmetrical matrix
+force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+
+#Retrieve lower/upper triangle of a matrix as a vector
+triangle_to_vector <- function(MATR , diag = FALSE){
+  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
+  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+}
+
+#Create a symmetric matrix from a vector
+vector_to_triangle <- function(VECT){
+  m <- length(VECT)
+  p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
+  p <- p[which( (p==round(p))&p==abs(p) )]
+  if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+  pelet <- matrix(0, ncol = p, nrow = p)
+  pelet[lower.tri(pelet)] <- VECT
+  pelet <- pelet+t(pelet)
+  diag(pelet) <- 1
+  return(pelet)
+}
+
+multi.deriv<-function(FUN,X,whichx=NULL,whichfn=NULL,eps=9){
+  eps <- min(eps,12)
+  if(length(whichx)==0) whichx <- 1:length(X)
+  if(length(whichfn)==0) whichfn <- 1:length(FUN(X))
+  lex<-length(whichx)
+  
+  pelet<-matrix(ncol=lex,nrow=length(whichfn))
+  
+  for (i in 1:lex){
+    newX<-X
+    newX[whichx[i]]<-X[whichx[i]]+(1/(10^eps))
+    pelet[,i]<-(FUN(newX)[whichfn]-FUN(X)[whichfn])/(1/(10^eps))
+  }
+  
+  rownames(pelet)<-paste (rep("f",length(whichfn)),sapply(whichfn,toString))
+  colnames(pelet)<-paste (rep("x",lex),sapply(whichx,toString))
+  pelet
+}
+
+vector_var_matrix_calc <- function(MATR){
+  if(!is.positive.definite(MATR)) stop("MATR not positive definite")
+  p <- dim(MATR)[1]
+  m <- (p*(p+1)/2)
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  for(i in 1:(p)){
+    v1 <- c(v1, rep(i, p-i+1))
+    v2 <- c(v2, (i):p)
+  }
+  order_vect <- cbind(v1,v2)
+  
+  pelet <- matrix(nrow = m, ncol = m)
+  for(i in 1:m){
+    for(j in i:m){
+      indexes <- c(order_vect[i,], order_vect[j,])
+      pelet[i,j] <- MATR[indexes[1],indexes[3]]*MATR[indexes[2],indexes[4]] + 
+        MATR[indexes[1],indexes[4]]*MATR[indexes[2],indexes[3]]
+      pelet[j,i] <- pelet[i,j]
+    }
+  }
+  
+  return(pelet)
+}
+cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle_to_vector))
+
+g <- function(X){
+  return( c(X[2]/sqrt(X[1]*X[5]),
+            X[3]/sqrt(X[1]*X[8]),
+            X[4]/sqrt(X[1]*X[10]),
+            X[6]/sqrt(X[5]*X[8]),
+            X[7]/sqrt(X[5]*X[10]),
+            X[9]/sqrt(X[8]*X[10])) )
+}
+```
+
+```{r}
+VARR <- rnorm(4*100, -10, 10) %>% matrix(ncol = 4) %>% (function(x) t(x)%*%x/100)
+VARR <- VARR*(sample(c(1,-0.5), 6, TRUE) %>% vector_to_triangle())
+
+while (!is.positive.definite(VARR)) {
+  VARR <- VARR*(sample(c(1,-0.5), 6, TRUE) %>% vector_to_triangle())
+}
+
+is.positive.definite(VARR)
+VARR
+CORR <- force_symmetry(cov2cor(VARR))
+
+gtag <- multi.deriv(g, triangle_to_vector(VARR, diag = TRUE))
+corr_var_est <- gtag%*%(vector_var_matrix_calc(VARR)/n)%*%t(gtag)
+
+n <- 100
+B <- 1000
+rhos <- array(dim = c(4,4,B))
+rho_var <- array(dim = c(6,6,B))
+
+for(b in 1:B){
+  var_hat <- mvrnorm(n = n, mu = rep(0, 4), VARR) %>% (function(X) t(X)%*%X/n)
+  rhos[,,b] <- force_symmetry(cov2cor(var_hat))
+  
+  g_tag <- multi.deriv(g, triangle_to_vector(var_hat, TRUE))
+
+  rho_var[,,b] <- g_tag%*%(vector_var_matrix_calc(var_hat)/n)%*%t(g_tag)
+}
+
+empiric <- cor.matrix_to_norm.matrix(rhos) %>% cov()
+corr_var_est
+empiric
+
+mean(empiric/corr_var_est)
+
+data.frame(Delta = triangle_to_vector(corr_var_est), Empiric = triangle_to_vector(empiric)) %>%
+  ggplot(aes(x = Delta, y = Empiric)) + labs(title = "Delta Method ~ Empiric") + 
+  geom_abline(slope = 1, intercept = 0, col = "red", size = 1, linetype = 2) + 
+  geom_point(col = "blue")
+
+ind <- sample(1:6, 2)
+ind
+
+data.frame(Bias = rho_var[ind[1], ind[2], ] - corr_var_est[ind[1], ind[2]]) %>% 
+  ggplot(aes(x=Bias)) + geom_histogram(bins = 4*log(n), col = "white", fill = "blue") +
+  geom_hline(yintercept = 0) + labs(title = "Bias from Delta method based on parameters",
+                                    y = "Frequency")
+data.frame(Bias = n*(rho_var[ind[1], ind[2], ] - corr_var_est[ind[1], ind[2]])) %>% summary()
+
+data.frame(Bias = rho_var[ind[1], ind[2], ] - empiric[ind[1], ind[2]]) %>% 
+  ggplot(aes(x=Bias)) + geom_histogram(bins = 4*log(n), col = "white", fill = "blue") +
+  geom_hline(yintercept = 0) + labs(title = "Bias from Delta method based on parameters",
+                                    y = "Frequency")
+data.frame(Bias = n*(rho_var[ind[1], ind[2], ] - empiric[ind[1], ind[2]])) %>% summary()
+```
+
+```{r}
+diag(rho_var[,,2])
+bias_diag <- t(apply(rho_var,3,diag)) - (1 - triangle_to_vector(CORR)^2)^2/n
+hist(bias_diag)
+summary(bias_diag)
+summary(bias_diag/((1 - triangle_to_vector(CORR)^2)^2/n))
+```
+
+```{r}
+corrvar <- function(i,j,k,l, corrmat){
+  (corrmat[i,j]*corrmat[k,l]/2)*(corrmat[i,k]^2 + corrmat[i,l]^2 + corrmat[j,k]^2 + corrmat[j,l]^2) -
+    corrmat[i,j]*(corrmat[i,k]*corrmat[i,l] + corrmat[j,k]*corrmat[j,l]) - 
+    corrmat[k,l]*(corrmat[i,k]*corrmat[j,k] + corrmat[i,l]*corrmat[j,l]) + 
+    (corrmat[i,k]*corrmat[j,l] + corrmat[i,l]*corrmat[j,k])
+}
+compare_results <- function(i,j,k,l){
+  c(corrvar(i,j,k,l,CORR)/n, cov(rhos[i,j,], rhos[k,l,]))
+}
+
+compare_results(1,2,3,4)
+
+corrvar(1,2,3,4, CORR)/n/
+corr_var_est[1,6]
+
+
+corrvar(1,3,2,4, CORR)/n/
+corr_var_est[2,5]
+
+corrvar(1,4,2,3, CORR)/n/
+corr_var_est[3,4]
+
+corrvar(1,2,1,2, CORR)/n/
+corr_var_est[1,1]
+corrvar(1,3,1,3, CORR)/n/
+corr_var_est[2,2]
+corrvar(1,4,1,4, CORR)/n/
+corr_var_est[3,3]
+corrvar(2,3,2,3, CORR)/n/
+corr_var_est[4,4]
+corrvar(2,3,2,3, CORR)/n/
+corr_var_est[4,4]
+
+
+```

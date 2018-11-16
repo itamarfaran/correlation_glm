@@ -1,0 +1,207 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left\{ X_{i}\right\} _{i=1}^{n}\overset{iid}{\sim}N_{p}\left(\mu,\,I+\mu\mu^{t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mu_{i}\in\left(-1,1\right)\,\forall\,i
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+f_{X_{i}}\left(x_{i}\right) & =\left(2\pi\right)^{-\frac{p}{2}}\cdot\det\left(\Sigma\right)^{-\frac{1}{2}}\cdot\exp\left[-\frac{1}{2}||x_{i}-\mu||_{\Sigma}^{2}\right]\\
+L\left(X;\,\mu\right) & =\left(2\pi\right)^{-\frac{np}{2}}\cdot\det\left(\Sigma\right)^{-\frac{n}{2}}\cdot\exp\left[-\frac{1}{2}\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\right]\\
+l\left(X;\,\mu\right) & =-\frac{np}{2}\ln\left(2\pi\right)-\frac{n}{2}\ln\det\left(\Sigma\right)-\frac{1}{2}\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\\
+ & =-\frac{1}{2}\left(np\ln\left(2\pi\right)+n\ln\det\left(\Sigma\right)+\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\right)\\
+-l\left(X;\,\mu\right) & \propto\ln\det\left(\Sigma\right)+n^{-1}\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\\
+ & =\ln\det\left(I+\mu\mu^{t}\right)+n^{-1}\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\\
+ & =\ln\left(1+\mu^{t}\mu\right)+n^{-1}\stackrel[i=1]{n}{\sum}||x_{i}-\mu||_{\Sigma}^{2}\\
+||x_{i}-\mu||_{\Sigma}^{2} & =\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right)\\
+ & =\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right)\\
+\Sigma^{-1} & =\left(I+\mu\mu^{t}\right)^{-1}=I-\frac{\mu\mu^{t}}{1+\mu^{t}\mu}\\
+\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right) & =\left(x_{i}-\mu\right)^{t}\left(I-\frac{\mu\mu^{t}}{1+\mu^{t}\mu}\right)\left(x_{i}-\mu\right)\\
+ & =d^{t}\left(I-\frac{\mu\mu^{t}}{1+\mu^{t}\mu}\right)d\\
+ & =d^{t}Id-\frac{d^{t}\mu\mu^{t}d}{1+\mu^{t}\mu}\\
+ & =d^{t}d-\frac{\left(d^{t}\mu\right)^{2}}{1+\mu^{t}\mu}\\
+ & =\left(x_{i}-\mu\right)^{t}\left(x_{i}-\mu\right)-\frac{\left(\left(x_{i}^{t}-\mu^{t}\right)\mu\right)^{2}}{1+\mu^{t}\mu}\\
+ & =\left(x_{i}-\mu\right)^{t}\left(x_{i}-\mu\right)-\frac{\left(x_{i}^{t}-\mu^{t}\right)\mu\mu^{t}\left(x_{i}-\mu\right)}{1+\mu^{t}\mu}\\
+-l\left(X;\,\mu\right) & \propto n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}\left(x_{i}-\mu\right)^{t}\left(x_{i}-\mu\right)-\stackrel[i=1]{n}{\sum}\frac{\left(x_{i}^{t}-\mu^{t}\right)\mu\mu^{t}\left(x_{i}-\mu\right)}{1+\mu^{t}\mu}\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}||x_{i}-\mu||^{2}-\left(1+\mu^{t}\mu\right)^{-1}\stackrel[i=1]{n}{\sum}\left(x_{i}^{t}-\mu^{t}\right)\mu\mu^{t}\left(x_{i}-\mu\right)\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}||x_{i}-\mu||^{2}-\left(1+\mu^{t}\mu\right)^{-1}\stackrel[i=1]{n}{\sum}\left(x_{i}^{t}\mu\mu^{t}x_{i}-x_{i}^{t}\mu\mu^{t}\mu-\mu^{t}\mu\mu^{t}x_{i}+\mu^{t}\mu\mu^{t}\mu\right)\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}||x_{i}-\mu||^{2}-\left(1+\mu^{t}\mu\right)^{-1}\stackrel[i=1]{n}{\sum}\left(\left(x_{i}^{t}\mu\right)^{2}-2\cdot x_{i}^{t}\mu\mu^{t}\mu+\left(\mu^{t}\mu\right)^{2}\right)\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}\left(x_{i}^{t}x_{i}-2x_{i}\mu+\mu^{t}\mu\right)-\left(1+\mu^{t}\mu\right)^{-1}\stackrel[i=1]{n}{\sum}\left(\left(x_{i}^{t}\mu\right)^{2}-2\cdot x_{i}^{t}\mu\mu^{t}\mu+\left(\mu^{t}\mu\right)^{2}\right)\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+\stackrel[i=1]{n}{\sum}x_{i}^{t}x_{i}-2\mu^{t}\stackrel[i=1]{n}{\sum}x_{i}+n\cdot\mu^{t}\mu-\left(1+\mu^{t}\mu\right)^{-1}\left(\stackrel[i=1]{n}{\sum}\left(x_{i}^{t}\mu\right)^{2}-2\cdot\mu^{t}\mu\mu^{t}\stackrel[i=1]{n}{\sum}x_{i}+n\cdot\left(\mu^{t}\mu\right)^{2}\right)\\
+ & =n\ln\left(1+\mu^{t}\mu\right)+n\bar{x^{t}x}_{n}-2n\mu^{t}\bar{x}_{n}+n\cdot\mu^{t}\mu-\left(1+\mu^{t}\mu\right)^{-1}\left(n\bar{\left(x_{i}^{t}\mu\right)_{n}^{2}}-2n\mu^{t}\mu\mu^{t}\bar{x}_{n}+n\cdot\left(\mu^{t}\mu\right)^{2}\right)\\
+ & =n\left(\ln\left(1+\mu^{t}\mu\right)+\bar{x^{t}x}_{n}-2\mu^{t}\bar{x}_{n}+\mu^{t}\mu-\left(1+\mu^{t}\mu\right)^{-1}\left(\bar{\left(x_{i}^{t}\mu\right)_{n}^{2}}-2\mu^{t}\mu\mu^{t}\bar{x}_{n}+\left(\mu^{t}\mu\right)^{2}\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+for a 
+\begin_inset Formula $3\times3$
+\end_inset
+
+ model:
+\begin_inset Formula 
+\begin{align*}
+\Sigma & =I+\mu\mu^{t}\\
+ & =\left(\begin{array}{ccc}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right)+\left(\begin{array}{c}
+\mu_{1}\\
+\mu_{2}\\
+\mu_{3}
+\end{array}\right)\left(\begin{array}{ccc}
+\mu_{1} & \mu_{2} & \mu_{3}\end{array}\right)\\
+ & =\left(\begin{array}{ccc}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right)+\left(\begin{array}{ccc}
+\mu_{1}^{2} & \mu_{1}\mu_{2} & \mu_{1}\mu_{3}\\
+\mu_{1}\mu_{2} & \mu_{2}^{2} & \mu_{2}\mu_{3}\\
+\mu_{1}\mu_{3} & \mu_{2}\mu_{3} & \mu_{3}^{2}
+\end{array}\right)\\
+ & =\left(\begin{array}{ccc}
+1+\mu_{1}^{2} & \mu_{1}\mu_{2} & \mu_{1}\mu_{3}\\
+\mu_{1}\mu_{2} & 1+\mu_{2}^{2} & \mu_{2}\mu_{3}\\
+\mu_{1}\mu_{3} & \mu_{2}\mu_{3} & 1+\mu_{3}^{2}
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\det\left(\Sigma\right) & =\det\left(\begin{array}{ccc}
+1+\mu_{1}^{2} & \mu_{1}\mu_{2} & \mu_{1}\mu_{3}\\
+\mu_{1}\mu_{2} & 1+\mu_{2}^{2} & \mu_{2}\mu_{3}\\
+\mu_{1}\mu_{3} & \mu_{2}\mu_{3} & 1+\mu_{3}^{2}
+\end{array}\right)\\
+(1) & =\left(1+\mu_{1}^{2}\right)\left(\left(1+\mu_{2}^{2}\right)\left(1+\mu_{3}^{2}\right)-\left(\mu_{2}\mu_{3}\right)\left(\mu_{2}\mu_{3}\right)\right)\\
+ & -\left(\mu_{1}\mu_{2}\right)\left(\left(\mu_{1}\mu_{2}\right)\left(1+\mu_{3}^{2}\right)-\left(\mu_{2}\mu_{3}\right)\left(\mu_{1}\mu_{3}\right)\right)\\
+ & +\left(\mu_{1}\mu_{3}\right)\left(\left(\mu_{1}\mu_{2}\right)\left(\mu_{2}\mu_{3}\right)-\left(1+\mu_{2}^{2}\right)\left(\mu_{1}\mu_{3}\right)\right)\\
+(2) & =\left(1+\mu_{1}^{2}\right)\left(1+\mu_{2}^{2}+\mu_{3}^{2}\cancel{+\mu_{2}^{2}\mu_{3}^{2}-\mu_{2}^{2}\mu_{3}^{2}}\right)\\
+ & -\left(\mu_{1}\mu_{2}\right)\left(\mu_{1}\mu_{2}+\cancel{\mu_{1}\mu_{2}\mu_{3}^{2}-\mu_{1}\mu_{2}\mu_{3}^{2}}\right)\\
+ & +\left(\mu_{1}\mu_{3}\right)\left(\cancel{\mu_{1}\mu_{2}^{2}\mu_{3}}-\mu_{1}\mu_{3}\cancel{-\mu_{1}\mu_{2}^{2}\mu_{3}}\right)\\
+(3) & =\left(1+\mu_{1}^{2}\right)\left(1+\mu_{2}^{2}+\mu_{3}^{2}\right)\\
+ & -\left(\mu_{1}\mu_{2}\right)\left(\mu_{1}\mu_{2}\right)\\
+ & -\left(\mu_{1}\mu_{3}\right)\left(\mu_{1}\mu_{3}\right)\\
+(4) & =1+\mu_{2}^{2}+\mu_{3}^{2}+\mu_{1}^{2}+\mu_{1}^{2}\mu_{2}^{2}+\mu_{1}^{2}\mu_{3}^{2}-\mu_{1}^{2}\mu_{2}^{2}-\mu_{1}^{2}\mu_{3}^{2}\\
+(5) & =1+\mu_{1}^{2}+\mu_{2}^{2}+\mu_{3}^{2}+\left(\mu_{1}^{2}\mu_{2}^{2}-\mu_{1}^{2}\mu_{2}^{2}\right)+\left(\mu_{1}^{2}\mu_{3}^{2}-\mu_{1}^{2}\mu_{3}^{2}\right)\\
+(6) & =1+\mu^{t}\mu=\stackrel[i=0]{3}{\sum}\mu_{i}^{2}\,wh.\,\mu_{0}=1
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+\det\left(\Sigma\right)^{-\frac{n}{2}} & =\left(1+\mu^{t}\mu\right)^{-\frac{n}{2}}=\left(\frac{1}{\sqrt{1+\mu^{t}\mu}}\right)^{n}\\
+ & =\left(\frac{1}{\sqrt{1+\mu_{1}^{2}+\mu_{2}^{2}+\mu_{3}^{2}}}\right)^{n}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,12 @@
+*.pdf
+*.pptx
+*.Rhistory
+*_Rhistory
+*.RData
+*.mat
+*.lyx#
+*.lyx~
+*.docx
+*.tex
+desktop.ini
+.Rproj.user

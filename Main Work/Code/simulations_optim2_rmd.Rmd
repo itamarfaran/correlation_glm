@@ -1,0 +1,1553 @@
+---
+title: "Untitled"
+author: '305316390'
+date: "22 January 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load packages and functions
+```{r}
+setwd("C:/Users/Itamar/Google Drive/Documents/#My Documents/Study/99 Other/Binyamini/Main Work/Data")
+
+library(abind)
+library(corrplot)
+library(numDeriv)
+library(matrixcalc)
+library(R.matlab)
+library(stats4)
+library(tidyverse)
+
+#Calculate mean Correlation
+calculate_mean_matrix <- function(matrix_array){
+  temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])
+  returns <- dim(matrix_array)[3]
+  for(i in 1:returns) temp <- temp + matrix_array[,,i]
+  return(temp/returns)
+}
+
+#Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
+central.moment <- function(x,norm=TRUE) {
+  n<-length(x)
+  b<-vector()
+  
+  mean<-mean(x)
+  sd<-sqrt(var(x)*((n-1)/n))
+  
+  b<-c(b,mean)
+  b<-c(b,var(x))
+  
+  skew<-mean((x-mean)^3)/(sd^3)
+  kurt<-(mean((x-mean)^4)/(sd^4))
+  
+  b<-c(b,(sqrt(n*(n-1))/(n-2))*skew)
+  b<-c(b,((n-1)/((n-2)*(n-3)))*((n+1)*kurt+6))
+  if (norm) b[4]<-b[4]-3
+  
+  names(b) <- c("Mean", "Variance", "Skewness", "Kurtosis")
+  if (norm) names(b)[4]<-"Ex.Kurtosis"
+  return(b)
+}
+
+#Take array of symmetric matrices and convert them to one data matrix
+cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle_to_vector))
+
+#Build the alpha matrix according to the model
+create_alpha_mat <- function(VECT){
+  pelet <- VECT%*%t(VECT)
+  diag(pelet) <- rep(1, length(VECT))
+  return(pelet)
+}
+
+#Force Positive Definiteness
+force_positive_definiteness <- function(MATR, sensitivity = 0.01, homoscedasticity = FALSE){
+  if(!is.symmetric.matrix(MATR)) stop("MATR not symmetric")
+  alpha_seq <- unique(c(0, seq(0,1, by = sensitivity), 1))
+  pelet <- MATR
+  if(homoscedasticity){
+    if(mean(diag(MATR)) <= 0) stop("Diag mean not positive")
+  diag_MATR <- mean(diag(MATR)) * diag(nrow(MATR))
+  } else {
+    if(any(diag(MATR) <= 0)) stop("Diag not positive")
+    diag_MATR <- diag(diag(MATR))
+  }
+
+  i <- 1
+  while(!is.positive.definite(pelet)){
+  pelet <- alpha_seq[i]*diag_MATR + (1 - alpha_seq[i])*MATR
+  i <- i+1
+  }
+  
+  if(i == 1) return(list(Matrix = pelet,
+                         Alpha = 0)) else return(list(Matrix = pelet,
+                                                                   Alpha = alpha_seq[i-1]))
+}
+
+#Force symmetry on non-symmetrical matrix
+force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+
+#Calculte sum of mahalonobis distances
+SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
+  if((reg.par < 0) | (reg.par > 1)) stop("reg.par not between [0,1]")
+  sigma <- (1 - reg.par)*sigma + reg.par*mean(diag(sigma))*diag(length(mu))
+  
+  if(solve_sig) sigma <- solve(sigma)
+  dist <- DATA - rep(1,nrow(DATA))%*%t(mu)
+  return(sum(diag(dist%*%sigma%*%t(dist))))
+}
+
+#Retrieve lower/upper triangle of a matrix as a vector
+triangle_to_vector <- function(MATR , diag = FALSE){
+  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
+  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+}
+
+#Trim extreme values
+trim_num <- function(x, lower = -Inf, upper = Inf){
+  pelet <- x
+  pelet[x<lower] <- lower
+  pelet[x>upper] <- upper
+  return(pelet)
+}
+
+#Create a symmetric matrix from a vector
+vector_to_triangle <- function(VECT){
+  m <- length(VECT)
+  p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
+  p <- p[which( (p==round(p))&p==abs(p) )]
+  if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+  pelet <- matrix(0, ncol = p, nrow = p)
+  pelet[lower.tri(pelet)] <- VECT
+  pelet <- pelet+t(pelet)
+  diag(pelet) <- 1
+  return(pelet)
+}
+
+#Calculate Maholonobis norm of a vector. Default is regular norm.
+vnorm <- function(x, MATR = NULL, sqroot = FALSE, solve_matr = FALSE){
+  if(solve_matr) MATR <- solve(MATR)
+  if(length(MATR)==0) { pelet <- sum(x^2) } else{ pelet <- as.vector(t(x)%*%MATR%*%x) }
+  if(sqroot) pelet <- sqrt(pelet)
+  return(pelet)
+}
+```
+
+Set parameters for simulation
+```{r}
+#Set sample size
+healthy_N <- 40
+sick_N <- 40
+Tlength <- 35
+p <- 13 # max{p} = 24
+```
+
+Generate real parameters
+```{r}
+#Set parameters for Real Sigma
+location.par <- 0
+scale.par <- 1
+
+#Build Real Sigma and Theta
+temp <- matrix(rnorm(2*p^2, location.par, scale.par), nrow = 2*p)
+temp <- t(temp)%*%temp
+real.theta <- force_symmetry(cov2cor(temp))
+is.positive.definite(real.theta)
+
+#Show and plot Theta
+round(real.theta[1:10,1:10],4)
+real.theta %>% triangle_to_vector() %>% as.data.frame() %>%
+  ggplot(aes(x = .)) + geom_histogram(bins = 20, color = "white", fill = "blue") + 
+    labs(title = "Histogram of Theta", x = "Theta", y = "Frequency") + 
+    geom_vline(xintercept = 0, color = "grey") + geom_hline(yintercept = 0, color = "black")
+
+corrplot(real.theta)
+
+#Generate Variances and create Variance matrix parameters
+varss <- rlogis(p)^2
+real.sigma <- sqrt(diag(varss)) %*% real.theta %*% sqrt(diag(varss))
+
+#Build Real Alpha
+percent <- 0.45
+bounds <- c(0.85,0.95)
+alpha <- rep(1,p)
+alpha[sample(1:p, floor(percent * p))] <- runif(floor(percent * p), bounds[1], bounds[2])
+alpha.mat <- create_alpha_mat(alpha)
+
+#Plot alpha
+data.frame(Alpha = alpha) %>%
+  ggplot(aes(x = Alpha)) + geom_histogram(bins = 20, color = "white", fill = "blue") + 
+    labs(title = "Histogram of Alpha", x = "Alpha", y = "Frequency") + 
+    geom_vline(xintercept = 0, color = "grey") + geom_hline(yintercept = 0, color = "black")
+
+is.positive.definite(real.theta*alpha.mat)
+```
+
+Simulate sample from parameters and estimate
+```{r}
+rm(location.par, scale.par, temp, varss, percent, bounds)
+
+#Simulate Sample
+create_correlation_matrices <- function(real_corr, sample_size, df = 0, var_scale = NULL,
+                                        seed.control = NULL){
+  if(!is.positive.definite(real_corr)) stop("real_corr not positive definite")
+  p <- nrow(real_corr)
+  df <- max(df, p + 1)
+  if(length(var_scale)==0){
+    var_scale <- runif(p,10,100)
+  } else if(length(var_scale)!=p){
+    stop("var_scale not in dimension")
+  }
+
+  Dhalf <- sqrt(diag(var_scale))
+  real_var <- Dhalf%*%real_corr%*%Dhalf
+
+  if(length(seed.control)==1) set.seed(seed.control)
+  pelet_matrices <- rWishart(sample_size, df, real_var)
+  for(b in 1:sample_size) pelet_matrices[,,b] <- force_symmetry(cov2cor(pelet_matrices[,,b]))
+  
+  return(pelet_matrices)
+}
+
+healthy <- create_correlation_matrices(real.theta, healthy_N, Tlength)
+sick <- create_correlation_matrices(real.theta*alpha.mat, sick_N, Tlength)
+
+#Are all matrices positive definite?
+all(abind(healthy, sick, along = 3) %>%
+      apply(3, is.positive.definite))
+```
+
+The Estimation Function on the misspecified model
+```{r}
+#Estimate Parameters
+Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 5){
+  
+  Tnai <- all(abind(Healthy_List, Sick_List, along = 3) %>%
+            apply(3, is.positive.definite))
+  if(!Tnai) stop("Some matrices not positive definite")
+
+  SICK <- Sick_List %>% calculate_mean_matrix() %>% force_symmetry()
+  HEALTHY <- Healthy_List %>% calculate_mean_matrix() %>% force_symmetry()
+  N <- c(SICK = dim(Sick_List)[3], HEALTHY = dim(Healthy_List)[3])
+  p <- dim(Sick_List)[2]
+  
+  for.optim <- function(ALPHA, THETA) sum(triangle_to_vector(THETA*create_alpha_mat(ALPHA)-SICK)^2)
+
+  #Initialize parameters
+  Steps <- list()
+  temp.theta <- HEALTHY
+  temp.alpha <- optim(rep(0.8,p), function(A) for.optim(A,temp.theta), method = "BFGS")$par
+  Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
+  
+  #Begin Loop until Convergence
+  const <- 0
+  
+  i <- 1
+  distanceA <- 100
+  distanceT <- 100
+  while((i<=MaxLoop)&(distanceA>10^(-Persic))&(distanceT>10^(-Persic))){
+    temp.theta <- force_symmetry( (N["SICK"] * SICK / create_alpha_mat(temp.alpha) + 
+                                    N["HEALTHY"] * HEALTHY) / sum(N) )
+    temp.alpha <- optim(temp.alpha,function(A) for.optim(A,temp.theta), method = "BFGS")$par
+    Steps[[i+1]] <- list(theta = temp.theta, alpha = temp.alpha)
+    
+    distanceA <- vnorm(Steps[[i+1]]$alpha-Steps[[i]]$alpha, sqroot = TRUE)
+    distanceT <- vnorm(Steps[[i+1]]$theta-Steps[[i]]$theta, sqroot = TRUE)
+    
+    if(i%%10==0) cat(paste(i,","))
+    i <- i + 1
+  }
+  
+  theta.res <- force_positive_definiteness(temp.theta, sensitivity = 0.0001)
+  Estimates <- list(theta = theta.res$Matrix,
+                    const = theta.res$Alpha,
+                    alpha = temp.alpha)
+  
+  return(list("Estimates" = Estimates, "Returns" = i, Steps = Steps))
+}
+
+Pelet_IID <- Estimate.Loop(healthy, sick, MaxLoop = 100)
+```
+
+View results
+```{r}
+# Results
+Pelet_IID$Returns
+Alpha.estimate <- data.frame(Real = alpha, Estimate = Pelet_IID$Estimates$alpha)
+Theta.estimate <- data.frame(Real = triangle_to_vector(real.theta),
+                             Estimate = triangle_to_vector(Pelet_IID$Estimates$theta))
+
+index <- sort(sample(1:(p*(p-1)/2),min(100,p*(p-1)/2)))
+Alpha.estimate
+cbind(index, Theta.estimate[index, ])
+
+#Euclidean Distance
+vnorm(Alpha.estimate$Real-Alpha.estimate$Estimate) / c(1, sqrt(sick_N+healthy_N))
+vnorm(Theta.estimate$Real-Theta.estimate$Estimate) / c(1, sqrt(sick_N+healthy_N))
+
+is.positive.definite(Pelet_IID$Estimates$theta)
+#Did theta need a change to be positive definite?
+Pelet_IID$Estimates$const
+is.positive.definite(Pelet_IID$Estimates$theta * create_alpha_mat(Pelet_IID$Estimates$alpha))
+```
+
+Plot results and bias
+```{r}
+#Plot Alpha Estimates
+ggplot(Alpha.estimate, aes(x = Real, y = Estimate)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = 2, color = "red", alpha = 0.7, size = 1) + 
+  geom_point(color = "darkblue", alpha = 0.7) + ggtitle("Alpha Estimate ~ Real")
+
+Alpha.bias <- mutate(Alpha.estimate, Bias = Estimate - Real)
+
+ggplot(Alpha.bias, aes(x = Bias)) + 
+  geom_histogram(bins = 25, color = "white", fill = "blue") + 
+  geom_vline(xintercept =  mean(Alpha.bias$Bias), col = "darkblue", size = 1) + 
+  labs(title = "Bias of Alpha Est.", x = "Bias", y = "Frequency")
+
+(Alpha.bias$Bias/sd(Alpha.bias$Real)) %>% as.data.frame() %>% ggplot(aes(x = .)) + 
+  geom_histogram(bins = 25, color = "white", fill = "blue") + 
+  geom_vline(xintercept =  mean(Alpha.bias$Bias)/sd(Alpha.estimate[,2]),
+             col = "darkblue", size = 1) + 
+  labs(title = "Bias of Normalized Alpha Est.", x = "Bias", y = "Frequency")
+
+ggplot(Alpha.bias, aes(x = Real, y = Bias)) + 
+  labs(title = "Bias ~ Alpha", x = "Alpha", y = "Bias") + 
+  geom_hline(yintercept = 0, color = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.8)
+
+#Plot Theta Estimates
+index <- sort(sample(1:(p*(p-1)/2), min(750,p*(p-1)/2)))
+
+ggplot(Theta.estimate , aes(x = Real, y = Estimate)) +
+  geom_point(color = "darkblue", alpha = 0.4, size = 0.65) +
+  #geom_smooth(method = "lm", linetype = 4, color = "red4", alpha = 0.7, size = 1) + 
+  geom_abline(slope = 1, intercept = 0, linetype = 2, color = "red", alpha = 0.7, size = 1) + 
+  ggtitle("Theta Estimate ~ Real")
+
+Theta.bias <- mutate(Theta.estimate, Bias = Estimate - Real)
+
+ggplot(Theta.bias, aes(x = Bias)) + 
+  geom_histogram(bins = 150, color = "white", fill = "blue") + 
+  geom_vline(xintercept =  mean(Theta.bias$Bias),
+             col = "darkblue", size = 1) + 
+  labs(title = "Bias of Theta Est.", x = "Bias", y = "Frequency")
+
+ggplot(Theta.bias, aes(x = Real, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_smooth(method = "lm", se = FALSE, color = "darkgreen", size = 0.8, linetype = 4) + 
+  geom_point(color = "blue", alpha = 0.7) + 
+  labs(title = "Bias of Theta Est.", x = "Real", y = "Bias")
+
+summary(lm(Bias ~ Real, data = Theta.bias))
+
+data.frame(Theta = Theta.bias$Real,
+           Bias = Theta.bias$Bias/Theta.bias$Real) %>%
+  ggplot(aes(x = Theta, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_smooth(method = "lm", se = FALSE, color = "darkgreen", size = 0.8, linetype = 4) + 
+  geom_point(color = "blue", alpha = 0.7) + 
+  labs(title = "Bias Ratio of Theta Est.", x = "Real", y = "Bias / Real")
+
+(Theta.bias$Bias/sd(Theta.bias$Real)) %>%
+  as.data.frame() %>% ggplot(aes(x = .)) + 
+  geom_histogram(bins = 150, color = "white", fill = "blue") + 
+  geom_vline(xintercept =  mean(Theta.estimate[,2]-Theta.estimate[,1]),
+             col = "darkblue", size = 1) + 
+  labs(title = "Bias of Normalized Theta Est.", x = "Bias", y = "Frequency")
+
+#hist(Theta.estimate[,2]-Theta.estimate[,1])
+#hist(triangle_to_vector(Pelet_IID$Steps[[Pelet_IID$Returns]]$theta)-Theta.estimate[,1])
+```
+
+Check the algorithm on real data!
+```{r}
+rm(Alpha.estimate, Theta.estimate, Alpha.bias, Theta.bias, index)
+
+###Check Real Data
+link <- "C:/Users/Itamar/Google Drive/Documents/#My Documents/Study/99 Other/Binyamini/Main Work/Data/NMDA_all_data_AAL90.mat"
+Real.dta <- readMat(link)
+#str(Real.dta)
+
+#Which coloumns are NA? (Usually, 87-88)
+which.drop <- which(is.na(Real.dta$group.all[1,,1]), arr.ind = TRUE)
+p <- dim(Real.dta$group.all)[1] - length(which.drop)
+
+All.data <- array(dim = c(p, p, dim(Real.dta$group.all)[3]))
+
+#Clean data from unknown coloumns
+for(i in 1:dim(All.data)[3]){
+  All.data[,,i] <- force_symmetry(Real.dta$group.all[-which.drop,-which.drop,i])
+}
+dim(All.data)
+
+#Some observations still have NAs. Remove those observations:
+healthy.Real_t <- All.data[,,Real.dta$CONTROLS]
+healthy.Real <- healthy.Real_t[,,-unique(which(is.na(healthy.Real_t), arr.ind = TRUE)[,3])]
+rm(healthy.Real_t)
+
+sick.Real_t <- All.data[,,Real.dta$NMDA]
+sick.Real <- sick.Real_t[,,-unique(which(is.na(sick.Real_t), arr.ind = TRUE)[,3])]
+rm(sick.Real_t)
+
+#Now, are all matrices good to go?
+abind(healthy.Real, sick.Real) %>% apply(3, is.positive.definite) %>% all()
+sum(is.na(healthy.Real)) + sum(is.na(sick.Real))
+
+#Estimate Real parameters
+Pelet.Real <- Estimate.Loop(healthy.Real, sick.Real)
+#str(Pelet.Real)
+Real.estimate <- Pelet.Real$Estimates
+
+#How many loops?
+Pelet.Real$Returns
+#Did theta come out not positive?
+Real.estimate$const
+
+#Did any of the alphas get trimmed?
+which(round(Real.estimate$alpha - Pelet.Real$Steps[[Pelet.Real$Returns]]$alpha, 0.0001) != 0)
+
+#Both matrices positive?
+is.positive.definite(Real.estimate$theta)
+is.positive.definite(Real.estimate$theta * create_alpha_mat(Real.estimate$alpha))
+```
+
+Analyze results
+```{r}
+temp <- Real.estimate$theta
+temp[Real.estimate$theta>1] <- 1
+#Healthy corrplot
+corrplot(temp, method = "color", tl.pos = "n", title = "Corrplot of Theta")
+
+Real.estimate$theta %>% triangle_to_vector %>% as.data.frame() %>% 
+  ggplot(aes(x = .)) + geom_histogram(bins = 50, color = "white", fill = "blue") + 
+  labs(title = "Histogram of Theta", x = "Theta", y = "Frequency") + 
+  geom_hline(yintercept = 0)
+
+Real.estimate$alpha %>% as.data.frame() %>% 
+  ggplot(aes(x = .)) + geom_histogram(bins = 20, color = "white", fill = "blue") + 
+  labs(title = "Histogram of Alpha", x = "Alpha", y = "Frequency") + 
+  geom_hline(yintercept = 0)
+
+#Trim alphas greater than 1 (only for the corrplot...)
+tempa <- Real.estimate$alpha %>% trim_num(upper = 1)
+real.alpha.mat <- create_alpha_mat(tempa)
+
+#Sick corrplot
+corrplot(temp*real.alpha.mat, method = "color", tl.pos = "n", title = "Corrplot of Theta*AlphaMat")
+corrplot(real.alpha.mat - 1, method = "color", tl.pos = "n", is.corr = FALSE,
+         title = "Effect of Alpha in %")
+#Difference corrplot
+corrplot(temp*(real.alpha.mat - 1), method = "color", tl.pos = "n", is.corr = FALSE,
+         title = "Difference")
+
+#Hist of alpha's different than 1
+tempa[tempa<1] %>% as.data.frame() %>% ggplot(aes(x = .)) + 
+  geom_histogram(bins = 20, fill = "lightblue", col = "black") + 
+  labs(title = "Histogram of Alpha (!=1)", x = "Alpha", y = "Frequency") + 
+  geom_hline(yintercept = 0, col = "black")
+
+#Hist of alpha %*% t(alpha) - the REAL effect on theta
+(1 - tempa %*% t(tempa)) %>% triangle_to_vector() %>% as.data.frame() %>%
+  ggplot(aes(x = .)) + geom_histogram(bins = 20, fill = "lightblue", col = "black") + 
+  labs(title = "Histogram of 1 - Alpha%*%t(Alpha)", x = "Alpha", y = "Frequency") + 
+  geom_hline(yintercept = 0, col = "black")
+
+#Collect residuals
+healthyResid <- numeric()
+for(i in 1:dim(healthy.Real)[3]) healthyResid <- c(healthyResid,
+                                                   triangle_to_vector(healthy.Real[,,i]-Real.estimate$theta))
+
+sickResid <- numeric()
+for(i in 1:dim(sick.Real)[3]) sickResid <- c(sickResid,
+                                        triangle_to_vector(sick.Real[,,i] -
+                                                             Real.estimate$theta*create_alpha_mat(Real.estimate$alpha)))
+
+#Plot Residuals
+healthyResid %>% as.data.frame() %>% 
+  ggplot(aes(x = .)) + geom_histogram(bins = 100, color = "white", fill = "blue") + 
+  labs(title = "Histogram of Healthy Residuals", x = "Residuals", y = "Frequency") + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0, linetype = 2, col = "grey", size = 1)
+
+sickResid %>% as.data.frame() %>% 
+  ggplot(aes(x = .)) + geom_histogram(bins = 100, color = "white", fill = "blue") + 
+  labs(title = "Histogram of Sick Residuals", x = "Residuals", y = "Frequency") + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0, linetype = 2, col = "grey", size = 1)
+
+totalResid <- c(healthyResid, sickResid)
+
+totalResid %>% as.data.frame() %>% 
+  ggplot(aes(x = .)) + geom_histogram(bins = 100, color = "white", fill = "blue") + 
+  labs(title = "Histogram of Total Residuals", x = "Residuals", y = "Frequency") + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0, linetype = 2, col = "grey", size = 1)
+
+#Summary of residuals
+summary(totalResid)
+centralmoments <- rbind(central.moment(healthyResid),
+                        central.moment(sickResid),
+                        central.moment(totalResid))
+row.names(centralmoments) <- c("Hea", "Sic", "Tot")
+round(centralmoments, 3)
+```
+
+Compare residuals in seperate models:
+```{r}
+st_mean <- abind(sick.Real, healthy.Real, along = 3) %>% apply(3, triangle_to_vector) %>% 
+  mean() %>%  matrix(nrow = dim(sick.Real)[1], ncol = dim(sick.Real)[2])
+diag(st_mean) <- 1
+
+Models <- list(Full_Model = list("H" = calculate_mean_matrix(healthy.Real),
+                                 "S" = calculate_mean_matrix(sick.Real)),
+               Alpha_model = list("H" = Real.estimate$theta,
+                                  "S" = Real.estimate$theta*create_alpha_mat(Real.estimate$alpha)),
+               Null_Model = list("H" = calculate_mean_matrix(abind(healthy.Real, sick.Real,
+                                                                   along = 3)),
+                                 "S" = calculate_mean_matrix(abind(healthy.Real, sick.Real,
+                                                                   along = 3))),
+               St_model = list("H" = st_mean, "S" = st_mean))
+
+SSE_calc <- function(MODEL){
+  (sum((apply(healthy.Real, 3, function(M) (M - MODEL$H)^2))) + 
+    sum((apply(sick.Real, 3, function(M) (M - MODEL$S)^2)))) / 2
+}
+
+n <- length(totalResid)
+comparision <- data.frame(SSE = sapply(Models, SSE_calc),
+                          Parameters = c(p*(p-1), 0.5*p*(p+1), 0.5*p*(p-1), 1)) %>%
+  mutate(DF = n - Parameters,
+         Rsqrd = round(1 - SSE/SSE[4], 3),
+         Radj = round(1 - (1 - Rsqrd) * (n - 1) / (n - Parameters - 1), 3),
+         RMSE = round(sqrt(SSE/DF), 3))
+row.names(comparision) <- c("2Means", "Alpha", "1Mean", "SST")
+
+#F-test for alpha
+
+# p is the dim of our matrix.
+# p = length(alpha) - number of paramters tested
+# 0.5*p*(p-1) = number of unique values in theta
+
+#Build our pelet
+ftest.dat0 <- data.frame(Value = c(n, p, p*(p-1)/2))
+row.names(ftest.dat0) <- c("N", "P", "Unique_Par")
+
+ftest.dat1 <- data.frame(SSE = c(comparision$SSE[2], comparision$SSE[3],
+                                 comparision$SSE[3] - comparision$SSE[2]),
+                        DF = c(comparision$DF[2], comparision$DF[3],
+                               comparision$DF[3] - comparision$DF[2]))
+rownames(ftest.dat1) <- c("Full", "Restricted", "Difference")
+
+Fval <- function(nested_model, full_model){
+  if(nested_model >= full_model) stop("nested_model not nested in full")
+  SSEr <- comparision$SSE[full_model]
+  SSEur <- comparision$SSE[nested_model]
+  
+  DFr <- comparision$DF[full_model]
+  DFur <- comparision$DF[nested_model]
+  
+  temp <- ((SSEr - SSEur)/(DFr - DFur))/((SSEur)/(DFur))
+  return(c(Fval = temp, Pval = 1-pf(temp, DFr - DFur, DFur)))
+}
+
+ftest.dat2 <- data.frame("F test Results" = Fval(2,3))
+rownames(ftest.dat2) <- c("Fval", "Pval")
+Ftest <- list(Observations = ftest.dat0, Models = ftest.dat1, Test = ftest.dat2)
+
+list("N" = n, "Table" = comparision)
+Ftest
+
+for(i in 1:3){
+  for(j in (i+1):4){
+    toprint <- rbind(comparision[c(i,j),], comparision[j,] - comparision[i,])
+    row.names(toprint)[3] <- "Diff"
+    print(toprint)
+    print(Fval(i,j))
+
+  }
+}
+
+corrplot(Models$Alpha_model$S - Models$Full_Model$S,
+         method = "color", tl.pos = "n", title = "", is.corr = FALSE)
+
+(Models$Alpha_model$S - Models$Full_Model$S) %>% triangle_to_vector() %>% summary()
+(Models$Alpha_model$S - Models$Full_Model$S) %>% sd()
+
+corrplot(Models$Alpha_model$H - Models$Full_Model$H,
+         method = "color", tl.pos = "n", title = "", is.corr = FALSE)
+
+plot(triangle_to_vector(Models$Alpha_model$H - Models$Full_Model$H),
+     triangle_to_vector(Models$Full_Model$H))
+```
+
+Build Variance matrix for non-independence model
+```{r}
+rm(centralmoments, Pelet.Real, real.alpha.mat, Real.dta, Real.estimate, temp, All.data,
+   healthy.Real, healthyResid, i, sick.Real, sickResid, tempa, totalResid, which.drop,
+   Ftest, ftest.dat0, ftest.dat1, ftest.dat2, Fval, comparision, Models, st_mean, n,
+   toprint, j)
+
+p <- length(alpha)
+
+vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+                                       reg_par = 0){
+  if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
+  if(!is.positive.definite(MATR)){
+    if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
+    } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
+  
+  real.cov2 <- function(i, j, k, l) {
+    (MATR[i,j]*MATR[k,l]/2) * (MATR[i,k]^2 + MATR[i,l]^2 + MATR[j,k]^2 + MATR[j,l]^2) -
+       MATR[i,j]*(MATR[i,k]*MATR[i,l] + MATR[j,k]*MATR[j,l]) -
+      MATR[k,l]*(MATR[i,k]*MATR[j,k] + MATR[i,l]*MATR[j,l]) +
+      (MATR[i,k]*MATR[j,l] + MATR[i,l]*MATR[j,k])
+    }
+
+  p <- dim(MATR)[1]
+  m <- (p*(p-1)/2)
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  for(i in 1:(p-1)){
+    v1 <- c(v1, rep(i, p-i))
+    v2 <- c(v2, (i+1):p)
+  }
+  order_vect <- cbind(v1,v2)
+  
+  pelet <- matrix(nrow = m, ncol = m)
+  for(i in 1:m){
+    for(j in i:m){
+      indexes <- c(order_vect[i,], order_vect[j,])
+      pelet[i,j] <- real.cov2(indexes[1], indexes[2], indexes[3], indexes[4])
+      pelet[j,i] <- pelet[i,j]
+    }
+  }
+  
+  if((reg_par<0)|(reg_par>1)) warning("Regularization Parameter not between 0,1")
+  pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  
+  return(pelet)
+}
+
+emp <- healthy %>% cor.matrix_to_norm.matrix() %>% cov() %>% triangle_to_vector(diag = TRUE)
+theo <- healthy %>% calculate_mean_matrix() %>% vector_var_matrix_calc_COR() %>%
+  triangle_to_vector(diag = TRUE)
+
+temp_mod <- lm(emp ~ 0 + theo)
+summary(temp_mod)
+plot(theo, emp)
+abline(temp_mod, col = "red", lwd = 2)
+plot(theo, temp_mod$residuals)
+abline(h = 0, col = "blue", lwd = 2)
+round(c("Coef" = temp_mod$coefficients, "1/Coef" = 1/temp_mod$coefficients, "Effective_N" = Tlength), 6)
+```
+
+Build Likelihood function
+```{r}
+compute_estimated_N <- function(est, theo){
+    x <- triangle_to_vector(theo, diag = TRUE)
+    y <- triangle_to_vector(est, diag = TRUE)
+    return(1/lm(y ~ x)$coef[2])
+  }
+
+minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N = NULL, DET = TRUE){
+  
+  calc_n <- TRUE
+  if(length(effective.N) == 2){
+    calc_n <- FALSE
+    n.effective_H <- effective.N[1]
+    n.effective_D <- effective.N[2]
+  }
+  
+  Nh <- nrow(healthy.data)
+  Nd <- nrow(sick.data)
+  
+  g20 <- vector_var_matrix_calc_COR(vector_to_triangle(theta))
+  if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data), g20)
+  e20 <- eigen(g20/n.effective_H)
+  U0 <- e20$vectors
+  D0 <- e20$values
+  
+  g21 <- vector_var_matrix_calc_COR(vector_to_triangle(theta)*
+                                      create_alpha_mat(alpha))
+  if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data), g21)
+  e21 <- eigen(g21/n.effective_H)
+  U1 <- e21$vectors
+  D1 <- e21$values
+  
+  
+  g10 <- as.matrix(theta)
+  g11 <- as.matrix(triangle_to_vector(vector_to_triangle(theta)*create_alpha_mat(alpha)))
+  
+  dist0 <- (healthy.data - rep(1,Nh)%*%t(g10))%*%U0
+  dist1 <- (sick.data - rep(1,Nd)%*%t(g11))%*%U1
+  
+  SSE <- sum(c(diag(dist0%*%diag(1/D0)%*%t(dist0)), diag(dist1%*%diag(1/D1)%*%t(dist1))))
+  if(DET) SSE <- SSE + Nh*sum(log(D0)) + Nd*sum(log(D1))
+  
+  return(SSE)
+}
+```
+
+Optimization by iteration method
+```{r}
+Estimate.Loop2 <- function(theta0, alpha0, Healthy.ARR, Sick.ARR, T_thresh, max.loop = 50, eps = 10^(-3), min_reps = 3, method = "Nelder-Mead",
+                           comp_hess = TRUE){
+  
+  compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
+    return(min( compute_estimated_N(cov(sick.data), vector_var_matrix_calc_COR(
+      vector_to_triangle(theta)*create_alpha_mat(alpha))), threshold ))
+  }
+  minusloglik_onlyalpha <- function(theta, alpha, healthy.data, sick.data, effective.N){
+    Nd <- nrow(sick.data)
+    meanmat <-vector_to_triangle(theta)*create_alpha_mat(alpha)
+
+    g11 <- as.matrix(triangle_to_vector(meanmat))
+    g21 <- vector_var_matrix_calc_COR(meanmat)/effective.N
+    eigen21 <- eigen(g21)
+
+    U <- eigen21$vectors
+    D <- eigen21$values
+    dist <- (sick.data - rep(1,nrow(sick.data))%*%t(g11))%*%U
+
+    return( Nd*sum(log(D)) + sum(diag(dist%*%diag(1/D)%*%t(dist))) )
+  }
+  
+  temp.theta <- theta0
+  temp.alpha <- alpha0
+  if( !(is.positive.definite(vector_to_triangle(theta0)) & is.positive.definite(vector_to_triangle(theta0)*create_alpha_mat(alpha0))) ){
+  stop("Initial parameters dont result with positive-definite matrices")
+}
+  
+  healthy.data <- cor.matrix_to_norm.matrix(Healthy.ARR)
+  sick.data <- cor.matrix_to_norm.matrix(Sick.ARR)
+  healthy_N <- nrow(healthy.data)
+  sick_N <- nrow(sick.data)
+  p <- dim(Healthy.ARR)[1]
+  m <- 0.5*p*(p-1)
+  
+  Steps <- list()
+  Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
+  log_optim <- list()
+  dist <- 100*eps
+  i <- 1
+  
+  #Convergence is a matrix wich tells us if the convergence in each iteration is completed
+  convergence <- rep(-1, max.loop)
+  convergence[1] <- 0
+  tnai0 <- FALSE
+  
+  cat("\n Progress: 'Loop, (Convergence, Distance);'\n")
+  while((i <= max.loop) & (!tnai0)){
+    i <- i + 1
+    
+    effective.N <- compute_estimated_N_2(sick.data, temp.theta, temp.alpha, T_thresh)
+    
+    clean_sick <- sick.data/(rep(1, sick_N)
+                             %*% t(temp.alpha %>% create_alpha_mat() %>% triangle_to_vector()))
+    
+    temp.theta <- rbind(healthy.data, clean_sick) %>% colMeans()
+  
+    #Optimize Alpha
+    optim.alpha <- optim(temp.alpha,
+                        function(A) minusloglik_onlyalpha(theta = temp.theta,
+                                                          alpha = A,
+                                                          healthy.data = healthy.data,
+                                                          sick.data = sick.data,
+                                                          effective.N = effective.N),
+                        method = method,
+                        control = list(maxit = min(max(500, i*100), 2000)))
+    convergence[i] <- optim.alpha$convergence
+    temp.alpha <- optim.alpha$par
+    
+    Steps[[i]] <- list(theta = temp.theta, alpha = temp.alpha,
+                       convergence = optim.alpha$convergence,
+                       Est_N = effective.N)
+    log_optim[[i]] <- optim.alpha
+    
+    #KLAL ATZIRA
+    #dist <- max(c(sqrt(vnorm(Steps[[i]]$theta - Steps[[i-1]]$theta)/m),
+    #              sqrt(vnorm(Steps[[i]]$alpha - Steps[[i-1]]$alpha)/p)))
+    dist <- sqrt(mean((Steps[[i]]$alpha - Steps[[i-1]]$alpha))^2)
+    
+    tnai0 <- FALSE
+    if(i > min_reps) tnai0 <- (dist <= eps) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
+    
+    cat(paste0(i," (",convergence[i],", ",round(dist, 5) , "); "))
+  }
+  if(comp_hess){
+    cat("\n \n 'while' loop finished; Computing Hessian\n")
+  
+    hess <- hessian(x =  temp.alpha,
+                    func = function(A) minusloglik_onlyalpha(theta = temp.theta,
+                                                             alpha = A,
+                                                             healthy.data = healthy.data,
+                                                             sick.data = sick.data,
+                                                             effective.N = effective.N))
+  } else {hess <- NULL}
+  
+  return( list(theta = temp.theta, alpha = temp.alpha, Hess = hess, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
+               returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
+}
+
+Pelet_Cov <- Estimate.Loop2(theta0 = triangle_to_vector(Pelet_IID$Estimates$theta),
+                            alpha0 = Pelet_IID$Estimates$alpha, Healthy.ARR = healthy,
+                            Sick.ARR = sick, T_thresh = Tlength)
+```
+
+Plot and View Results
+```{r}
+Pelet_Cov$returns
+Pelet_Cov$convergence
+Pelet_Cov$Est_N
+
+Pelet_Cov$alpha
+Pelet_Cov$theta
+is.positive.definite(vector_to_triangle(Pelet_Cov$theta))
+is.positive.definite(vector_to_triangle(Pelet_Cov$theta) * create_alpha_mat(Pelet_Cov$alpha))
+
+healthy.data <- cor.matrix_to_norm.matrix(healthy)
+sick.data <- cor.matrix_to_norm.matrix(sick)
+
+#likelihood with Cov Estimates (With DET)
+(-1)*minusloglik(theta = Pelet_Cov$theta, alpha = Pelet_Cov$alpha,
+            healthy.data = healthy.data, sick.data = sick.data,
+            DET = TRUE)
+
+
+#likelihood with IID Estimates (With DET)
+(-1)*minusloglik(theta = triangle_to_vector(Pelet_IID$Estimates$theta),
+            alpha = Pelet_IID$Estimates$alpha,
+            healthy.data = healthy.data, sick.data = sick.data,
+            DET = TRUE)
+
+Alpha.estimate <- data.frame(Real = alpha,  IID_model = Pelet_IID$Estimates$alpha,
+                             Cov_model = Pelet_Cov$alpha) %>%
+  gather(key = Model, value = Estimate, IID_model, Cov_model, -Real) %>%
+  mutate(Bias = Estimate - Real, Norm.Bias = (Estimate - Real)/sd(Real))
+Alpha.estimate[,2] <- factor(Alpha.estimate[,2])
+
+Theta.estimate <- data.frame(Real = triangle_to_vector(real.theta),
+                             IID_model = triangle_to_vector(Pelet_IID$Estimates$theta),
+                             Cov_model = Pelet_Cov$theta) %>%
+  gather(key = Model, value = Estimate, IID_model, Cov_model, -Real) %>%
+  mutate(Bias = Estimate - Real, Norm.Bias = (Estimate - Real)/sd(Real))
+Theta.estimate[,2] <- factor(Theta.estimate[,2])
+
+
+ggplot(Alpha.estimate, aes(x = Real, y = Estimate, color = Model)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = 2, color = "red", alpha = 0.7, size = 1) + 
+  geom_point(alpha = 0.7, size = 2) + ggtitle("Alpha Estimate ~ Real")
+
+ggplot(Alpha.estimate, aes(x = Norm.Bias, fill = Model)) + 
+  geom_histogram(position = "dodge", bins = 7) + 
+  geom_hline(yintercept = 0) + 
+  geom_vline(xintercept =  0) + 
+  labs(title = "Normalized Bias of Alpha Est.", x = "Bias", y = "Frequency")
+group_by(Alpha.estimate, Model) %>% summarise(Mean_Abs_bias = mean(abs(Bias)),
+                                              Mean_Abs_Normalized_bias = mean(abs(Norm.Bias)))
+ggplot(Theta.estimate, aes(x = Real, y = Estimate, color = Model, shape = Model)) +
+  geom_abline(slope = 1, intercept = 0, linetype = 2, color = "red", alpha = 0.7, size = 1) + 
+  geom_point(alpha = 0.8, size = 1.5) +
+  ggtitle("Theta Estimate ~ Real")
+
+ggplot(Theta.estimate, aes(x = Norm.Bias, fill = Model)) + 
+  geom_histogram(position = "dodge", bins = 12) + 
+  geom_hline(yintercept = 0) + 
+  geom_vline(xintercept =  0) + 
+  labs(title = "Normalized Bias of Theta Est.", x = "Bias", y = "Frequency")
+group_by(Theta.estimate, Model) %>% summarise(Mean_Abs_bias = mean(abs(Bias)),
+                                              Mean_Abs_Normalized_bias = mean(abs(Norm.Bias)))
+```
+
+Results
+```{r}
+build_hyp.test <- function(Estimate.Loop2_object, Real = NULL, test = c("lower", "upper", "two-sided"), qval = 0.05, method = "none", const = 1, effectiveN = NULL){
+  if(length(test) > 1) test <- test[1]
+  obj <- Estimate.Loop2_object
+  
+  alpha_var_mat <- solve(obj$Hess)
+  alpha_sd <- sqrt(diag(alpha_var_mat))
+  
+  A <- matrix(nrow = length(obj$alpha), ncol = 6)
+  colnames(A) <- c("Est.", "Std.", "Z-val", "P-val", "Adj.P-val", "Reject_H0")
+  
+  dist_fun <- function(q) pnorm(q)
+  if(length(effectiveN) > 0){
+    colnames(A)[3] <- "T-val"
+    dist_fun <- function(q) pt(q, effectiveN)
+  }
+  
+  A[,1] <- obj$alpha
+  A[,2] <- const*alpha_sd
+  A[,3] <- (A[,1] - 1)/A[,2]
+  
+  if(test == "lower"){ A[,4] <- round(dist_fun(A[,3]),5)
+  }else if(test == "upper"){ A[,4] <- round(1 - dist_fun(A[,3]),5)
+  }else{A[,4] <- round(2*(1-dist_fun(abs(A[,3]))),5)}
+  
+  A[,5] <- p.adjust(A[,4], method = method)
+  A[,6] <- A[,5] < qval
+  
+  if(length(Real) > 0) A <- cbind(A, Real)
+  
+  return(list(Results = as.data.frame(A), DF = effectiveN, Test = test, Significance = qval, method = method, SD_origin = alpha_sd, Var_Mat = alpha_var_mat))
+}
+
+tmp <- build_hyp.test(Pelet_Cov, alpha, method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
+
+Pelet_Cov$returns
+Pelet_Cov$convergence
+Pelet_Cov$Est_N
+
+tmp$Results[order(tmp$Results$Real),]
+tmp$DF
+tmp$Test
+tmp$Significance
+tmp$method
+
+#Do a wilks test (chi-square)
+chisq <- -2*( minusloglik(theta = Pelet_Cov$theta, alpha = Pelet_Cov$alpha, healthy.data = healthy.data, sick.data = sick.data) -
+               minusloglik(theta = Pelet_Cov$theta, alpha = rep(1, length(Pelet_Cov$alpha)), healthy.data = healthy.data, sick.data = sick.data) )
+c("Chisq_val" = chisq, "DF" = length(Pelet_Cov$alpha), "Pval" = 1 - pchisq(chisq, length(Pelet_Cov$alpha)))
+
+```
+
+
+Build V matrix for misspecified model!!!!!!!!!
+```{r}
+tmpFun2 <- function(i, theta, alpha){
+  tmpFun <- function(i) 
+}
+```
+Check Robustness - Carefull, this takes forever.
+```{r}
+if(p <= 13){
+  B <- 50
+  simuldat <- list()
+  alpha_simul <- matrix(nrow = B, ncol = p)
+  
+  for (b in 1:B){
+    cat(paste0("\n \n b: ", b, ";"))
+    healthy_tmp <- create_correlation_matrices(real.theta, healthy_N, Tlength)
+    sick_tmp <- create_correlation_matrices(real.theta*alpha.mat, sick_N, Tlength)
+    res_misspecified <- Estimate.Loop(healthy, sick)
+    res_specified <- Estimate.Loop2(theta0 = triangle_to_vector(res_misspecified$Estimates$theta),
+                                    alpha0 = res_misspecified$Estimates$alpha,
+                                    Healthy.ARR = healthy_tmp, Sick.ARR = sick_tmp, T_thresh = Tlength,
+                                    comp_hess = FALSE)
+    simuldat[[b]] <- list(healthy = healthy_tmp, sick = sick_tmp,
+                          misspecified = res_misspecified, specified = res_specified)
+    alpha_simul[b,] <- res_specified$alpha
+    
+  }
+  
+  Emp_vs_Theo <- data.frame(Theoretic = tmp$SD,
+                            Empiric = sapply(1:p, function(i) sd(alpha_simul[,i]))) %>%
+    mutate(Quotient = Empiric/Theoretic)
+  
+  find_covariate <- lm(Empiric ~ 0 + Theoretic, data = Emp_vs_Theo)
+  
+  hist(Emp_vs_Theo$Quotient, main = "Quotient Histogram", xlab = "Quotient", col = "lightblue")
+  summary(Emp_vs_Theo$Quotient)
+  
+  
+  ggplot(Emp_vs_Theo, aes(x = Theoretic, y = Empiric)) +
+    geom_abline(slope = 1, intercept = 0, col = "darkblue", size = 1, linetype = 2) +
+    geom_abline(slope = find_covariate$coefficients, intercept = 0,
+                col = "darkred", size = 1, linetype = 2) + 
+    geom_vline(xintercept = 0) + geom_hline(yintercept = 0) + 
+    geom_point(col = "black", size = 1.5) + 
+    labs(title = "Empiric SD of alpha VS. Theoretical",
+         x = "Theoretical SD", y = "Empiric SD")
+  summary(find_covariate)
+  
+  Tlength
+  Pelet_Cov$Est_N
+  Pelet_Cov$Est_N/Tlength
+}
+```
+
+Save Enviroment
+```{r}
+link2 <- paste0("C:/Users/Itamar/Google Drive/Documents/#My Documents/Study/99 Other/Binyamini/Main Work/Data/Enviroments/enviroment ", "p", p, " ", gsub(":", "", Sys.time()), ".RData")
+save.image(link2)
+```
+
+
+
+
+# Drafts - Do not run
+Plot likelihood as a function of Theta and Alpha
+```{r}
+rm(IID.VarH, IID.VarS, real.VarH, real.VarS, Diff)
+PlotLKH_t <- TRUE
+WithDET <- TRUE
+if(PlotLKH_t){
+  persic <- 3
+  which_replace <- sample(1:length(Pelet_Cov$theta), 1)
+  
+  eps <- 10 ^ (-persic)
+
+  minuslog_replace <- function(value, index){
+    return(minusloglik(theta = replace(Pelet_Cov$theta, index, value),
+                       alpha = Pelet_Cov$alpha, Sigma1 = TRUE,
+                       healthy.data = healthy.data, sick.data = sick.data, DET = WithDET))
+  
+  }
+
+  check_bounderies <- function(i, persic = 4){
+  eps <- 10 ^ (-persic)
+  myseq <- seq(-1, 1, eps)
+  
+  j <- 1
+  while(! (is.positive.definite(vector_to_triangle(
+    replace(Pelet_Cov$theta, i, myseq[j])))) ) j <- j + 1
+  pelet <- myseq[j]
+  
+  j <- length(myseq)
+  while(! (is.positive.definite(vector_to_triangle(
+    replace(Pelet_Cov$theta, i, myseq[j])))) ) j <- j - 1
+  pelet <- c(pelet, myseq[j])
+  
+  return(pelet)
+}
+
+  bounds <- check_bounderies(which_replace, persic)
+
+
+  tempTable <- matrix( nrow = diff(bounds)/eps + 1, ncol = 2)
+  colnames(tempTable) <- c("Theta", "Likelihood")
+  tempTable[,1] <- seq(bounds[1], bounds[2], eps)
+  
+  for(i in 1:nrow(tempTable)) {
+    tempTable[i,2] <- (-1)*minuslog_replace(tempTable[i,1], which_replace)
+    
+    if ( i%%(round(nrow(tempTable)/20)) == 0 ) cat(round(100 * i/nrow(tempTable)), "%, ")
+  }
+  cat(100, "%")
+  
+  TableTheta <- list(Table = as.data.frame(tempTable), Est = Pelet_Cov$theta[which_replace],
+                     Index = which_replace)
+  
+  save(TableTheta, file = "TableTheta")
+  rm(minuslog_replace, tempTable, check_bounderies, bounds, eps)
+} else { load("TableTheta") }
+
+
+ggplot(TableTheta$Table, aes(x = Theta, y = Likelihood)) +
+  geom_line(col = "blue", size = 1) + 
+  labs(title = paste0("Likelihood ~ Theta [", TableTheta$Index, "]")) + 
+  geom_vline(xintercept = TableTheta$Est, color = "red") + ylim(-10000,1000)
+TableTheta$Est
+
+PlotLKH_a <- TRUE
+if(PlotLKH_a){
+  persic <- 3
+  which_replace <- sample(1:length(Pelet_Cov$alpha), 1)
+  
+  eps <- 10 ^ (-persic)
+
+  minuslog_replace <- function(value, index){
+    return(minusloglik(theta = Pelet_Cov$theta,
+                       alpha = replace(Pelet_Cov$alpha, index, value),  Sigma1 = TRUE,
+                       healthy.data = healthy.data, sick.data = sick.data, DET = WithDET))
+  
+  }
+
+  check_bounderies <- function(i, persic = 4){
+    eps <- 10 ^ (-persic)
+    myseq <- seq(0, 2, eps)
+    
+    j <- 1
+    while(! (is.positive.definite(vector_to_triangle(Pelet_Cov$theta) * 
+                                  create_alpha_mat(replace(Pelet_Cov$alpha,
+                                                           i, myseq[j])))) ) j <- j + 1
+    pelet <- myseq[j]
+    
+    j <- length(myseq)
+    while(! (is.positive.definite(vector_to_triangle(Pelet_Cov$theta) * 
+                                  create_alpha_mat(replace(Pelet_Cov$alpha,
+                                                           i, myseq[j])))) ) j <- j - 1
+    pelet <- c(pelet, myseq[j])
+    
+    return(pelet)
+  }
+
+  bounds <- check_bounderies(which_replace, persic)
+
+  tempTable <- matrix( nrow = ceiling(diff(bounds)/eps + 1), ncol = 2)
+  colnames(tempTable) <- c("Alpha", "Likelihood")
+  tempTable[,1] <- seq(bounds[1], bounds[2], eps)
+  
+  for(i in 1:nrow(tempTable)) {
+    tempTable[i,2] <- (-1)*minuslog_replace(tempTable[i,1], which_replace)
+    
+    if ( i%%(round(nrow(tempTable)/20)) == 0 ) cat(round(100 * i/nrow(tempTable)), "%, ")
+  }
+  cat(100, "%")
+  
+  TableAlpha <- list(Table = as.data.frame(tempTable),
+                     Est = Pelet_Cov$alpha[which_replace],
+                     Index = which_replace)
+  
+  save(TableAlpha, file = "TableAlpha")
+  rm(minuslog_replace, tempTable, check_bounderies, bounds, eps)
+
+} else { load("TableAlpha") }
+
+ggplot(TableAlpha$Table, aes(x = Alpha, y = Likelihood)) +
+  geom_line(col = "blue", size = 1) + 
+  labs(title = paste0("Likelihood ~ Alpha [", TableAlpha$Index, "]")) + 
+  geom_vline(xintercept = TableAlpha$Est, color = "red")
+TableAlpha$Est
+```
+
+Now try search method - NOT FINISHED!!!
+```{r}
+search_theta <- function(i, theta.initial, alpha, healthy.data, sick.data, persic = 4){
+  
+  mllFUN <- function(M) minusloglik(M, alpha,
+              healthy.data = healthy.data, sick.data = sick.data)
+  eps <- 10 ^ (-persic)
+
+  theta_positive <- theta.initial
+  values <- seq(-1, 1, by = eps)
+  
+  check_bounderies <- function(j){
+    theta_positive[i] <- values[j]
+    is.positive.definite(vector_to_triangle(theta_positive))
+  }
+  
+  j <- 1
+  while(!check_bounderies(j)) j <- j+1
+  lower_bound <- values[j]
+    
+  j <- length(values)
+  while(!check_bounderies(j)) j <- j-1
+  upper_bound <- values[j]
+  
+  range <- c(lower_bound, upper_bound)
+  
+  theta_test_lo <- theta.initial
+  theta_test_hi <- theta.initial
+
+  while(abs(diff(range)) > eps){
+    middle <- mean(range)
+    check_nxt <- middle + 0.25*diff(range)*c(-1,1)
+    
+    theta_test_lo[i] <- check_nxt[1]
+    theta_test_hi[i] <- check_nxt[2]
+    
+    next_move <- which.min(c(mllFUN(theta_test_lo), mllFUN(theta_test_hi)))
+    range <- sort(c(middle, range[next_move]))
+  }
+  middle <- mean(range)
+  
+  pelet <- theta.initial
+  pelet[i] <- middle
+  return(pelet)
+}
+
+answer <- search_theta(i = 1, theta.initial = triangle_to_vector(Pelet_IID$Estimates$theta),
+                       alpha = Pelet_IID$Estimates$alpha,
+                       healthy.data = healthy.data, sick.data = sick.data)
+
+answer[1]
+triangle_to_vector(Pelet_IID$Estimates$theta)[1]
+
+is.positive.definite(vector_to_triangle(answer))
+```
+
+```{r}
+bounds_positive_definite <- function(index, theta, search_range = c(-1,1), tol = 3){
+  p <- nrow(vector_to_triangle(theta))
+  
+  sequ <- seq(search_range[1], search_range[2], 10^(-1))
+  for(j in 1:tol){
+    n <- length(sequ)
+    check <- array(dim = c(p, p, n))
+    for(i in 1:n) check[,,i] <- vector_to_triangle(replace(theta, index, sequ[i]))
+    next_check <- sequ[c((apply(check, 3, is.positive.definite) %>% diff), 0) != 0]
+    sequ <- c(seq(next_check[1], next_check[1] + 10^(-j), 10^(-j-1)),
+              seq(next_check[2], next_check[2] + 10^(-j), 10^(-j-1)))
+  }
+  return(next_check + c(1, -1)*10^(-tol))
+}
+
+minimize_theta_elementwise <- function(index, theta, alpha, healthy.data, sick.data, tol = 3){
+  bounds <- bounds_positive_definite(index, theta, tol = tol)
+  foroptim <- function(x) minusloglik(replace(theta, index, x), alpha, healthy.data, sick.data)
+  pelet <- optimise(foroptim, interval = bounds)
+  pelet$origin <- theta[index]
+  pelet$theta <- replace(theta, index, pelet$minimum)
+  return(pelet)
+}
+
+tmptheta <- Pelet_IID$Estimates$theta %>% triangle_to_vector()
+```
+
+Step by Step optimization
+```{r}
+temp.theta <- triangle_to_vector(Pelet_IID$Estimates$theta)
+temp.alpha <- Pelet_IID$Estimates$alpha
+
+sick.data <- cor.matrix_to_norm.matrix(sick)
+
+minusloglik_alpha <- function(alpha, theta, sick.data, effective.N = 1){
+  Nd <- nrow(sick.data)
+  
+  thetaMAT <- vector_to_triangle(theta)*create_alpha_mat(alpha)
+  
+  g11 <- as.matrix(triangle_to_vector(thetaMAT))
+  g21 <- vector_var_matrix_calc_COR(thetaMAT)/effective.N
+  
+  SSE <- SSS_norm.matrix(sick.data, g11, g21, solve_sig = TRUE) + Nd*log(det(g21))
+  
+  return(SSE)
+}
+
+optim(par = temp.alpha, fn = function(A) minusloglik_alpha(alpha = A,
+                                                           theta = temp.theta,
+                                                           sick.data = sick.data))
+
+multi.deriv(function(A) minusloglik_alpha(alpha = A,
+                                          theta = temp.theta,
+                                          sick.data = sick.data)/nrow(sick.data),temp.alpha)
+
+temp.alpha
+```
+
+Draft: Unused Functions
+```{r}
+#Size of Cov matrix for pxp model:
+show_howmany <- FALSE
+if(show_howmany){
+  how_many_m <- function(p) 0.125*p*(p-1)*(p*(p-1) + 2)
+  how_many_m_matr <- cbind(c(10:20, seq(25, 50, 5), seq(60, 100, 10)),
+                           how_many_m(c(10:20, seq(25, 50, 5), seq(60, 100, 10))))
+  colnames(how_many_m_matr) <- c("p", "Cov_matr_size")
+  how_many_m_matr
+}
+rm(show_howmany, how_many_m_matr)
+
+#derivatives
+multi.deriv <- function(FUN, X, whichx = NULL, whichfn = NULL, eps = 9){
+  eps <- min(eps,12)
+  if(length(whichx)==0) whichx <- 1:length(X)
+  if(length(whichfn)==0) whichfn <- 1:length(FUN(X))
+  
+  lex <- length(whichx)
+  pelet <- matrix(ncol = lex, nrow = length(whichfn))
+  
+  for (i in 1:lex){
+    newX <- X
+    newX <- replace(X, i, X[i] + 10^(-eps))
+    pelet[,i] <- (FUN(newX)[whichfn] - FUN(X)[whichfn])/(10^(-eps))
+  }
+  
+  rownames(pelet) <- paste (rep("f", length(whichfn)), sapply(whichfn, toString))
+  colnames(pelet)<-paste (rep("x", lex), sapply(whichx,toString))
+  pelet
+}
+
+#Fisher Trasnformations
+Fisher_Z <- function(r) 0.5*log((1+r)/(1-r))
+Fisher_Z_inv <- function(z) (exp(2*z)-1)/(exp(2*z)+1)
+
+data.frame(r = seq(-0.999,0.999,0.001), Identity = seq(-0.999,0.999,0.001),
+           Fisher = Fisher_Z(seq(-0.999,0.999,0.001))) %>%
+  gather(key = Function, value = Value, -r) %>%
+  ggplot(aes(x = r, y = Value, color = Function)) + 
+  geom_hline(yintercept = 0, col = "grey") + geom_vline(xintercept = 0, col = "grey") + 
+  geom_line(size = 1) + ggtitle("Fisher's Z Inverse")
+
+cbind(seq(-4,4,0.01), Fisher_Z_inv(seq(-4,4,0.01))) %>% as.data.frame() %>%
+  ggplot(aes(x = V1, y = V2)) + 
+  geom_hline(yintercept = 0, col = "grey") + geom_vline(xintercept = 0, col = "grey") + 
+  geom_line(color = "blue", size = 0.5) + labs(title = "Fisher's Z Inverse", x = "x", y = "f(x)")
+
+create_correlation_matrices_alt <- function(real_corr, sample_size, df = 0,
+                                            noise_scale = NULL, var_scale = NULL,
+                                            seed.control = NULL){
+  if(!is.positive.definite(real_corr)) stop("real_corr not positive definite")
+  p <- nrow(real_corr)
+  df <- max(df, p)
+  if(length(var_scale)==0){
+    var_scale <- runif(p,10,100)
+  } else if(length(var_scale)!=p){
+    stop("var_scale not in dimension")
+  }
+  if(length(noise_scale)==0){
+    noise_scale <- rep(1,p)
+  } else if(length(noise_scale)!=p){
+    stop("noise_scale not in dimension")
+  }
+  
+  Dhalf <- sqrt(diag(var_scale))
+  Mat_noise <- diag(noise_scale)
+  
+  pelet_matrices <- array(dim = c(p,p,sample_size))
+  real_var <- Dhalf%*%real_corr%*%Dhalf
+  if(length(seed.control)==1) set.seed(seed.control)
+  noise_matrices <- rWishart(sample_size, df, Mat_noise)
+  for(b in 1:sample_size) pelet_matrices[,,b] <-
+    force_symmetry(cov2cor(noise_matrices[,,b]/df + real_var))
+  
+  return(pelet_matrices)
+}
+
+
+#Simulate sample from random variances
+create_correlation_matrices_alt2 <- function(real_corr, sample_size, df = 0,
+                                             rdist = rnorm, par = c(0,1), sqrd = TRUE){
+  if(!is.positive.definite(real_corr)) stop("real_corr not positive definite")
+  p <- nrow(real_corr)
+  df <- max(p, df)
+  
+  pelet <- array(dim = c(p, p, sample_size))
+  for(b in 1:sample_size){
+    varss <- rdist(p, par[1], par[2]) ^ (2^sqrd)
+    if(any(varss<=0)) stop("Distribution not positive")
+    
+    D <- sqrt(diag(varss))
+    pelet[,,b] <- force_symmetry(cov2cor(rWishart(1, df, D %*% real_corr %*% D)[,,1]))
+  }
+  return(pelet)
+}
+
+vector_var_matrix_calc_COV <- function(MATR){
+  if(!is.positive.definite(MATR)) stop("MATR not positive definite")
+  p <- dim(MATR)[1]
+  m <- (p*(p-1)/2)
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  for(i in 1:(p-1)){
+    v1 <- c(v1, rep(i, p-i))
+    v2 <- c(v2, (i+1):p)
+  }
+  order_vect <- cbind(v1,v2)
+  
+  pelet <- matrix(nrow = m, ncol = m)
+  for(i in 1:m){
+    for(j in i:m){
+      indexes <- c(order_vect[i,], order_vect[j,])
+      pelet[i,j] <- MATR[indexes[1],indexes[3]]*MATR[indexes[2],indexes[4]] + 
+        MATR[indexes[1],indexes[4]]*MATR[indexes[2],indexes[3]]
+      pelet[j,i] <- pelet[i,j]
+    }
+  }
+  
+  return(pelet)
+}
+
+
+p <- dim(real.theta)[1]
+m <- (p*(p-1)/2)
+
+RunExample <- FALSE
+if(RunExample){
+  covariance.matrix <- matrix(nrow = (m*(m+1)/2), ncol = 7)
+  colnames(covariance.matrix) <- c("V-Index_i", "M-Index_R_i", "M-Index_C_i", 
+                                   "V-Index_j", "M-Index_R_j", "M-Index_C_j", "Cov")
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  for(i in 1:m){
+    v1 <- c(v1, rep(i, m-i+1))
+    v2 <- c(v2, i:m)
+  }
+  covariance.matrix[,c(1,4)] <- cbind(v1,v2)
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  
+  for(i in 1:(p-1)){
+    v1 <- c(v1, rep(i, p-i))
+    v2 <- c(v2, (i+1):p)
+  }
+  order_vect <- cbind(v1,v2)
+  for(i in 1:(m*(m+1)/2)){
+    covariance.matrix[i,2:3] <- order_vect[covariance.matrix[i,1],]
+    covariance.matrix[i,5:6] <- order_vect[covariance.matrix[i,4],]
+  }
+  
+  covariance.matrix[,7] <- triangle_to_vector(vector_var_matrix_calc_COR(real.theta), diag = TRUE)
+  
+  covariance.matrix
+}
+
+```
+
+Draft: Other attempts
+```{r}
+
+minusloglik <- function(theta, alpha, healthy.data, sick.data, df = 0){
+  Nh <- nrow(healthy.data)
+  Nd <- nrow(sick.data)
+  
+  fr <- Nd/Nh
+  
+  theta.mat <- vector_to_triangle(theta)
+  alpha.mat <- create_alpha_mat(alpha)
+  Sigma0 <- vector_var_matrix_calc(theta.mat)
+  Sigma1 <- vector_var_matrix_calc(theta.mat*alpha.mat)
+  
+  Dist0 <- healthy.data - rep(1, Nh) %*% t(theta)
+  Dist1 <- sick.data - rep(1, Nd) %*% t(theta * triangle_to_vector(alpha.mat))
+    
+  return(Nh*log((det(Sigma1)^fr)*det(Sigma0)) + 
+           sum(diag(Dist0 %*% solve(Sigma0) %*% t(Dist0))) + 
+           sum(diag(Dist1 %*% solve(Sigma1) %*% t(Dist1))) )
+}
+
+minusloglik(theta = triangle_to_vector(Pelet_IID$Estimates$theta),
+            alpha = Pelet_IID$Estimates$alpha,
+            sick.data = cor.matrix_to_norm.matrix(sick),
+            healthy.data = cor.matrix_to_norm.matrix(healthy))
+
+for_optim <- function(theta, alpha) minusloglik(theta = theta,
+                                                alpha = alpha,
+                                                sick.data = cor.matrix_to_norm.matrix(sick),
+                                                healthy.data = cor.matrix_to_norm.matrix(healthy))
+
+for_hess <- function(vect) minusloglik(theta = vect[1:m],
+                                      alpha = vect[(m+1):(m+p)],
+                                      sick.data = cor.matrix_to_norm.matrix(sick),
+                                      healthy.data = cor.matrix_to_norm.matrix(healthy))
+myhess <- hessian(for_hess,
+        c(triangle_to_vector(Pelet_IID$Estimates$theta), Pelet_IID$Estimates$alpha),
+        method = "Richardson")
+
+optim(Pelet_IID$Estimates$alpha,
+      function(M) for_optim(triangle_to_vector(Pelet_IID$Estimates$theta), M),
+      method = "BFGS")
+
+optim(triangle_to_vector(Pelet_IID$Estimates$theta),
+      function(M) for_optim(M, Pelet_IID$Estimates$alpha),
+      method = "BFGS")
+
+##Initialize paramters based on non-correlation model
+Steps <- list()
+simple_model_EST <- Estimate.Loop(healthy,sick)
+temp.theta <- simple_model_EST$Estimates$theta
+temp.alpha <- simple_model_EST$Estimates$alpha
+
+Steps[[1]] <- list(theta = temp.theta,
+                   alpha = temp.alpha)
+
+healthy.dat <- cor.matrix_to_norm.matrix(healthy)
+sick.dat <- cor.matrix_to_norm.matrix(sick)
+##Build functions for maximiziation
+#SSE_theta <- function(theta)  SSS_norm.matrix(healthy.dat,
+#                                              theta, Sigma0, prop_sig) + 
+#  SSS_norm.matrix(sick.dat,
+#                  theta*triangle_to_vector(create_alpha_mat(temp.alpha)),
+#                  Sigma1, prop_sig)
+
+SSE_alpha <- function(alpha) SSS_norm.matrix(sick.dat,
+triangle_to_vector(temp.theta*create_alpha_mat(alpha)),
+Sigma1, prop_sig)
+
+prop_sig <- 0
+i <- 1
+while(i <= 3){
+  Sigma0 <- vector_var_matrix_calc(Steps[[i]]$theta)
+  Sigma1 <- vector_var_matrix_calc(Steps[[i]]$theta*(create_alpha_mat(Steps[[i]]$alpha)))
+  
+  temp.alpha.info <- optim(temp.alpha, SSE_alpha, lower = 0.001, upper = 1.2 ,method = "L-BFGS-B")
+  temp.alpha <- temp.alpha.info$par
+  
+  temp.theta <- (dim(sick)[3]*calculate_mean_matrix(sick)/create_alpha_mat(temp.alpha) + 
+                   dim(healthy)[3]*calculate_mean_matrix(healthy))/(dim(sick) + dim(healthy))[3]
+
+  i <- i + 1
+  Steps[[i]] <- list(theta = temp.theta,
+                     alpha = temp.alpha,
+                     info = list(theta.info = temp.theta.info,
+                                 alpha.info = temp.alpha.info))
+}
+round(Steps[[2]]$theta,2)
+i
+```
+
+Draft: Other
+```{r}
+m <- p*(p-1)/2
+X <- triangle_to_vector(healthy[[1]])
+mu <- triangle_to_vector(real.theta)
+
+Sigma <- matrix(0, ncol = m, nrow = m)
+
+K <- vector_to_triangle(1:m)
+diag(K) <- 0
+
+for(i in 1:m){
+  t1 <- which(K==i)[1]
+  t1c <- c(ceiling(t1/p), t1%%p)
+  if(t1c[2]==0) t1c[2] <- p
+  for(j in i:m)
+    t2 <- which(K==j)[1]
+  t2c <- c(ceiling(t2/p), t2%%p)
+  if(t2c[2]==0) t2c[2] <- p
+  
+  Sigma[i,j] <- real.theta[t1c[1], t2c[1]]*
+    real.theta[t1c[2], t2c[2]]*
+    real.theta[t1c[1], t2c[2]]*
+    real.theta[t1c[2], t2c[1]]
+}
+
+#############################
+#Transform to Fisher Z
+sick_mean <- Fisher_Z(calculate_mean_matrix(sick))
+diag(sick_mean) <- 1
+healthy_mean <- Fisher_Z(calculate_mean_matrix(healthy))
+diag(healthy_mean) <- 1
+
+#Build Function for Estimation - Sum of Squares of sick Theta
+for.optim <- function(ALPHA, THETA) sum(triangle_to_vector(THETA*create_alpha_mat(ALPHA)-sick_mean)^2)
+
+#Initialize Step
+Steps <- list()
+temp.theta <- healthy_mean
+temp.alpha <- optim(rep(0.8,p), function(A) for.optim(A,temp.theta), method = "L-BFGS-B")$par
+Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
+
+#Begin Loop until Convergence
+limit <- c(MaxLoop = 500, Persic = 10^(-5))
+i <- 1
+distance <- 100
+while((i<=limit["MaxLoop"])&(distance>limit["Persic"])){
+  temp.theta <- (sick_N*sick_mean/create_alpha_mat(temp.alpha)+healthy_N*healthy_mean)/(sick_N+healthy_N)
+  temp.alpha <- optim(temp.alpha,function(A) for.optim(A,temp.theta), method = "L-BFGS-B")$par
+  Steps[[i+1]] <- list(theta = temp.theta, alpha = temp.alpha)
+  
+  distance <- sqrt(sum((Steps[[i+1]]$alpha-Steps[[i]]$alpha)^2))
+  if(i%%10==0) cat(paste(i,","))
+  i <- i + 1
+}
+
+
+#Results
+Estimates <- Steps[[i]]
+euclidian.dist <- c(Alpha = sqrt(sum((Estimates$alpha - alpha)^2)),
+                    Theta = sqrt(sum(triangle_to_vector(Fisher_Z_inv(Estimates$theta) - real.theta)^2)))
+
+paste("Number of Returns: ", i-1)
+euclidian.dist
+
+temp <- cbind(Estimates$alpha, alpha)
+colnames(temp) <- c("Estimate", "Real")
+print("Alpha Estimate")
+round(temp,4)
+
+index <- sort(sample(1:(p*(p-1)/2), size = 100))
+temp <- cbind(index,
+              Fisher_Z_inv(triangle_to_vector(Estimates$theta))[index],
+              triangle_to_vector(real.theta)[index])
+colnames(temp) <- c("Index","Estimate", "Real")
+print("Theta Estimate")
+round(temp,4)
+```
+

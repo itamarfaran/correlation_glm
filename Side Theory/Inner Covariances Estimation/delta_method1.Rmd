@@ -1,0 +1,140 @@
+---
+title: "Univariate Delta Method"
+author:
+- Itamar Faran
+- Department of Statistics
+- The Hebrew University
+date: "April 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=5) 
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+# Load Packages
+wd <- "C:/Users/Itamar/Google Drive/Documents/#My Documents/Study/99 Other/Binyamini/Models"
+setwd(wd)
+
+library(MASS)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+```{r}
+#Builds Sigma
+Bui_Sigma <- function(Sx, Sy, rho)  matrix(c(Sx^2, rho*Sx*Sy, rho*Sx*Sy, Sy^2), ncol = 2)
+
+#Creates B samples of size n with covariances
+create_samples <- function(B, n, Sx, Sy, rho){
+  BIG <- mvrnorm(n = B*n, mu = c(0,0), Sigma = Bui_Sigma(0.5,2,0.5))
+  
+  pelet <- array(dim = c(n, 2, B))
+  for(b in 1:B) pelet[,,b] <- BIG[( (b-1)*n + 1 ):( b*n ), ]
+  
+  return(pelet)
+}
+
+#Raw delta method, eg. compute matrices by computer
+delta_meth <- function(n, Sx, Sy, rho){
+  Var_mat <- matrix(0, ncol = 3, nrow = 3)
+  Var_mat[1,2] <- rho * Sx^3 * Sy
+  Var_mat[1,3] <- rho * Sx * Sy^3
+  Var_mat[2,3] <- (rho * Sx * Sy)^2
+  
+  Var_mat <- Var_mat + t(Var_mat)
+  Var_mat[1,1] <- 0.5*(1+rho^2) * Sx^2 * Sy^2
+  Var_mat[2,2] <- Sx^4
+  Var_mat[3,3] <- Sy^4
+  Var_mat <- 2*Var_mat/n
+  
+  grad <- matrix(0, nrow = 3)
+  grad[1,1] <- 1/(Sx*Sy)
+  grad[2,1] <- -rho/(2*Sx^2)
+  grad[3,1] <- -rho/(2*Sy^2)
+  
+  return(as.vector(t(grad)%*%Var_mat%*%grad))
+}
+
+#Delta method we found (final answer only)
+delta_meth_simple <- function(n, rho) (1-rho^2)^2/n
+
+#Estimate cor with mean = 0
+cor_usr <- function(X,Y) sum(X*Y)/sqrt(sum(X^2)*sum(Y^2))
+
+print_percent <- function(index, Total, percent){
+  if(((100/percent)*(index/Total))%%1 == 0) cat(100*(index/Total), "%, ") }
+```
+
+```{r, echo = FALSE}
+data.frame(rho = seq(-1,1,0.01)) %>% mutate(var_rho = delta_meth_simple(1, rho)) %>%
+  ggplot(aes(x = rho, y = var_rho)) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) + 
+  geom_line(col = "blue") + labs(title = "Variance of Correlation Estimator (n = 1)", x = "r", y = "Var(r)")
+```
+
+\newpage
+# Simulation
+```{r}
+RUN <- FALSE
+if(RUN){
+  n <- 1000
+  B <- 5000
+  Sx <- sqrt(14)
+  Sy <- sqrt(3541)
+  rho <- 0.5
+  
+  B2 <- 1000
+  corrs_vars <- numeric(B2)
+  for(j in 1:B2){
+    Samples <- create_samples(B, n, Sx, Sy, rho)
+    corrs_vars[j] <- var(sapply(1:B, function(b) cor_usr(Samples[,1,b], Samples[,2,b])))
+  
+    print_percent(j, B2, 5)
+  }
+  
+  last_data <- list(n = n, B = B, B2 = B2, Sx = Sx, Sy = Sy, rho = rho, corrs_vars = corrs_vars)
+  #save(last_data, file = "last_data")
+  rm(last_data)
+} else {
+  load(file = "last_data")
+  
+  n <- last_data$n
+  B <- last_data$B
+  Sx <- last_data$Sx
+  Sy <- last_data$Sy
+  rho <- last_data$rho
+  B2 <- last_data$B2
+  corrs_vars <- last_data$corrs_vars
+
+  rm(last_data)
+}
+
+```
+
+\newpage
+# Results and Plots
+```{r}
+mean(corrs_vars)
+delta_meth(n, Sx, Sy, rho)
+delta_meth_simple(n, rho)
+```
+
+Bias/Real = $\frac{\widehat{Var}\left(\hat{\rho}_{n}\right)-Var\left(\hat{\rho}_{n}\right)}{Var\left(\hat{\rho}_{n}\right)}$
+```{r, echo = FALSE}
+summary((corrs_vars - delta_meth_simple(n, rho))/delta_meth_simple(n, rho))
+```
+
+\newpage
+```{r, echo = FALSE}
+data.frame(V = corrs_vars) %>% ggplot(aes(x = V)) + geom_histogram(bins = 2*log(B2), col = "white", fill = "lightblue") + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = delta_meth_simple(n, rho), col = "darkblue", size = 1) + 
+  labs(title = "Variance and Estimate of Var(Cor(X,Y))", x = "Var(Cor(X,Y))", y = "Frequency")
+
+data.frame(V = (corrs_vars - delta_meth_simple(n, rho))/delta_meth_simple(n, rho)) %>% ggplot(aes(x = V)) +
+  geom_histogram(bins = 2*log(B2), col = "white", fill = "lightblue") + 
+  geom_hline(yintercept = 0) + geom_vline(xintercept = 0, col = "darkblue", size = 1) + 
+  labs(title = "Variance and Estimate of Var(Cor(X,Y))", x = "Bias/Real", y = "Frequency")
+```

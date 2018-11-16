@@ -1,0 +1,448 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+The Whishart Distribution and it's Inner Covariances
+\end_layout
+
+\begin_layout Part
+The Covariance Estimate Matrix
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $\{Z_{n}\}_{n=1}^{N}\,\overset{i.i.d}{\sim}\,N_{p}(0,\Sigma)$
+\end_inset
+
+.
+ We define 
+\begin_inset Formula $Y=\stackrel[n=1]{N}{\Sigma}\,Z_{n}\cdot Z_{n}^{t}\,\sim W_{p}(N,\Sigma)$
+\end_inset
+
+; 
+\begin_inset Formula $Y\in M_{P}(\mathbb{R})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We are intrested in finding 
+\begin_inset Formula $cov(Y_{ij},Y_{kl})\,\forall\,(i,j,k,l)\in\left\{ 1,...,P\right\} {}^{4}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $cov(Y_{ij},Y_{kl})=cov(\stackrel[n=1]{N}{\Sigma}Z_{ni}\cdot Z_{nj},\stackrel[m=1]{N}{\Sigma}Z_{mk}\cdot Z_{ml})=\stackrel[n=1]{N}{\Sigma}\stackrel[m=1]{N}{\Sigma}cov(Z_{ni}\cdot Z_{nj},Z_{mk}\cdot Z_{ml})$
+\end_inset
+
+.
+ denote 
+\begin_inset Formula $Z_{ni}\bot Z_{mj}\,\forall\,n\neq m,\,\forall\,i,j$
+\end_inset
+
+ and that 
+\begin_inset Formula $Z_{n}\overset{d}{=}Z_{m}\,\forall\,m,n$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Rightarrow cov(Y_{ij},Y_{kl})=\stackrel[n=1]{N}{\Sigma}cov(Z_{ni}\cdot Z_{nj},Z_{nk}\cdot Z_{nl})=N\cdot\left(E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]-E[Z_{ni}Z_{nj}]\cdot E[Z_{nk}Z_{nl}]\right)$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $E[Z_{ni}]=0\,\forall\,i$
+\end_inset
+
+, 
+\begin_inset Formula $E[Z_{ni}Z_{nj}]=E[Z_{ni}Z_{nj}]-\underset{=0}{E[Z_{ni}]\cdot E[Z_{nj}]}=cov(Z_{ni,}Z_{nj})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Rightarrow E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]-E[Z_{ni}Z_{nj}]\cdot E[Z_{nk}Z_{nl}]=E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]-cov(Z_{ni},Z_{nj})\cdot cov(Z_{nk},Z_{nl})=E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]-\Sigma_{ij}\cdot\Sigma_{kl}\,\forall n$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using Isserlis' theorem, we denote 
+\begin_inset Formula $E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]=E[Z_{ni}\cdot Z_{nj}]\cdot E[Z_{nk}\cdot Z_{nl}]+E[Z_{ni}\cdot Z_{nk}]\cdot E[Z_{nj}\cdot Z_{nl}]+E[Z_{ni}\cdot Z_{nl}]\cdot E[Z_{nj}\cdot Z_{nk}]$
+\end_inset
+
+.
+ We noted that 
+\begin_inset Formula $E[Z_{ni}Z_{nj}]=cov(Z_{ni,}Z_{nj})$
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Standard
+therefore 
+\begin_inset Formula $E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]=\Sigma_{ij}\cdot\Sigma_{kl}+\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, we can express 
+\begin_inset Formula $cov(Y_{ij},Y_{kl})$
+\end_inset
+
+: 
+\begin_inset Formula $cov(Y_{ij},Y_{kl})=\stackrel[n=1]{N}{\Sigma}\left(E[Z_{ni}Z_{nj}Z_{nk}Z_{nl}]-\Sigma_{ij}\cdot\Sigma_{kl}\right)=N\cdot\left(\Sigma_{ij}\cdot\Sigma_{kl}+\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk}-\Sigma_{ij}\cdot\Sigma_{kl}\right)=N\cdot(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Rightarrow cov(Y_{ij},Y_{kl})=N\cdot(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+The Correlation Estimate Matrix
+\end_layout
+
+\begin_layout Section
+The Case of a Known 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\Lambda\in M_{P}(\mathbb{R}):\,\Lambda_{ii}=1\,\forall\,i,\,|\Lambda_{ij}|\leq1,\,\lambda_{ij}=\lambda_{ji}\,\forall\,i\neq j,\,\Lambda\,is\,positive-definite$
+\end_inset
+
+ be the correlation matrix.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $D_{\Sigma}\in M_{P}(\mathbb{R}):\,D_{\Sigma,ii}=\sigma_{ii}^{2}>0\,\forall\,i,D_{\Sigma,ij}=0\,\forall\,i\neq j.$
+\end_inset
+
+ Notice that 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+ is also positive definite.
+\end_layout
+
+\begin_layout Standard
+We know that 
+\begin_inset Formula $\Sigma=D_{\Sigma}^{\nicefrac{1}{2}}\cdot\Lambda\cdot D_{\Sigma}^{\nicefrac{1}{2}}\Longleftrightarrow\Lambda=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\nicefrac{1}{2}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $Y\sim W_{P}(n,\Sigma)\Rightarrow n\cdot\bar{Y}\coloneqq n\cdot\frac{Y}{n}\sim W_{P}(n,D_{\Sigma}^{\nicefrac{1}{2}}\cdot\Lambda\cdot D_{\Sigma}^{\nicefrac{1}{2}})\Rightarrow n\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{Y}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\sim W_{P}(n,\Lambda)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So 
+\begin_inset Formula $E\left[D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{Y}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\right]=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot E\left[\frac{Y}{n}\right]\cdot D_{\Sigma}^{-\nicefrac{1}{2}}=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\nicefrac{1}{2}}=\Lambda$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For a known 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+, define 
+\begin_inset Formula $R=D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{Y}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\Rightarrow n\cdot R\sim W_{P}(n,\Lambda)$
+\end_inset
+
+ and 
+\begin_inset Formula $E[R]=\Lambda$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+But since 
+\begin_inset Formula $n\cdot R\sim W_{P}(n,\Lambda)$
+\end_inset
+
+, we know that:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Cov\left(R_{ij},R_{kl}\right)=n^{-2}\cdot Cov\left(n\cdot R_{ij},n\cdot R_{kl}\right)=n^{-2}\cdot n\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})=n^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The Case of an Unknown 
+\begin_inset Formula $D_{\Sigma}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $Y\sim W_{P}(n,\Sigma)\Rightarrow n\cdot\bar{Y}\coloneqq n\cdot\frac{Y}{n}\sim W_{P}(n,D_{\Sigma}^{\nicefrac{1}{2}}\cdot\Lambda\cdot D_{\Sigma}^{\nicefrac{1}{2}})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Define 
+\begin_inset Formula $R_{Y}=D_{Y}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{Y}^{-\nicefrac{1}{2}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $R|D_{Y}\overset{d}{=}n^{-1}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{\Sigma}^{-\nicefrac{1}{2}}$
+\end_inset
+
+, then
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $E[R]=E\left[E\left[R|D_{Y}\right]\right]=E\left[n^{-1}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\right]=E\left[\Lambda\right]=\Lambda$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $Cov\left(R_{ij},R_{kl}\right)=E\left[Cov\left(R_{ij},R_{kl}|D_{Y}\right)\right]=n^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $R=D_{Y}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{Y}^{-\nicefrac{1}{2}}=D_{Y}^{-\nicefrac{1}{2}}\cdot\left(D_{\Sigma}^{\nicefrac{1}{2}}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\right)\cdot Y\cdot\left(D_{\Sigma}^{-\nicefrac{1}{2}}\cdot D_{\Sigma}^{\nicefrac{1}{2}}\right)\cdot D_{Y}^{-\nicefrac{1}{2}}$
+\end_inset
+
+ since 
+\begin_inset Formula $D_{\Sigma}^{\nicefrac{1}{2}}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}=I$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Note that 
+\begin_inset Formula $W\coloneqq D_{Y}\cdot D_{\Sigma}^{-1}\sim W_{P}(n,I)$
+\end_inset
+
+.
+ Therefore, 
+\begin_inset Formula $W^{-1}=D_{Y}^{-1}\cdot D_{\Sigma}=\left(D_{Y}\cdot D_{\Sigma}^{-1}\right)^{-1}\sim W_{P}^{_{-1}}(n,I)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $M\coloneqq D_{\Sigma}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{\Sigma}^{-\nicefrac{1}{2}}=n\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\cdot\bar{Y}\cdot D_{\Sigma}^{-\nicefrac{1}{2}}\sim W_{P}(n,\Lambda)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So 
+\begin_inset Formula $R=D_{Y}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{Y}^{-\nicefrac{1}{2}}=W^{-\nicefrac{1}{2}}\cdot M\cdot W^{-\nicefrac{1}{2}}$
+\end_inset
+
+ and 
+\begin_inset Formula $R|D_{Y}=\left(W^{-\nicefrac{1}{2}}\cdot M\cdot W^{-\nicefrac{1}{2}}|D_{Y}\right)=W^{-\nicefrac{1}{2}}\cdot\left(M|D_{Y}\right)\cdot W^{-\nicefrac{1}{2}}=$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subparagraph
+Tyuta
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $\left(D_{Y}^{-\nicefrac{1}{2}}\cdot E\left[Y|D_{Y}\right]\cdot D_{Y}^{-\nicefrac{1}{2}}\right)_{ij}=\begin{cases}
+1 & i=j\\
+\frac{E\left[Y_{ij}|D_{Y}\right]}{\sqrt{Y_{ii}\cdot Y_{jj}}} & i\neq j
+\end{cases}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So for 
+\begin_inset Formula $i\neq j$
+\end_inset
+
+, 
+\begin_inset Formula $E\left[\frac{E\left[Y_{ij}|D_{Y}\right]}{\sqrt{Y_{ii}\cdot Y_{jj}}}\right]=E\left[E\left[\frac{Y_{ij}}{\sqrt{Y_{ii}\cdot Y_{jj}}}|D_{Y}\right]\right]=E\left[E\left[R_{ij}|D_{Y}\right]\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $=E\left[\left(\begin{array}{ccccc}
+\nicefrac{1}{\sqrt{Y_{11}}} & 0 & 0 & \cdots & 0\\
+0 & \nicefrac{1}{\sqrt{Y_{22}}} & 0\\
+0 & 0 & \nicefrac{1}{\sqrt{Y_{33}}} &  & \vdots\\
+\vdots &  &  & \ddots\\
+0 &  & \ldots &  & \nicefrac{1}{\sqrt{Y_{PP}}}
+\end{array}\cdot\right)\left(\begin{array}{ccccc}
+Y_{11} & E\left[Y_{12}|D_{Y}\right] & E\left[Y_{13}|D_{Y}\right] & \cdots & E\left[Y_{1P}|D_{Y}\right]\\
+E\left[Y_{12}|D_{Y}\right] & Y_{22} & E\left[Y_{23}|D_{Y}\right]\\
+E\left[Y_{13}|D_{Y}\right] & E\left[Y_{23}|D_{Y}\right] & Y_{33} &  & \vdots\\
+\vdots &  &  & \ddots\\
+E\left[Y_{1P}|D_{Y}\right] &  & \cdots &  & Y_{55}
+\end{array}\right)\cdot\left(\begin{array}{ccccc}
+\nicefrac{1}{\sqrt{Y_{11}}} & 0 & 0 & \cdots & 0\\
+0 & \nicefrac{1}{\sqrt{Y_{22}}} & 0\\
+0 & 0 & \nicefrac{1}{\sqrt{Y_{33}}} &  & \vdots\\
+\vdots &  &  & \ddots\\
+0 &  & \ldots &  & \nicefrac{1}{\sqrt{Y_{PP}}}
+\end{array}\right)\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+=
+\begin_inset Formula $E\left[\begin{array}{ccccc}
+1\\
+ & 1\\
+ &  & 1\\
+\\
+\\
+\end{array}\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that for 
+\begin_inset Formula $i\neq j$
+\end_inset
+
+, 
+\begin_inset Formula $R_{Y,ij}=\left(D_{Y}^{-\nicefrac{1}{2}}\cdot Y\cdot D_{Y}^{-\nicefrac{1}{2}}\right)_{ij}=\frac{Y_{ij}}{\sqrt{Y_{ii}\cdot Y_{jj}}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Rightarrow cov(Y_{ii},Y_{ij})=N\cdot(\Sigma_{ii}\cdot\Sigma_{ij}+\Sigma_{ij}\cdot\Sigma_{ii})=2\cdot N\cdot\Sigma_{ii}\cdot\Sigma_{ij}$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

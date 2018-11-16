@@ -1,0 +1,751 @@
+---
+title: "Whishart Inner Covariances Simulations"
+subtitle: "Applications on Sample Covariance and Correlation Matrices"
+author:
+- Itamar Faran
+- Department of Statistics
+- The Hebrew University
+date: "March, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=5) 
+```
+
+##      Prologue
+We begin with defining the needed functions for this code (in this case it's only one function):
+
+The function "force_symmetry" is a function that, surprisingly enough, forces a matrix to be symmetric:
+
+$force\_symmetry\left(A\right)=\frac{1}{2}\cdot\left(A+A^{t}\right)$
+
+So, if $B=force\_symmetry\left(A\right)$, then $B_{ij}=\frac{A_{ij}+A_{ji}}{2}=B_{ji}$
+
+```{r, warning = FALSE, message=FALSE, echo=FALSE}
+library(abind)
+library(corrplot)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(matrixcalc)
+library(tidyr)
+
+#Force symmetry, as the name implies, forces symmetry on a matrix
+force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+```
+
+# I     Building the Parameters for Simulation
+
+We begin with constructing our paramters. We use the Cauchy distribution to create some extreme values.
+p is the dimension of our covariance matrix. Our real $\Sigma$ is built in the next way:
+
+1. Conduct p i.i.d. RV's from $X\sim Cauchy\left(\mu,\sigma\right)$
+2. Conduct p i.i.d. RV's from $Y\,|\,X\sim Uni\left(0,\,\underset{i}{\max}\left\{ x_{i}\right\} \right)$
+3. Construct $\Sigma=x\cdot x^{t}+diag\left(y\right)$ where:
+   $diag\left(a\right)\in\mathbb{M}_{p}\left(\mathbb{R}\right):\;diag\left(a\right)_{ij}=\begin{cases}a_{i} & i=j\\0 & i\neq j\end{cases},\:a\in\mathbb{R}^{p}$
+4. Authenticate that $\Sigma$ is positive Definite
+5. Construct $\Lambda=D_{\Sigma}^{-\frac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\frac{1}{2}}$ where:
+   $\left(D_{\Sigma}\right)_{ij}=\begin{cases}\Sigma_{ii} & i=j\\0 & i\neq j\end{cases}$
+6. Authenticate that $\Lambda$ is positive Definite
+
+```{r}
+p <- 10
+location.par <- 2
+scale.par <- 1
+
+set.seed(214)
+x <- as.matrix(rcauchy(p, location.par, scale.par))
+real_sigma <- x%*%t(x)+diag(runif(p, 0, max(x)))
+is.positive.definite(real_sigma)
+rm(x, location.par, scale.par)
+
+real_corr <- force_symmetry(cov2cor(real_sigma))
+is.positive.definite(real_corr)
+```
+Note that in this simulation, p = `r p`
+
+\newpage
+The next image visualizes the real correlation matrix ($\Lambda$):
+
+```{r, echo=FALSE, fig.width=12, fig.height=7}
+corrplot(real_corr, method = "circle", addCoef.col = "black",
+         diag = FALSE, tl.pos = "d", tl.cex = 1.2,
+         number.cex = .8, tl.col = "darkgrey",
+         title="(1.1) Correlation matrix", mar=c(0,0,1,0))
+```
+
+The next image visualizes the real variances ($D_{\Sigma}$):
+
+```{r, echo=FALSE}
+data.frame(i = 1:10, Variance = round(diag(real_sigma),1)) %>% 
+  ggplot(aes(x = i, y = Variance)) + 
+  geom_hline(yintercept = seq(50,300,50), size = 0.2, color = "darkgrey") + 
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") + 
+  geom_label(aes(label = Variance), position = position_dodge(0.9), vjust = 0) + 
+  scale_x_discrete(limits = 1:10, labels = 1:10) + 
+  scale_y_continuous(breaks = seq(0,300,25), labels = seq(0,300,25)) + 
+  geom_hline(yintercept = 0, size = 1) + 
+  labs(y = expression(Sigma[ii]), title = "(1.2) Diagonal of Sigma")
+```
+
+```{r, echo=FALSE}
+temp <- t(data.frame(Variance = round(diag(real_sigma),2)))
+colnames(temp) <- 1:10
+kable(temp)
+```
+
+Next we choose our Whishart degrees of freedom ($df$, must be greater than $p$) and the number of simulations we wish to conduct (B).
+
+```{r}
+wishart.df <- 50
+returns <- 1000
+```
+
+```{r,echo=FALSE, error=TRUE}
+if(wishart.df < p) warning("Lower degrees of freedom than matrix dimension")
+```
+
+\newpage
+
+# II    Simulations
+Now we simulate B i.i.d. random matrices from the distribution $S_{b}\sim W_{p}\left(df,\,\Sigma\right)$.
+
+* The function 'real.cov' calculates the theoretical covariance of a given index in the Wishart matrix:
++ For $Y\sim W_{p}(N,\Sigma)$, $cov(Y_{ij},Y_{kl})=N\cdot(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk})$
+
+* The function 'compare_estimate' recieves the index of two Elements in the Whishart matrix, and returns us a list with:
+
+1. The theoretical covariance
+2. The estimated covariance
+3. The bias, e.g. $\left(est.\,-\,theory\right)$
+4. The bias ratio, e.g. $\frac{\left(est.\,-\,theory\right)}{theory}$
+
+We calculate these values for each element in our matrix, and save the results in 'covariance.matrix'.
+
+```{r}
+results <- rWishart(returns, df = wishart.df, real_sigma)
+
+real.cov <- function(i, j, k, l) (real_sigma[i,k]*real_sigma[j,l]
+                                             + real_sigma[i,l]*real_sigma[j,k])*wishart.df
+
+compare_estimate <- function(i,j,k,l){
+  real <- real.cov(i, j, k, l)
+  estimate <- cov(results[i,j,], results[k,l,])
+  return(list(Index = c(i,j,k,l), Real = real, Estimate = estimate, Bias = real - estimate,
+              Bias.Ratio = (real - estimate)/real))
+}
+
+m <- 0.5*p*(p+1)
+covariance.matrix <- matrix(nrow = (m*(m+1)/2), ncol = 10)
+colnames(covariance.matrix) <- c("V-Index_i", "M-Index_R_i", "M-Index_C_i",
+                                 "V-Index_j", "M-Index_R_j", "M-Index_C_j",
+                                 "Theoretical","Empiric", "Bias", "Bias.Ratio")
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:m){
+  v1 <- c(v1, rep(i, m-i+1))
+  v2 <- c(v2, i:m)
+}
+covariance.matrix[,c(1,4)] <- cbind(v1,v2)
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:p){
+  v1 <- c(v1, rep(i, p-i+1))
+  v2 <- c(v2, i:p)
+}
+order_vect <- cbind(v1,v2)
+```
+\newpage
+```{r}
+for(i in 1:(m*(m+1)/2)){
+  covariance.matrix[i,2:3] <- order_vect[covariance.matrix[i,1],]
+  covariance.matrix[i,5:6] <- order_vect[covariance.matrix[i,4],]
+  temp <- compare_estimate(covariance.matrix[i,2], covariance.matrix[i,3],
+                           covariance.matrix[i,5], covariance.matrix[i,6])
+  covariance.matrix[i, 7] <- temp$Real
+  covariance.matrix[i, 8] <- temp$Estimate
+  covariance.matrix[i, 9] <- temp$Bias
+  covariance.matrix[i, 10] <- temp$Bias.Ratio
+}
+
+rm(temp)
+covariance.matrix <- as.data.frame(covariance.matrix)
+```
+
+# III   Results (Covariance matrix)
+
+Let's view our results:
+
+```{r, echo=FALSE}
+covariance.matrix <- mutate(covariance.matrix, Bias_n = Bias/wishart.df)
+quant <- function(Col, tail = 0.2){
+  quantile(covariance.matrix[[Col]], probs = c(tail, 1 - tail))
+}
+
+ggplot(covariance.matrix, aes(x = Theoretical, y = Empiric)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_abline(intercept = 0, slope = 1, linetype = 2, size = 1) + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(3.1) Cov Matrix: Empiric ~ Theoretical",
+       x = "Theoretical Cov",  y = "Empiric Cov") + 
+  coord_cartesian(xlim = quant("Theoretical"), ylim = quant("Theoretical"))
+```
+
+Corr: `r cor(covariance.matrix$Theoretical, covariance.matrix$Empiric)`
+
+It seems that the estimated values of the covarainces fall right on the y = x line.
+\newpage
+```{r, echo=FALSE}
+ggplot(covariance.matrix, aes(x = Theoretical, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(3.2) Cov Matrix: Bias ~ Theoretical",
+       x = "Theoretical Cov",  y = "Estimation Bias") + 
+  coord_cartesian(xlim = quant("Theoretical"), ylim = quant("Bias", 0.1))
+
+ggplot(covariance.matrix, aes(x = Theoretical, y = Bias.Ratio)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(3.3) Cov Matrix: Bias Ratio ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias/Theoretical") + 
+  coord_cartesian(xlim = quant("Theoretical", 0.2), ylim = quant("Bias.Ratio", 0))
+```
+The bias seems uncorrelated to the theoretical values. The bias ratio ($\frac{\left(est.\,-\,theory\right)}{theory}$) kind of rages around 0, but it is only natural that with small values our bias ratio will be large, since we divide the bias with a number that is close to zero.
+
+\newpage
+```{r, echo=FALSE}
+filter(covariance.matrix,
+       Bias.Ratio > quant("Bias.Ratio",0.1)[1], Bias.Ratio < quant("Bias.Ratio",0.1)[2]) %>%
+ggplot(aes(x = Bias.Ratio)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(3.4) Cov Matrix: Bias Ratio Histogram",
+       x = "Bias/Theoretical",  y = "Frequency")
+
+filter(covariance.matrix, Bias > quant("Bias",0.1)[1], Bias < quant("Bias",0.1)[2]) %>%
+  ggplot(aes(x = Bias_n)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(3.5) Cov Matrix: Bias Histogram",
+       x = "Bias/df",  y = "Frequency") + 
+  coord_cartesian(xlim = quant("Bias_n", 0.1))
+```
+Again, the bias looks scattered pretty nicely around the 0.
+
+\newpage
+# IV    The Empiric correlation matrix
+
+We move on towards the correlation matrix.
+For each $b$ we construct the empiric correlation matrix:
+$R_{b}=D_{S_{b}}^{-\frac{1}{2}}\cdot S_{b}\cdot D_{S_{b}}^{-\frac{1}{2}}$, where:
+
+$\left(D_{S_{b}}\right)_{ij}=\begin{cases}S_{b,ii} & i=j\\0 & i\neq j\end{cases}$
+
+We omit the covariances of the diagonals of $\left\{ R_{b}\right\} _{b=1}^{B}$ since they are now deterministic.
+Unlike the sample covariance matrix, the inner covariance of the elements of the sample correlation matrix is (under some assumptions) $Cov\left(R_{ij},R_{kl}\right)	=N^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})$.
+The rest of the calculations are the same.
+
+```{r, echo=FALSE}
+rm(order_vect, i, v1, v2)
+```
+
+```{r}
+results2 <- array(dim = dim(results))
+for(i in 1:returns) results2[,,i] <- force_symmetry(cov2cor(results[,,i]))
+real.cov2 <- function(i, j, k, l) (real_corr[i,k]*real_corr[j,l]
+                                             + real_corr[i,l]*real_corr[j,k])/wishart.df
+
+compare_estimate2 <- function(i,j,k,l){
+  real <- real.cov2(i, j, k, l)
+  estimate <- cov(results2[i,j,], results2[k,l,])
+  return(list(Index = c(i,j,k,l), Real = real, Estimate = estimate, Bias = real - estimate,
+              Bias.Ratio = (real - estimate)/real))
+}
+
+m <- 0.5*p*(p-1)
+covariance.matrix2 <- matrix(nrow = (m*(m+1)/2), ncol = 10)
+colnames(covariance.matrix2) <- c("V-Index_i", "M-Index_R_i", "M-Index_C_i",
+                                 "V-Index_j", "M-Index_R_j", "M-Index_C_j",
+                                 "Theoretical","Empiric", "Bias", "Bias.Ratio")
+```
+
+```{r, echo=FALSE}
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:m){
+  v1 <- c(v1, rep(i, m-i+1))
+  v2 <- c(v2, i:m)
+}
+covariance.matrix2[,c(1,4)] <- cbind(v1,v2)
+
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:(p-1)){
+  v1 <- c(v1, rep(i, p-i))
+  v2 <- c(v2, (i+1):p)
+}
+order_vect <- cbind(v1,v2)
+```
+
+```{r}
+for(i in 1:(m*(m+1)/2)){
+  covariance.matrix2[i,2:3] <- order_vect[covariance.matrix2[i,1],]
+  covariance.matrix2[i,5:6] <- order_vect[covariance.matrix2[i,4],]
+  temp <- compare_estimate2(covariance.matrix2[i,2], covariance.matrix2[i,3],
+                            covariance.matrix2[i,5], covariance.matrix2[i,6])
+  covariance.matrix2[i, 7] <- temp$Real
+  covariance.matrix2[i, 8] <- temp$Estimate
+  covariance.matrix2[i, 9] <- temp$Bias
+  covariance.matrix2[i, 10] <- temp$Bias.Ratio
+}
+
+rm(temp)
+covariance.matrix2 <- as.data.frame(covariance.matrix2)
+```
+
+\newpage
+# V     Results (Correlation matrix)
+
+Let's view our results:
+
+```{r, echo=FALSE}
+quant2 <- function(Col, tail = 0.2){
+  quantile(covariance.matrix2[[Col]], probs = c(tail, 1 - tail))
+}
+
+ggplot(covariance.matrix2, aes(x = Theoretical, y = Empiric)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_abline(intercept = 0, slope = 1, linetype = 2, size = 1) + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(5.1) Corr Matrix: Empiric ~ Theoretical",
+       x = "Theoretical Cov",  y = "Empiric Cov") + 
+  coord_cartesian(xlim = quant2("Theoretical"), ylim = quant2("Theoretical"))
+```
+
+Corr: `r cor(covariance.matrix2$Theoretical, covariance.matrix2$Empiric)`
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix2, aes(x = Theoretical, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(5.2) Corr Matrix: Bias ~ Theoretical",
+       x = "Theoretical Cov",  y = "Estimation Bias") + 
+  coord_cartesian(xlim = quant2("Theoretical"), ylim = quant2("Bias", 0.1))
+```
+It is clear that the theoretical covariances are missing the estimated ones.
+It is completely off the y = x line.
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix2, aes(x = Theoretical, y = Bias.Ratio)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(5.3) Corr Matrix: Bias Ratio ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias/Theoretical") + 
+  coord_cartesian(xlim = quant2("Theoretical", 0.2), ylim = quant2("Bias.Ratio", 0))
+
+ggplot(covariance.matrix2, aes(x = Bias.Ratio)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(5.4) Corr Matrix: Bias Ratio Histogram",
+       x = "Bias/Theoretical",  y = "Frequency")
+
+filter(covariance.matrix2, Bias > quant2("Bias",0.1)[1], Bias < quant2("Bias",0.1)[2]) %>%
+  ggplot(aes(x = Bias)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(5.5) Corr Matrix: Bias Histogram",
+       x = "Bias",  y = "Frequency") + 
+  coord_cartesian(xlim = quant2("Bias", 0.1))
+```
+We are clearly missing the "real" covariances.
+
+\newpage
+# VI    Attempt to Fix Theoretical Covariances with a Constant
+
+We try to estimate a constant which can maybe explain why our theoretical covariances are wrong. If we find that this constant can help our calculations, we will later try to find its interpretation.
+```{r}
+lm_model <- lm(Empiric ~ Theoretical, data = covariance.matrix2)
+summary(lm_model)
+
+covariance.matrix3 <- covariance.matrix2 %>%
+                      mutate(Theoretical_N = Theoretical * lm_model$coefficients["Theoretical"],
+                             Empiric_N = Empiric,
+                             Bias_N = Empiric_N - Theoretical,
+                             Bias.Ratio_N = Bias_N/Theoretical) %>%
+                      select(ends_with("_N"))
+```
+
+\newpage
+Let's see if our correction helped us somehow:
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix3, aes(x = Theoretical_N, y = Empiric_N)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_abline(intercept = 0, slope = 1, linetype = 2, size = 1) + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(6.1) lm Corr Matrix: Empiric ~ Theoretical",
+       x = "Theoretical Cov",  y = "Empiric Cov") 
+  
+ggplot(covariance.matrix3, aes(x = Theoretical_N, y = Bias_N)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(6.2) lm Corr Matrix: Bias ~ Theoretical",
+       x = "Theoretical Cov",  y = "Estimation Bias")
+```
+Unfortunately, this constant doesn't help our theory much. We have to find a creative way to approach this problem.
+
+\newpage
+# VII   Adding Noise to the Diagonal
+
+Lets try now adding a bit noise to the matrices, so that once again the diagonal will be stochastic.
+Our procedure for each b is as such:
+
+1. Conduct a random vector from $\left\{ Z\right\} _{i=1}^{p}\overset{iid}{\sim}N\left(1,\,\sigma^{2}\right)$.
+2. Then, construct $Y_{b}=diag\left(z_{b}\right)^{\frac{1}{2}}\cdot R_{b}\cdot diag\left(z_{b}\right)^{\frac{1}{2}}$, where:
+
+   $diag\left(a\right)\in\mathbb{M}_{p}\left(\mathbb{R}\right):\;diag\left(a\right)_{ij}=\begin{cases}a_{i} & i=j\\0 & i\neq j\end{cases},\:a\in\mathbb{R}^{p}$.
+
+Denoting that for a normal distribution, 99% of a sample falls in an interval of $\mu\pm3\cdot\sigma$, we will choose $\sigma\ll\frac{1}{3}$. 
+
+```{r}
+sigma <- 0.1
+Zmat <- matrix(rnorm(returns*p, 1, sigma),
+               nrow = returns, ncol = p)
+while(sum(Zmat<0) > 0) Zmat <- matrix(rnorm(returns*p, 1, sigma),
+                                      nrow = returns, ncol = p)
+```
+
+```{r, echo=FALSE}
+Zmat %>% as.vector() %>% data.frame() %>%
+  ggplot(aes(x=.)) +
+  geom_histogram(bins = sqrt(round(returns)), color = "black", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  labs(title = "Histogram of Z", x = "Z", y = "Frequency")
+```
+
+```{r}
+results4 <- array(dim = dim(results))
+
+for(i in 1:returns) {
+  tempZ <- sqrt(diag(Zmat[i,]))
+  results4[,,i] <- (tempZ %*% results2[,,i]  %*% tempZ) %>% force_symmetry()
+}
+rm(tempZ)
+```
+
+And again we build a large table...
+```{r}
+compare_estimate4 <- function(i,j,k,l){
+  real <- real.cov2(i, j, k, l)
+  estimate <- cov(results4[i,j,], results4[k,l,])
+  return(list(Index = c(i,j,k,l), Real = real, Estimate = estimate, Bias = real - estimate,
+              Bias.Ratio = (real - estimate)/real))
+}
+```
+
+```{r, echo=FALSE}
+m <- 0.5*p*(p+1)
+covariance.matrix4 <- matrix(nrow = (m*(m+1)/2), ncol = 10)
+colnames(covariance.matrix4) <- c("V-Index_i", "M-Index_R_i", "M-Index_C_i",
+                                 "V-Index_j", "M-Index_R_j", "M-Index_C_j",
+                                 "Theoretical","Empiric", "Bias", "Bias.Ratio")
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:m){
+  v1 <- c(v1, rep(i, m-i+1))
+  v2 <- c(v2, i:m)
+}
+covariance.matrix4[,c(1,4)] <- cbind(v1,v2)
+
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:p){
+  v1 <- c(v1, rep(i, p-i+1))
+  v2 <- c(v2, i:p)
+}
+order_vect <- cbind(v1,v2)
+for(i in 1:(m*(m+1)/2)){
+  covariance.matrix4[i,2:3] <- order_vect[covariance.matrix4[i,1],]
+  covariance.matrix4[i,5:6] <- order_vect[covariance.matrix4[i,4],]
+  temp <- compare_estimate4(covariance.matrix4[i,2], covariance.matrix4[i,3],
+                           covariance.matrix4[i,5], covariance.matrix4[i,6])
+  covariance.matrix4[i, 7] <- temp$Real
+  covariance.matrix4[i, 8] <- temp$Estimate
+  covariance.matrix4[i, 9] <- temp$Bias
+  covariance.matrix4[i, 10] <- temp$Bias.Ratio
+}
+
+rm(temp)
+covariance.matrix4 <- as.data.frame(covariance.matrix4)
+```
+
+\newpage
+Lets see the results:
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix4, aes(x = Theoretical, y = Empiric)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_abline(intercept = 0, slope = 1, linetype = 2, size = 1) + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(7.1) Corr Matrix (w. Noise): Empiric ~ Theoretical",
+       x = "Theoretical Cov",  y = "Empiric Cov") 
+```
+Again, the estimated covariances are completely off the y = x line.
+Unfortiunatly, adding noise to the sample correlation matrices didn't solve our estimation problem.
+
+\newpage
+Lets have a glimpse on the Bias:
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix4, aes(x = Theoretical, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(7.2) Corr Matrix (w. Noise): Bias  ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias")
+
+ggplot(covariance.matrix4, aes(x = Theoretical, y = Bias.Ratio)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(7.3) Corr Matrix (w. Noise): Bias Ratio ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias/Theoretical")
+
+
+```
+Again, we are completely off track.
+
+\newpage
+
+# VIII  Using Known Variances
+
+Our last round consists of using the fact that our "true" variances are known.
+
+That is, for each $b$, construct $R_{b}=D_{\Sigma}^{-\frac{1}{2}}\cdot\frac{S_{b}}{df}\cdot D_{\Sigma}^{-\frac{1}{2}}$ where:
+   $\left(D_{\Sigma}\right)_{ij}=\begin{cases}\Sigma_{ii} & i=j\\0 & i\neq j\end{cases}$
+```{r}
+results5 <- array(dim = dim(results))
+temp_var <- diag(diag(real_sigma)^(-0.5))
+
+for(i in 1:returns) {
+  results5[,,i] <- (temp_var %*% (results[,,i]/wishart.df)  %*% temp_var) %>% force_symmetry()
+}
+
+```
+
+Lets now look on the results:
+```{r, echo=FALSE}
+compare_estimate5 <- function(i,j,k,l){
+  real <- real.cov2(i, j, k, l)
+  estimate <- cov(results5[i,j,], results5[k,l,])
+  return(list(Index = c(i,j,k,l), Real = real, Estimate = estimate, Bias = real - estimate,
+              Bias.Ratio = (real - estimate)/real))
+}
+
+m <- 0.5*p*(p+1)
+covariance.matrix5 <- matrix(nrow = (m*(m+1)/2), ncol = 10)
+colnames(covariance.matrix5) <- c("V-Index_i", "M-Index_R_i", "M-Index_C_i",
+                                 "V-Index_j", "M-Index_R_j", "M-Index_C_j",
+                                 "Theoretical","Empiric", "Bias", "Bias.Ratio")
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:m){
+  v1 <- c(v1, rep(i, m-i+1))
+  v2 <- c(v2, i:m)
+}
+covariance.matrix5[,c(1,4)] <- cbind(v1,v2)
+v1 <- numeric(0)
+v2 <- numeric(0)
+for(i in 1:p){
+  v1 <- c(v1, rep(i, p-i+1))
+  v2 <- c(v2, i:p)
+}
+order_vect <- cbind(v1,v2)
+for(i in 1:(m*(m+1)/2)){
+  covariance.matrix5[i,2:3] <- order_vect[covariance.matrix5[i,1],]
+  covariance.matrix5[i,5:6] <- order_vect[covariance.matrix5[i,4],]
+  temp <- compare_estimate5(covariance.matrix5[i,2], covariance.matrix5[i,3],
+                           covariance.matrix5[i,5], covariance.matrix5[i,6])
+  covariance.matrix5[i, 7] <- temp$Real
+  covariance.matrix5[i, 8] <- temp$Estimate
+  covariance.matrix5[i, 9] <- temp$Bias
+  covariance.matrix5[i, 10] <- temp$Bias.Ratio
+}
+
+rm(temp)
+covariance.matrix5 <- as.data.frame(covariance.matrix5)
+```
+
+```{r, echo=FALSE}
+quant <- function(Col, tail = 0.1){
+  quantile(covariance.matrix5[[Col]], probs = c(tail, 1 - tail))
+}
+
+ggplot(covariance.matrix5, aes(x = Theoretical, y = Empiric)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_abline(intercept = 0, slope = 1, linetype = 2, size = 1) + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(8.1) Cor Matrix (w. real variances): Empiric ~ Theoretical",
+       x = "Theoretical Cov",  y = "Empiric Cov") + 
+  coord_cartesian(xlim = quant("Theoretical"), ylim = quant("Theoretical"))
+```
+
+Corr: `r cor(covariance.matrix5$Theoretical, covariance.matrix5$Empiric)`
+
+It is clear that when the variances are known, then our Wishart theory works also for correlation matrices.
+
+Once again, the empiric covariances fall right on the theoretical ones.
+\newpage
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix5, aes(x = Theoretical, y = Bias)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(8.2) Cor Matrix (w. real variances): Bias ~ Theoretical",
+       x = "Theoretical Cov",  y = "Estimation Bias")
+```
+
+```{r, echo=FALSE}
+ggplot(covariance.matrix5, aes(x = Theoretical, y = Bias.Ratio)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(8.3) Cor Matrix (w. real variances): Bias Ratio ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias/Theoretical")
+
+```
+The bias has a range of `r round(range(covariance.matrix5$Bias),5)`. This is not large at all, since the range of each covariance is $0\pm\frac{2}{df}$. in our case, $\frac{2}{df}=$ `r 2/wishart.df`.
+
+The bias ratio again "rages" around zero, however this is normal as stated in chapter III.
+\newpage
+
+```{r, echo=FALSE}
+filter(covariance.matrix5,
+       Bias.Ratio > quant("Bias.Ratio",0.1)[1], Bias.Ratio < quant("Bias.Ratio",0.1)[2]) %>%
+ggplot(aes(x = Bias.Ratio)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(8.4) Cor Matrix (w. real variances): Bias Ratio Histogram",
+       x = "Bias/Theoretical",  y = "Frequency")
+
+#filter(covariance.matrix5, Bias > quant("Bias",0.1)[1], Bias < quant("Bias",0.1)[2]) %>%
+ggplot(covariance.matrix5, aes(x = Bias)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(8.5) Cor Matrix (w. real variances): Bias Histogram",
+       x = "Bias",  y = "Frequency")
+```
+
+# IX    Discussion
+
+We can conlude from chapter III that our theory indeed holds; that is, if $Y\sim W_{p}(N,\Sigma)$, then $cov(Y_{ij},Y_{kl})=N\cdot(\Sigma_{ik}\cdot\Sigma_{jl}+\Sigma_{il}\cdot\Sigma_{jk})$.
+
+In chapter VIII we saw that under **known** variances, our theorem can be used also on the correlation matrix; That is, if $S\sim W_{p}\left(n,\,\Sigma\right)$ and  $R=D_{\Sigma}^{-\frac{1}{2}}\cdot\frac{S}{n}\cdot D_{\Sigma}^{-\frac{1}{2}}$, then  $cov(R_{ij},R_{kl})=n^{-1}\cdot(\Lambda_{ik}\cdot\Lambda_{jl}+\Lambda_{il}\cdot\Lambda_{jk})$ where:
+
+* $\Lambda=D_{\Sigma}^{-\frac{1}{2}}\cdot\Sigma\cdot D_{\Sigma}^{-\frac{1}{2}}$
+* $\left(D_{\Sigma}\right)_{ij}=\begin{cases}\Sigma_{ii} & i=j\\0 & i\neq j\end{cases}$.
+
+However, as seen in chapters V-VII, this theorem doesn't hold when looking on the empiric correlation matrix: $R=D_{S}^{-\frac{1}{2}}\cdot S\cdot D_{S}^{-\frac{1}{2}}$. Then, the inner covariances of the matrix are significantly **smaller**, in a way that doesn't even allow using approximations based on our theory. In order to find the "true" covariance, we shall have to find the link between $cov(R_{ij},R_{kl})$ and $cov(S_{ij},S_{kl})$.
+
+#
+
+```{r, eval=FALSE, echo=FALSE}
+#other plots of correction
+ggplot(covariance.matrix3, aes(x = Theoretical_N, y = Bias.Ratio_N)) + 
+  geom_hline(yintercept = 0, col = "darkgrey") + geom_vline(xintercept = 0, col = "darkgrey") + 
+  geom_point(color = "blue", alpha = 0.4) + 
+  labs(title = "(3.3) lm Corr Matrix: Bias Ratio ~ Theoretical",
+       x = "Theoretical Cov",  y = "Bias/Theoretical")
+
+ggplot(covariance.matrix3, aes(x = Bias.Ratio_N)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(3.4) lm Corr Matrix: Bias Ratio Histogram",
+       x = "Bias/Theoretical",  y = "Frequency")
+
+ggplot(covariance.matrix3, aes(x = Bias_N)) + 
+  geom_histogram(bins = ceiling(sqrt(returns)), color = "darkblue", fill = "lightblue") + 
+  geom_hline(yintercept = 0, size = 1) + 
+  geom_vline(xintercept = 0, linetype = 4, size = 1, color = "darkgreen") + 
+  labs(title = "(3.5) lm Corr Matrix: Bias Histogram",
+       x = "Bias",  y = "Frequency")
+
+
+```
+
+```{r, eval=FALSE, echo=FALSE}
+#draft
+cor(covariance.matrix[,7:8])
+
+real.cov.matr <- matrix(nrow = 0.5*m*(m+1), ncol = 8)
+colnames(real.cov.matr) <- c("i","j","k","l","Real.COV","Estimate.COV",
+                             "Distance","Distance.Real.Ratio")
+count <- 1
+for(i in 1:(deg-1)){
+  for(j in (i+1):deg){
+    k <- i
+    for(l in j:deg){
+      real.cov.matr[count,1:4] <- c(i,j,k,l)
+      real.cov.matr[count,5] <- real.cov(i,j,k,l)
+      real.cov.matr[count,6] <- cov(retrieve.object(i, j, k, l))[1,2]
+      real.cov.matr[count,7] <- abs(real.cov.matr[count,5]-real.cov.matr[count,6])
+      real.cov.matr[count,8] <- abs(real.cov.matr[count,7]/real.cov.matr[count,5])
+      count <- count + 1
+    }
+    for(k in (i+1):(deg-1)){
+      for(l in (k+1):deg){
+        real.cov.matr[count,1:4] <- c(i,j,k,l)
+        real.cov.matr[count,5] <- real.cov(i,j,k,l)
+        real.cov.matr[count,6] <- cov(retrieve.object(i, j, k, l))[1,2]
+        real.cov.matr[count,7] <- real.cov.matr[count,5]-real.cov.matr[count,6]
+        real.cov.matr[count,8] <- real.cov.matr[count,7]/abs(real.cov.matr[count,5])
+        count <- count + 1
+        if(count%%10==0) cat(paste(",", count))
+      }
+    }
+  }
+}
+
+real.cov.matr <- real.cov.matr[1:sum(!is.na(real.cov.matr[,5])), ]
+
+compare_estimate <- function(i, j, k, l){
+  real <- real.cov(i, j, k, l)
+  estimate <- cov(retrieve.object(i, j, k, l))[1,2]
+  return(list(Index = c(i,j,k,l), Real = real, Estimate = estimate, Abs.dist = abs(real - estimate),
+              Abs.dist.Real.Ratio = abs((real - estimate)/real)))
+}
+
+
+
+compare_estimate(sample(1:deg, 1), sample(1:deg, 1), sample(1:deg, 1), sample(1:deg, 1))
+compare_estimate(1,2,1,2)
+compare_estimate(1,2,1,3)
+
+hist(real.cov.matr[,8], breaks = 50, xlab = "(Real.par - Est.)/Real.par",
+     main = "Normalized Absolute Distance of Correlation Parameters", probability = TRUE, col = "purple")
+lines(density(real.cov.matr[,8], adjust = 2.5), col = "red", lwd = 2)
+abline(v = mean(real.cov.matr[,8]), col = "black", lwd = 2, lty = 2)
+quantile(real.cov.matr[,8], 0:10/10)
+sqrt(mean(real.cov.matr[,7]^2)) #sqrt mean square error
+mean(real.cov.matr[,7]) #mean absolute square error
+
+variance.matrix <- matrix(0, ncol = deg, nrow = deg)
+for(i in 1:(deg-1)){
+  for(j in (i+1):deg) variance.matrix[i,j] <- cov(retrieve.object(i, j, i, j))[1,2]
+}
+
+variance.matrix <- variance.matrix + t(variance.matrix)
+diag(variance.matrix) <- 1
+
+distance.from.paramater <- sapply(results, function(X) triangle_to_vector((X-real_corr)/variance.matrix))
+distance.from.paramater
+hist(distance.from.paramater[,1])
+```

@@ -1,0 +1,228 @@
+---
+title: "Untitled"
+author: "Itamar Faran"
+date: "11 June 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(abind)
+library(corrplot)
+library(matrixcalc)
+library(R.matlab)
+library(stats4)
+library(tidyverse)
+
+#Size of Cov matrix for pxp model:
+show_howmany <- FALSE
+if(show_howmany){
+  how_many_m <- function(p) 0.125*p*(p-1)*(p*(p-1) + 2)
+  how_many_m_matr <- cbind(c(10:20, seq(25, 50, 5), seq(60, 100, 10)),
+                           how_many_m(c(10:20, seq(25, 50, 5), seq(60, 100, 10))))
+  colnames(how_many_m_matr) <- c("p", "Cov_matr_size")
+  how_many_m_matr
+}
+rm(show_howmany, how_many_m_matr)
+
+#Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
+central.moment <- function(x,norm=TRUE) {
+  n<-length(x)
+  b<-vector()
+  
+  mean<-mean(x)
+  sd<-sqrt(var(x)*((n-1)/n))
+  
+  b<-c(b,mean)
+  b<-c(b,var(x))
+  
+  skew<-mean((x-mean)^3)/(sd^3)
+  kurt<-(mean((x-mean)^4)/(sd^4))
+  
+  b<-c(b,(sqrt(n*(n-1))/(n-2))*skew)
+  b<-c(b,((n-1)/((n-2)*(n-3)))*((n+1)*kurt+6))
+  if (norm) b[4]<-b[4]-3
+  
+  names(b) <- c("Mean", "Variance", "Skewness", "Kurtosis")
+  if (norm) names(b)[4]<-"Ex.Kurtosis"
+  return(b)
+}
+
+#Force symmetry on non-symmetrical matrix
+force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+
+#Retrieve lower/upper triangle of a matrix as a vector
+triangle_to_vector <- function(MATR , diag = FALSE){
+  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
+  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+}
+
+#Create a symmetric matrix from a vector
+vector_to_triangle <- function(VECT){
+  m <- length(VECT)
+  p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
+  p <- p[which( (p==round(p))&p==abs(p) )]
+  if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+  pelet <- matrix(0, ncol = p, nrow = p)
+  pelet[lower.tri(pelet)] <- VECT
+  pelet <- pelet+t(pelet)
+  diag(pelet) <- 1
+  return(pelet)
+}
+
+#Trim extreme values
+trim_num <- function(x, lower = -Inf, upper = Inf){
+  pelet <- x
+  pelet[x<lower] <- lower
+  pelet[x>upper] <- upper
+  return(pelet)
+}
+
+#Calculate Maholonobis norm of a vector. Default is regular norm.
+vector_norm <- function(x, MATR = NULL){
+  if (length(MATR)==0) MATR <- diag(length(x))
+  return(as.vector(sqrt(t(x)%*%MATR%*%x)))
+}
+
+#Take array of symmetric matrices and convert them to one data matrix
+cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle_to_vector))
+
+#Calculte sum of mahalonobis distances
+SSS_norm.matrix <- function(DATA, mu, sigma, alpha = 0){
+  if((alpha < 0) | (alpha > 1)) stop("alpha not between [0,1]")
+  sigma <- (1-alpha)*sigma + alpha*mean(diag(sigma))*diag(length(mu))
+  if(!is.positive.definite(sigma)) stop("sigma not positive definite")
+  dist <- DATA - rep(1,nrow(DATA))%*%t(mu)
+  return(sum(diag(dist%*%solve(sigma)%*%t(dist))))
+}
+
+#Force Positive Definiteness
+force_positive_definiteness <- function(MATR, sensitivity = 0.01, homoscedasticity = FALSE){
+  if(!is.symmetric.matrix(MATR)) stop("MATR not symmetric")
+  alpha_seq <- unique(c(0, seq(0,1, by = sensitivity), 1))
+  pelet <- MATR
+  if(homoscedasticity){
+    if(mean(diag(MATR)) <= 0) stop("Diag mean not positive")
+  diag_MATR <- mean(diag(MATR)) * diag(nrow(MATR))
+  } else {
+    if(any(diag(MATR) <= 0)) stop("Diag not positive")
+    diag_MATR <- diag(diag(MATR))
+  }
+
+  i <- 1
+  while(!is.positive.definite(pelet)){
+  pelet <- alpha_seq[i]*diag_MATR + (1 - alpha_seq[i])*MATR
+  i <- i+1
+  }
+  
+  if(i == 1) return(list(Matrix = pelet,
+                         Alpha = 0)) else return(list(Matrix = pelet,
+                                                                   Alpha = alpha_seq[i-1]))
+}
+
+#derivatives
+multi.deriv<-function(FUN,X,whichx=NULL,whichfn=NULL,eps=9){
+  eps <- min(eps,12)
+  if(length(whichx)==0) whichx <- 1:length(X)
+  if(length(whichfn)==0) whichfn <- 1:length(FUN(X))
+  lex<-length(whichx)
+  pelet<-matrix(ncol=lex,nrow=length(whichfn))
+  for (i in 1:lex){
+    newX<-X
+    newX[whichx[i]]<-X[whichx[i]]+(1/(10^eps))
+    pelet[,i]<-(FUN(newX)[whichfn]-FUN(X)[whichfn])/(1/(10^eps))
+  }
+  rownames(pelet)<-paste (rep("f",length(whichfn)),sapply(whichfn,toString))
+  colnames(pelet)<-paste (rep("x",lex),sapply(whichx,toString))
+  pelet
+}
+
+calculate_mean_matrix <- function(matrix_array){
+  temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])
+  returns <- dim(matrix_array)[3]
+  for(i in 1:returns) temp <- temp + matrix_array[,,i]
+  return(temp/returns)
+}
+
+```
+
+```{r}
+p <- 10
+n <- 10
+Tn <- 100
+
+Sigma <- matrix(runif(2*p^2, -1, 1), nrow = 2*p, ncol = p) %>% (function(A) t(A)%*%A)
+is.positive.definite(Sigma)
+
+mySample <- rWishart(n, Tn, Sigma)/Tn
+for(i in 1:n) mySample[,,i] <- mySample[,,i] %>% cov2cor() %>% force_symmetry()
+meanMatrix <- calculate_mean_matrix(mySample)
+```
+
+```{r}
+vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+                                       reg_par = 0){
+  if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
+  if(!is.positive.definite(MATR)){
+    if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
+    } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
+  
+  real.cov2 <- function(i, j, k, l) {
+    (MATR[i,j]*MATR[k,l]/2) * (MATR[i,k]^2 + MATR[i,l]^2 + MATR[j,k]^2 + MATR[j,l]^2) -
+       MATR[i,j]*(MATR[i,k]*MATR[i,l] + MATR[j,k]*MATR[j,l]) -
+      MATR[k,l]*(MATR[i,k]*MATR[j,k] + MATR[i,l]*MATR[j,l]) +
+      (MATR[i,k]*MATR[j,l] + MATR[i,l]*MATR[j,k])
+    }
+
+  p <- dim(MATR)[1]
+  m <- (p*(p-1)/2)
+  
+  v1 <- numeric(0)
+  v2 <- numeric(0)
+  for(i in 1:(p-1)){
+    v1 <- c(v1, rep(i, p-i))
+    v2 <- c(v2, (i+1):p)
+  }
+  order_vect <- cbind(v1,v2)
+
+  pelet <- matrix(nrow = m, ncol = m)
+  for(i in 1:m){
+    for(j in i:m){
+      indexes <- c(order_vect[i,], order_vect[j,])
+      pelet[i,j] <- real.cov2(indexes[1], indexes[2], indexes[3], indexes[4])
+      pelet[j,i] <- pelet[i,j]
+    }
+  }
+  
+  if((reg_par<0)|(reg_par>1)) warning("Regularization Parameter not between 0,1")
+  pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  
+  return(pelet)
+}
+
+minus_log_lik <- function(theta, ARRAY){
+  
+  myDat <- cor.matrix_to_norm.matrix(ARRAY)
+  n <- nrow(myDat)
+  
+  thetaMat <- vector_to_triangle(theta)
+  covMat <- vector_var_matrix_calc_COR(thetaMat)
+  
+  
+  dist <- myDat - matrix(1, nrow = n, ncol = 1)%*%t(theta)
+  return( n*log(det(covMat)) + sum(diag(dist%*%solve(covMat)%*%t(dist))) )
+}
+
+minus_log_lik(Sigma %>% cov2cor() %>% force_symmetry() %>% triangle_to_vector(), mySample)
+
+res <- optim(meanMatrix %>% triangle_to_vector(), function(X) minus_log_lik(X, mySample),
+             control = list(maxit = 500))
+res
+res$par - meanMatrix %>% triangle_to_vector()
+
+plot(cov(cor.matrix_to_norm.matrix(mySample)), vector_var_matrix_calc_COR(meanMatrix)/n)
+abline(a = 0, b = 1)
+```

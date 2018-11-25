@@ -87,11 +87,11 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
 
 ###
 
-compute_estimated_N <- function(est, theo){
-  x <- triangle_to_vector(theo, diag = TRUE)
-  y <- triangle_to_vector(est, diag = TRUE)
-  return(lm(x ~ 0 + y)$coef)
-}
+# compute_estimated_N <- function(est, theo){
+#   x <- triangle_to_vector(theo, diag = TRUE)
+#   y <- triangle_to_vector(est, diag = TRUE)
+#   return(lm(x ~ 0 + y)$coef)
+# }
 
 compute_estimated_N <- function(est, theo){
   x <- diag(theo)
@@ -238,11 +238,14 @@ Estimate.Loop2 <- function(theta0, alpha0, Healthy.ARR, Sick.ARR, T_thresh,
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
 }
 
+# build_hyp.test <- function(Estimate.Loop2_object, Real = NULL, test = c("lower", "upper", "two-sided"),
+#                            qval = 0.05, method = "none", const = 1, effectiveN = NULL){
 build_hyp.test <- function(Estimate.Loop2_object, Real = NULL, test = c("lower", "upper", "two-sided"),
-                           qval = 0.05, method = "none", const = 1, effectiveN = NULL){
-  if(length(test) > 1) test <- test[1]
+                             qval = 0.05, method = "none", const = 1, effectiveN = NULL){
+    if(length(test) > 1) test <- test[1]
   obj <- Estimate.Loop2_object
   
+  # alpha_var_mat <- solve(obj$Hess)
   alpha_var_mat <- solve(obj$Hess)
   alpha_sd <- sqrt(diag(alpha_var_mat))
   
@@ -271,3 +274,36 @@ build_hyp.test <- function(Estimate.Loop2_object, Real = NULL, test = c("lower",
   return(list(Results = as.data.frame(A), DF = effectiveN, Test = test, Significance = qval, method = method, SD_origin = alpha_sd, Var_Mat = alpha_var_mat))
 }
 
+build_correction_mat <- function(Estimate.Loop2_object, Sick.ARR){
+  sick.data <- cor.matrix_to_norm.matrix(Sick.ARR)
+  theta <- Estimate.Loop2_object$theta
+  alpha <- Estimate.Loop2_object$alpha
+  k <- nrow(sick.data)
+  
+  forDeriv1 <- function(X){
+    g21 <- vector_var_matrix_calc_COR(vector_to_triangle(theta) * create_alpha_mat(X))
+    sum(log(eigen(g21, only.values = TRUE)$values))
+  }
+  psi <- grad(forDeriv1, alpha)
+  
+  forDeriv2 <- function(X, i){
+    x <- sick.data[i,]
+    meanmat <- vector_to_triangle(theta)*create_alpha_mat(X)
+    t(x - triangle_to_vector(meanmat)) %*% solve(vector_var_matrix_calc_COR(meanmat)) %*% (x - triangle_to_vector(meanmat))
+  } 
+  
+  xi <- t(sapply(1:k, function(i) grad(forDeriv2, alpha, i = i)))
+  
+  p <- length(psi)
+  
+  sumMat <- k*((psi) %*% t(psi))
+  for(i in 1:k){
+    psixi <- psi %*% t(xi[i,])
+    sumMat <- sumMat + psixi + t(psixi) + (xi[i,] %*% t(xi[i,]))
+  }
+  
+  sumMat <- sumMat/(4*k)
+  HessSolve <- -solve(Estimate.Loop2_object$Hess)
+  return(list(Correction = sumMat,
+              Corrected = HessSolve %*% sumMat %*% HessSolve))
+}

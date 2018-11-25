@@ -1994,7 +1994,7 @@ Under the MLE theory,
  can be esimated by 
 \begin_inset Formula 
 \[
-\hat{V}=\frac{1}{N}\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t}
+\hat{V}=\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t}
 \]
 
 \end_inset
@@ -2017,6 +2017,18 @@ f_{X_{n}}(x_{n}) & =(2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)
 \ln f_{X_{n}}(x_{n}) & =\ln\left((2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{-\frac{1}{2}}\cdot\exp\left[-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right]\right)\\
  & =-\frac{m}{2}\ln(2\pi)-\frac{1}{2}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)-\frac{1}{2}\,||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\\
 \nabla_{\alpha}\ln f_{X_{n}}(x_{n}) & =-\frac{1}{2}\left(\nabla_{\alpha}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)+\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2} & =\nabla_{\alpha}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{t}g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)^{-1}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)\\
+ & =\nabla_{\alpha}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{t}g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)^{-1}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)
 \end{align*}
 
 \end_inset

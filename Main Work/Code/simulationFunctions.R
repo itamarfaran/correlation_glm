@@ -39,3 +39,25 @@ create_correlation_matrices <- function(real_corr, sample_size, df = 0, var_scal
   
   return(pelet_matrices)
 }
+
+createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, loc_scale = c(0,1), seed = NULL){
+  
+  parameters <- build_parameters(p, percent_alpha, range_alpha, loc_scale, seed)
+  real.theta <- parameters$Corr.mat
+  real.sigma <- parameters$Cov.mat
+  alpha <- parameters$Alpha
+  alpha.mat <- create_alpha_mat(alpha)
+  
+  if(B == 1)   return(list(healthy = create_correlation_matrices(real.theta, nH, Tlength),
+                           sick = create_correlation_matrices(real.theta*alpha.mat, nS, Tlength),
+                           real.theta = real.theta, real.sigma = real.sigma, alpha = alpha))
+  
+  
+  pelet <- list(real.theta = real.theta, real.sigma = real.sigma, alpha = alpha, samples = list())
+  
+  for(b in 1:B){
+    pelet$samples[[b]] <- list(healthy = create_correlation_matrices(real.theta, nH, Tlength),
+                               sick = create_correlation_matrices(real.theta*alpha.mat, nS, Tlength))
+  }
+  return(pelet)
+}

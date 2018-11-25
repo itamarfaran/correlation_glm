@@ -5,6 +5,24 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
+packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab",
+              "stats4", "tidyverse", "data.table", "parallel")
+ipak(packages)
+
+buildcl <- function(ncores, packageList, dataList){
+  J <- length(packageList)
+  cl <<- makeCluster(ncores)
+  
+  for(j in 1:J){
+    tmp <- packageList[j]
+    clusterExport(cl = cl, "tmp", envir = environment())
+    clusterEvalQ(cl=cl, library(tmp, character.only = T))
+  }
+  clusterExport(cl = cl, dataList, envir = environment())
+  cat("Cluster opened, saved as 'cl' on global environment. Do not forget to stopCluster. \n")
+  return(cl)
+}
+
 #Calculate mean Correlation
 calculate_mean_matrix <- function(matrix_array){
   temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])

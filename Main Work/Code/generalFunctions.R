@@ -9,7 +9,7 @@ packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab",
               "stats4", "tidyverse", "data.table", "parallel")
 ipak(packages)
 
-buildcl <- function(ncores, packageList, dataList){
+buildCL <- function(ncores, packageList, dataList){
   J <- length(packageList)
   cl <<- makeCluster(ncores)
   

@@ -1,6 +1,7 @@
 source("Main Work/Code/generalFunctions.R")
 source("Main Work/code/estimationFunctions2.R")
 source("Main Work/code/simulationFunctions.R")
+source("Main Work/code/main_code_noPlots.R")
 
 tt <- rep(Sys.time(), 2)
 ncores <- detectCores() - 1 #### Enter here!
@@ -27,16 +28,16 @@ bootstrapFunction <- function(b){
   return(res_specified)
 }
 
-tt[1] <- Sys.time()
+tt1 <- Sys.time()
 if(ncores > 1){
-  buildcl(ncores, c("dplyr", "matrixcalc"), requiredFunction)
+  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
   clusterExport(cl = cl, "sampleData")
   simuldat <- parLapply(cl = cl, 1:B, bootstrapFunction)
   stopCluster(cl = cl)
 } else {
   simuldat <- lapply(1:B, bootstrapFunction)
 }
-tt[1] <- Sys.time() - tt[1]
+tt1 <- Sys.time() - tt1
 alpha_simul <- matrix(nrow = B, ncol = p)
 estN_all <- numeric(B)
 
@@ -57,19 +58,17 @@ Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
          QuotentCombined = TheoreticCombined/Empiric,
          QuotentBetween = TheoreticHess/TheoreticGrad)
   
+SDErrorByFunction <- Emp_vs_Theo %>% gather(key = Type, value = Thoeretic, -Empiric, -starts_with("Quotent")) %>%
+  ggplot(aes(x = Thoeretic, y = Empiric, col = Type)) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
+  geom_abline(intercept = 0, slope = 1, size = 0.9, linetype = 3) + 
+  geom_point() + geom_smooth(method = "lm", se = FALSE, linetype = 2)
 
-Tlength
-estN_all
-estN_all/Tlength
+BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
+  geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
+BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
+  geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 
-link2 <- paste0("Main Work/Data/Enviroments/enviroment ",
-                "p", p, " ", "B", B, " ", gsub(":", "", Sys.time()), ".RData")
-save.image(link2)
-rm(link2)
-
-
-
-p <- 6
+p <- 7
 B <- 100
 Tlist <- c(10, 30, 50, 70, 100, 120, 150, 170, 200, 250, 300, 400, 700, 1000, 1500, 2000, 3000, 4000)
 lngth_Tlist <- length(Tlist)
@@ -81,7 +80,6 @@ for(t in 1:lngth_Tlist){
                                     percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed) %>%
     append(c("Tlength" = Tlist[t]), 0)
 }
-
 
 bootstrapFunction <- function(b, k){
   res_unspecified <- Estimate.Loop(Healthy_List = sampleDataT[[k]]$samples[[b]]$healthy,
@@ -96,9 +94,9 @@ bootstrapFunction <- function(b, k){
 }
 simuldatT <- list()
 
-tt[2] <- Sys.time()
+tt2 <- Sys.time()
 if(ncores > 1){
-  buildcl(ncores, c("dplyr", "matrixcalc"), requiredFunction)
+  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
   clusterExport(cl = cl, "sampleDataT")
   for(t in 1:lngth_Tlist){
     cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
@@ -110,7 +108,7 @@ if(ncores > 1){
   cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
   simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
 } 
-tt[2] <- Sys.time() - tt[2]
+tt2 <- Sys.time() - tt2
 
 alpha_simul <- array(dim = c(B, p, lngth_Tlist))
 alpha_sdGrad <- matrix(0, nrow = lngth_Tlist, ncol = p)
@@ -139,65 +137,62 @@ for(t in 1:lngth_Tlist){
   coeffs[t, 3] <- lm(emp_sds[t,] ~ 0 + alpha_sdComb[t,])$coef
 }
 
+coeffs <- as.data.frame(coeffs)
+colnames(coeffs) <- c("Grad", "Hess", "Combination")
+coeffs$Tlength <- Tlist
 
-sdsDims <- dim(emp_sds)
-forLm <- matrix(0, nrow = prod(sdsDims), ncol = 4)
-for(i in 1:sdsDims[1]){
-  forLm[((i-1)*sdsDims[2] + 1): (i*sdsDims[2]), 1] <- Tlist[i]
-  forLm[((i-1)*sdsDims[2] + 1): (i*sdsDims[2]), 2] <- alpha_sd_est[i,]
-  forLm[((i-1)*sdsDims[2] + 1): (i*sdsDims[2]), 3] <- alpha_sd_est2[i,]
-  forLm[((i-1)*sdsDims[2] + 1): (i*sdsDims[2]), 4] <- emp_sds[i,]
-}
+CoefByDF <- gather(coeffs, key = Type, value = Coef, -Tlength) %>% ggplot(aes(x = Tlength, y = Coef, col = Type)) + geom_point()
 
-forLm <- as.data.frame(forLm)
-colnames(forLm) <- c("DF", "EstimatedHess", "EstimatedGrad", "Empiric")
-forLm <- mutate(forLm, QuotentHess = EstimatedHess/Empiric,
-                QuotentGrad = EstimatedGrad/Empiric,
-                QuotentBetween = EstimatedGrad/EstimatedHess)
+ErrorByDF_Grad <- 
+  inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
+             cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
+  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
-summary(aov(QuotentGrad ~ factor(DF), data = forLm))
-summary(aov(QuotentBetween ~ factor(DF), data = forLm))
-summary(lm(QuotentBetween ~ log(DF), data = forLm))
+ErrorByDF_Hess <- 
+  inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
+             cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
+  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
-summary(lm(QuotentGrad ~ 0 + log(DF)*QuotentHess, data = forLm))
+ErrorByDF_Combined <-
+  inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
+             cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
+  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
+BiasDiffEstN <- as.data.frame(estNT_all - rep(1, B) %*% t(Tlist))
+colnames(BiasDiffEstN) <- Tlist
 
-ggplot(forLm, aes(x = factor(DF), col = factor(DF), y = QuotentGrad)) + geom_point()
-ggplot(forLm, aes(x = factor(DF), col = factor(DF), y = QuotentHess)) + geom_point()
-ggplot(forLm, aes(x = factor(DF), col = factor(DF), y = QuotentBetween)) + geom_point()
+EstNDiff <- gather(BiasDiffEstN, key = DF, value = Bias) %>%
+  ggplot(aes(x = factor(DF, levels = Tlist, ordered = TRUE), y = Bias)) +
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Absolute Bias")
 
-tmp <- numeric()
-for(i in 1:lngth_Tlist) tmp <- c(tmp, rep(Tlist[i], p))
-forplt <- data.frame(DF = factor(tmp), Empiric = as.vector(t(emp_sds)), Estimate = as.vector(t(alpha_sd_est2)))
-tmp <- rbind(eff_n, round(eff_n/Tlist, 3), coeffs)
-colnames(tmp) <- Tlist
-row.names(tmp) <- c("Est_n", "Ratio", "Coeffs")
+BiasRatioEstN <- as.data.frame(estNT_all / rep(1, B) %*% t(Tlist) - 1)
+colnames(BiasRatioEstN) <- Tlist
 
-
-ggplot(forplt, aes(x = Estimate, y = Empiric)) + geom_point(aes(col = DF)) +
-  geom_vline(xintercept = 0) + 
-  geom_hline(yintercept = 0) + 
-  geom_abline(slope = 1, intercept = 0, size = 0.8, linetype = 2, col = "darkgrey") +
-  geom_smooth(method = "lm", formula = y ~ 0 + x + exp(x) ,se = FALSE, linetype = 4)
-  # geom_abline(slope = 2, intercept = 0, size = 0.8, col = "darkred", linetype = 2)
+EstNRatio <- gather(BiasRatioEstN, key = DF, value = Bias) %>%
+  ggplot(aes(x = factor(DF, levels = Tlist, ordered = TRUE), y = Bias)) +
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Absolute Bias")
 
 
-data.frame(DF = Tlist, Coefficient = coeffs) %>% ggplot(aes(x = DF, y = Coefficient)) + geom_point() +
-  geom_hline(yintercept = 1, col = "darkgrey") + geom_vline(xintercept = 0) + 
-  geom_smooth(method = "lm", formula = y ~ log(x), se = FALSE)
+link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRun ", Sys.time(), ".RData") )
 
-#View(t(tmp))
-x <- 1/Tlist
-summary(lm(coeffs ~ x))
+save.image(file = link2)
 
-df_error <- tmp[2,]-1
-hist(df_error)
-summary(df_error)
-plot(Tlist, df_error)
-summary(lm(df_error ~ 0 + Tlist))
 
-link2 <- paste0("Main Work/Data/Enviroments/enviroment robustness_check p_",
-                p, " T_", lngth_Tlist, " ", gsub(":", "", Sys.time()), ".RData")
-save.image(link2)
-rm(link2)
+ErrorByDF_Combined
+ErrorByDF_Grad
+ErrorByDF_Hess
 
+SDErrorByFunction
+CoefByDF
+
+BiasDiff
+BiasRatio
+
+EstNDiff
+EstNRatio

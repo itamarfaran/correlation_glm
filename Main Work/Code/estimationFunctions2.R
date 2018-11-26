@@ -244,14 +244,13 @@ loglikgrad_uni <- function(obs, CovObj){
     (function(x) x %*% t(x))
 }
 
-computeBmatr <- function(sickDat, CovObj){
-  Bmatr <- lapply(1:ncol(sickDat), function(j)
-    loglikgrad_uni(sickDat[j,], CovObj)) %>%
-    (function(list){
-      L <- length(list)
-      pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))
-      for(i in 1:L) pelet <- pelet + list[[i]]
-      pelet
+computeBmatr <- function(sickDat, CovObj, ncores = 1){
+  Bmatr <- lapply(1:ncol(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj)) 
+  Bmatr <- Bmatr %>% (function(list){
+    L <- length(list)
+    pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))
+    for(i in 1:L) pelet <- pelet + list[[i]]
+    pelet
     })
   
   return(Bmatr)

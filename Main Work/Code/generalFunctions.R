@@ -23,6 +23,11 @@ buildCL <- function(ncores, packageList, dataList){
   return(cl)
 }
 
+powerMatrix <- function(MATR, pow){
+  eigenMat <- eigen(MATR)
+  return(eigenMat$vectors %*% diag(eigenMat$values ^ pow) %*% t(eigenMat$vectors))
+}
+
 #Calculate mean Correlation
 calculate_mean_matrix <- function(matrix_array){
   temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])

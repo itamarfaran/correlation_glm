@@ -46,6 +46,10 @@ create_correlation_matrices <- function(real_corr, sample_size, df = 0, AR = NUL
 }
 
 rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL){
+  p <- ncol(Sigma)
+  
+  if(is.null(MA) & is.null(AR)) return(rWishart2(n = n, df = df, Sigma = Sigma))
+  if(df < p) warning("Wishart degrees of freedom lower than matrix dimension.")
   
   if(!is.null(AR)){
     if(!checkInv(AR)) stop("AR process not stationary.")
@@ -53,44 +57,61 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL){
     
   } 
   if(!is.null(MA)){
-    if(!checkInv(MA)) stop("MA process not invertable")
+    if(!checkInv(MA)) stop("MA process not invertable.")
     maxMA <- length(MA)
   }
   
-  p <- ncol(Sigma)
-  blocksDF <- floor(df/p)
-  if(blocksDF*p != df) warning(paste0("Using ", blocksDF*p, " Degrees of Freedom instead of ", df))
-  
-  rawFun <- function(k, blocksDF, p, Sigma, AR = NULL, MA = NULL){
-  
-    matrices <- rWishart(blocksDF, p, Sigma)
+  rawFun <- function(k, df, p, Sigma, AR = NULL, MA = NULL){
+    
+    matrices <- (matrix(rnorm(df*p), ncol = p) %*% powerMatrix(Sigma, 0.5))
+    matrices <- sapply(1:df, function(i) matrices[i,] %*% t(matrices[i,]), simplify = "array")
     meanMat <- calculate_mean_matrix(matrices)
     
-    centralMatrices <- array(0, c(p, p, blocksDF))
-    corelMatrics <- array(0, c(p, p, blocksDF))
-    pelet <- matrix(0, nrow = p, ncol = p)
-  
+    centralMatrices <- array(0, c(p, p, df))
+    corelMatrics <- array(0, c(p, p, df))
+    
+    centralMatrices[,,1] <- matrices[,,1] - meanMat
     corelMatrics[,,1] <- matrices[,,1] - meanMat
-    for(i in 2:blocksDF){
-      centralMatrices[,,i] <- matrices[,,i] - meanMat
-      corelMatrics[,,i] <- meanMat
+    pelet <- matrices[,,1]
+    
+    for(i in 2:df){
+      centralMatrices[,,i] <- matrices[,,i] - meanMat # epsilon[i]
+      corelMatrics[,,i] <- centralMatrices[,,i] # X[i] = epsilon[i]
       
       if(!is.null(AR)){
         arlag <- min(maxAR, i - 1)
         corelMatrics[,,i] <- corelMatrics[,,i] + summatrix(corelMatrics, (i - arlag):(i - 1), rev(AR[1:arlag]))
+        # X[i] = epsilon[i] + X[i-1] + ...
       }
       if(!is.null(MA)){
         malag <- min(maxMA, i - 1)
         corelMatrics[,,i] <- corelMatrics[,,i] + summatrix(centralMatrices, (i - malag):(i - 1) , rev(MA[1:malag]))
+        # X[i] = epsilon[i] + X[i-1] + ... + epsilon[i-1] + ...
       }
       
-      pelet <- pelet + corelMatrics[,,i]
+      pelet <- pelet + corelMatrics[,,i] + meanMat
+      # X[i] = epsilon[i] + X[i-1] + ... + epsilon[i-1] + ... + mu
+      # W = sum(X[i])
     }
     
     return(pelet)
   }
   
-  sapply(1:n, rawFun, blocksDF = blocksDF, p = p, Sigma = Sigma, AR = AR, MA = MA, simplify = "array")
+  sapply(1:n, rawFun, df = df, p = p, Sigma = Sigma, AR = AR, MA = MA, simplify = "array")
+}
+
+rWishart2 <- function(n = 1, df, Sigma){
+  p <- ncol(Sigma)
+  
+  if(df >= p) return(rWishart(n, df, Sigma))
+  warning("Wishart degrees of freedom lower than matrix dimension.")
+  
+  rawFun <- function(k, df, p, Sigma, AR = NULL, MA = NULL){
+    matrices <- (matrix(rnorm(df*p), ncol = p) %*% powerMatrix(Sigma, 0.5))
+    return(t(matrices) %*% matrices)
+  }
+  
+  sapply(1:n, rawFun, df = df, p = p, Sigma = Sigma, AR = AR, MA = MA, simplify = "array")
 }
 
 createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, loc_scale = c(0,1), 

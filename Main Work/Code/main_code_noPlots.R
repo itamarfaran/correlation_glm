@@ -2,9 +2,14 @@ source("Main Work/Code/generalFunctions.R")
 source("Main Work/code/estimationFunctions2.R")
 source("Main Work/code/simulationFunctions.R")
 
-Tlength <- 115
-sampleData <- createSamples(nH = 107, nS = 92, p = 12, Tlength = Tlength,
-                                percent_alpha = 0.4, range_alpha = c(0.6, 0.8))
+Tlength <- 120
+ARMAdetails <- list(ARsick = c(0.4, -0.2), MAsick = c(0.4),
+                    ARhealth = c(0.2, -0.1), MAhealth = c(0.4))
+sapply(ARMAdetails, checkInv)
+sampleData <- createSamples(nH = 19, nS = 15, p = 15, Tlength = Tlength,
+                                percent_alpha = 0.4, range_alpha = c(0.6, 0.8),
+                            ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
+                            ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
 
 #Are all matrices positive definite?
 all(abind(sampleData$healthy, sampleData$sick, along = 3) %>%
@@ -34,7 +39,7 @@ HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, MH
 Pelet_Cov$returns
 Pelet_Cov$convergence
 c("Est_DF" = Pelet_Cov$Est_N, "Real_DF" = Tlength)
-c("Test" = tmp$Test, "Sig Level" = tmp$Significance, "FWER Method" = tmp$MH_method)
+c("Test" = HypTestResHess$Test, "Sig Level" = HypTestResHess$Significance, "FWER Method" = HypTestResHess$MH_method)
 
 HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]

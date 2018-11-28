@@ -31,6 +31,22 @@ calculate_mean_matrix <- function(matrix_array){
   return(temp/returns)
 }
 
+checkInv <- function(coefs, perc = 0.001){
+  polfun <- function(x) 1 - sum(coefs*x^(1:length(coefs)))
+  x <- sign(sapply(seq(-1, 1, by = perc), polfun))
+  return(all(x == 1) | all(x == -1))
+}
+
+summatrix <- function(ARRAY, index, weights = NULL){
+  if(is.null(weights)) weights <- rep(1, length(index))
+  weights <- weights/sum(weights)
+  pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
+  for(i in 1:length(index)){
+    pelet <- pelet + ARRAY[,,index[i]]*weights[i]
+  }
+  return(pelet)
+}
+
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
 central.moment <- function(x,norm=TRUE) {
   n<-length(x)

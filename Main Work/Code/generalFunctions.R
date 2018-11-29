@@ -6,7 +6,7 @@ ipak <- function(pkg){
 }
 
 packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab",
-              "stats4", "tidyverse", "data.table", "parallel")
+              "stats4", "tidyverse", "data.table", "parallel", "mvtnorm")
 ipak(packages)
 
 buildCL <- function(ncores, packageList, dataList){
@@ -42,15 +42,26 @@ checkInv <- function(coefs, perc = 0.001){
   return(all(x == 1) | all(x == -1))
 }
 
-summatrix <- function(ARRAY, index, weights = NULL){
-  if(is.null(weights)) weights <- rep(1, length(index))
-  weights <- weights/sum(weights)
+summatrix <- function(ARRAY, index, constants = NULL, weights = FALSE){
+  if(is.null(constants)) constants <- rep(1, length(index))
+  if(weights) constants <- constants/sum(constants)
   pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
   for(i in 1:length(index)){
-    pelet <- pelet + ARRAY[,,index[i]]*weights[i]
+    pelet <- pelet + ARRAY[,,index[i]]*constants[i]
   }
   return(pelet)
 }
+
+sumvector <- function(MATR, index, constants = NULL, weights = FALSE){
+  if(is.null(weights)) constants <- rep(1, length(index))
+  if(weights) constants <- constants/sum(constants)
+  pelet <- numeric(ncol(MATR))
+  for(i in 1:length(index)){
+    pelet <- pelet + MATR[index[i],]*constants[i]
+  }
+  return(pelet)
+}
+
 
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
 central.moment <- function(x,norm=TRUE) {

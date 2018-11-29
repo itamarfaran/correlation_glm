@@ -245,7 +245,7 @@ loglikgrad_uni <- function(obs, CovObj){
 }
 
 computeBmatr <- function(sickDat, CovObj, ncores = 1){
-  Bmatr <- lapply(1:ncol(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj)) 
+  Bmatr <- lapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj)) 
   Bmatr <- Bmatr %>% (function(list){
     L <- length(list)
     pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))

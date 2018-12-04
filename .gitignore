@@ -1,6 +1,7 @@
 *.pdf
 *.pptx
 *.Rhistory
+.Rhistory
 *_Rhistory
 *.RData
 *.mat

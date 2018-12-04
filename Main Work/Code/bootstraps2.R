@@ -1,10 +1,8 @@
 source("Main Work/Code/generalFunctions.R")
 source("Main Work/code/estimationFunctions2.R")
 source("Main Work/code/simulationFunctions.R")
-source("Main Work/code/main_code_noPlots.R")
 
 tt <- rep(Sys.time(), 2)
-ncores <- detectCores() - 1 #### Enter here!
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
                                      "cor.matrix_to_norm.matrix", "triangle_to_vector","vector_to_triangle",
                                      "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR",
@@ -33,7 +31,7 @@ if(ncores > 1){
   buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
   clusterExport(cl = cl, "sampleDataB")
   simuldat <- parLapply(cl = cl, 1:B, bootstrapFunction)
-  stopCluster(cl = cl)
+  terminateCL()
 } else {
   simuldat <- lapply(1:B, bootstrapFunction)
 }
@@ -61,7 +59,7 @@ Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
 SDErrorByFunction <- Emp_vs_Theo %>% gather(key = Type, value = Thoeretic, -Empiric, -starts_with("Quotent")) %>%
   ggplot(aes(x = Thoeretic, y = Empiric, col = Type)) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
   geom_abline(intercept = 0, slope = 1, size = 0.9, linetype = 3) + 
-  geom_point() + geom_smooth(method = "lm", se = FALSE, linetype = 2)
+  geom_point() + geom_smooth(method = "lm", formula = y ~ 0 + x, se = FALSE, linetype = 2)
 
 BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
@@ -103,7 +101,7 @@ if(ncores > 1){
     clusterExport(cl = cl, "t")
     simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
   }
-  stopCluster(cl = cl)
+  terminateCL()
 } else for(t in 1:lngth_Tlist){
   cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
   simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
@@ -141,7 +139,8 @@ coeffs <- as.data.frame(coeffs)
 colnames(coeffs) <- c("Grad", "Hess", "Combination")
 coeffs$Tlength <- Tlist
 
-CoefByDF <- gather(coeffs, key = Type, value = Coef, -Tlength) %>% ggplot(aes(x = Tlength, y = Coef, col = Type)) + geom_point()
+CoefByDF <- gather(coeffs, key = Type, value = Coef, -Tlength) %>% ggplot(aes(x = Tlength, y = Coef, col = Type)) +
+  geom_smooth(se = FALSE) + geom_point()
 
 ErrorByDF_Grad <- 
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
@@ -176,10 +175,10 @@ colnames(BiasRatioEstN) <- Tlist
 
 EstNRatio <- gather(BiasRatioEstN, key = DF, value = Bias) %>%
   ggplot(aes(x = factor(DF, levels = Tlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Absolute Bias")
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Relative Bias")
 
 
-link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRun ", Sys.time(), ".RData") )
+link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)
 

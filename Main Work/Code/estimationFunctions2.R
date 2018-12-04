@@ -26,7 +26,7 @@ minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.
     
     g20 <- vector_var_matrix_calc_COR(vector_to_triangle(theta))
     if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data)*(nrow(healthy.data) - 1)/nrow(healthy.data), g20)
-    e20 <- eigen(g20/n.effective_H)
+    e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
     U0 <- e20$vectors
     D0 <- e20$values
     
@@ -37,7 +37,7 @@ minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.
   
   g21 <- vector_var_matrix_calc_COR(vector_to_triangle(theta)*create_alpha_mat(alpha))
   if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data), g21)
-  e21 <- eigen(g21/n.effective_D)
+  e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
   U1 <- e21$vectors
   D1 <- e21$values
   
@@ -137,6 +137,7 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
     if(i%%10==0) cat(paste(i,","))
     i <- i + 1
   }
+  cat("\n")
   
   return(list(theta = temp.theta,
               alpha = temp.alpha,
@@ -145,8 +146,8 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
 }
 
 Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
-                           max.loop = 50, eps = 10^(-3), min_reps = 3, method = "Nelder-Mead",
-                           progress = TRUE){
+                           max.loop = 50, epsIter = 10^(-3), min_reps = 3, method = "Nelder-Mead",
+                           epsOptim = 10^(-5), progress = TRUE){
   
   compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
     return(min( compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data),
@@ -173,7 +174,7 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   Steps <- list()
   Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
   log_optim <- list()
-  dist <- 100*eps
+  dist <- 100*epsIter
   i <- 1
   
   #Convergence is a matrix wich tells us if the convergence in each iteration is completed
@@ -181,7 +182,8 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   convergence[1] <- 0
   tnai0 <- FALSE
   
-  if(progress) cat("\n Progress: 'Loop, (Convergence, Distance);'\n")
+  tt <- Sys.time()
+  if(progress) message(paste0("Time of intialization: ", tt, "; Progress: 'Loop, (Time, Convergence, Distance)'"))
   while((i <= max.loop) & (!tnai0)){
     i <- i + 1
     
@@ -196,7 +198,8 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
                                                  sick.data = sick.data,
                                                  effective.N = effective.N),
                          method = method,
-                         control = list(maxit = min(max(500, i*100), 2000)))
+                         control = list(maxit = min(max(500, i*100), 2000),
+                                        reltol = epsOptim))
     convergence[i] <- optim.alpha$convergence
     temp.alpha <- optim.alpha$par
     
@@ -211,10 +214,12 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     dist <- sqrt(mean((Steps[[i]]$alpha - Steps[[i-1]]$alpha)^2))
     
     tnai0 <- FALSE
-    if(i > min_reps) tnai0 <- (dist <= eps) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
+    if(i > min_reps) tnai0 <- (dist <= epsIter) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
     
-    if(progress) cat(paste0(i," (",convergence[i],", ",round(dist, 5) , "); "))
+    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt)*60)
+                            ,convergence[i],", ",round(dist, 5) , "); "))
   }
+  message(paste0("Total time: ", Sys.time() - tt))
 
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
@@ -230,7 +235,7 @@ loglik_uni <- function(obs, theta, alpha = NULL, Eff.N){
   varMat <- vector_var_matrix_calc_COR(meanMat)/Eff.N
   meanVect <- triangle_to_vector(meanMat)
   
-  eigenDec <- eigen(varMat)
+  eigenDec <- eigen(varMat, symmetric = TRUE)
   U <- eigenDec$vectors
   D <- eigenDec$values
   
@@ -244,8 +249,23 @@ loglikgrad_uni <- function(obs, CovObj){
     (function(x) x %*% t(x))
 }
 
-computeBmatr <- function(sickDat, CovObj, ncores = 1){
-  Bmatr <- lapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj)) 
+computeBmatr <- function(sickDat, CovObj, silent = FALSE, ncores = .GlobalEnv$ncores){
+  if(ncores == 1) {
+    Bmatr <- lapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj))
+  } else {
+    rawFun <- function(j) loglikgrad_uni(sickDat[j,], CovObj)
+    cl <<- makeCluster(ncores)
+    if(!silent) message("In 'computeBmatr': Cluster 'cl' opened, saved to global environment.")
+    clusterEvalQ(cl, library(mvtnorm))
+    clusterEvalQ(cl, library(dplyr))
+    clusterEvalQ(cl, library(numDeriv))
+    clusterEvalQ(cl, library(matrixcalc))
+    clusterExport(cl, c("sickDat", "CovObj"), envir = environment())
+    clusterExport(cl, c("loglik_uni", "loglikgrad_uni", "vector_to_triangle","create_alpha_mat",
+                        "vector_var_matrix_calc_COR", "triangle_to_vector"), envir = .GlobalEnv)
+    Bmatr <- parLapply(cl = cl, 1:nrow(sickDat), rawFun)
+    terminateCL(silent)
+  }
   Bmatr <- Bmatr %>% (function(list){
     L <- length(list)
     pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))
@@ -256,7 +276,7 @@ computeBmatr <- function(sickDat, CovObj, ncores = 1){
   return(Bmatr)
 }
 
-ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad")){
+ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), silent = FALSE){
   if(class(sickDat) == "array") sickDat <- cor.matrix_to_norm.matrix(sickDat) 
   
   method <- method[1]
@@ -265,7 +285,7 @@ ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad")){
                                                                        alpha = A,
                                                                        sick.data = sickDat,
                                                                        effective.N = CovObj$Est_N))
-  if(method == "Grad") pelet <- computeBmatr(sickDat, CovObj)
+  if(method == "Grad") pelet <- computeBmatr(sickDat, CovObj, silent = FALSE)
   
   return(pelet)
 }

@@ -2,12 +2,12 @@ source("Main Work/Code/generalFunctions.R")
 source("Main Work/code/estimationFunctions2.R")
 source("Main Work/code/simulationFunctions.R")
 
-Tlength <- 120
-ARMAdetails <- list(ARsick = c(0.4, -0.2), MAsick = c(0.4),
-                    ARhealth = c(0.2, -0.1), MAhealth = c(0.4))
+Tlength <- 115
+ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
+                    ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 19, nS = 15, p = 15, Tlength = Tlength,
-                                percent_alpha = 0.4, range_alpha = c(0.6, 0.8),
+sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
+                                percent_alpha = 0.1, range_alpha = c(0.82, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
 
@@ -30,11 +30,13 @@ Pelet_Cov <- Estimate.Loop2(theta0 = Pelet_IID$theta, alpha0 = Pelet_IID$alpha,
                             healthy.data = sampleData$healthy, sick.data = sampleData$sick,
                             T_thresh = Tlength, method = "Nelder-Mead")
 
-fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess")
-fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad")
+fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess")  %>% regularizeMatrix()
+fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad")  %>% regularizeMatrix()
+fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 
 HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
 HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
+HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
 
 Pelet_Cov$returns
 Pelet_Cov$convergence
@@ -43,6 +45,9 @@ c("Test" = HypTestResHess$Test, "Sig Level" = HypTestResHess$Significance, "FWER
 
 HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]
+HypTestResComb$Results[order(HypTestResComb$Results$Real),]
+
+#for(i in 2:Pelet_Cov$returns) print(Pelet_Cov$Log_Optim[[i]]$counts)
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick)
 

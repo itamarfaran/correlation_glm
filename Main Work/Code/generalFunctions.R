@@ -6,10 +6,35 @@ ipak <- function(pkg){
 }
 
 packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab",
-              "stats4", "tidyverse", "data.table", "parallel", "mvtnorm")
+              "stats4", "tidyverse", "data.table", "parallel", "mvtnorm", "progress")
 ipak(packages)
 
-buildCL <- function(ncores, packageList, dataList){
+promptForCores <- function(){
+  det <- detectCores()
+  ncores <- 0
+  userans1 <- -1
+  userans2 <- "0"
+  while(userans2 != "y"){
+    ncores <- 0
+    userans1 <- -1
+    userans2 <- "0"
+    while(userans1 != ncores){
+      ncores <- 0
+      while(ncores < 1 | ncores  >= det){
+        ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
+        ncores <- floor(as.numeric(ncores))
+      }
+      userans1 <- as.numeric(readline("Please re-enter number of cores to use: "))
+    }
+    userans2 <- readline(paste0(det, " cores detected. ", ncores, " cores will be used. Confirm (y)? "))
+  }
+  ncores <<- ncores
+  message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))
+}
+
+promptForCores()
+
+buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){
   J <- length(packageList)
   cl <<- makeCluster(ncores)
   
@@ -19,13 +44,58 @@ buildCL <- function(ncores, packageList, dataList){
     clusterEvalQ(cl=cl, library(tmp, character.only = T))
   }
   clusterExport(cl = cl, dataList, envir = environment())
-  cat("Cluster opened, saved as 'cl' on global environment. Do not forget to stopCluster. \n")
+  setDefaultCluster(cl = cl)
+  message("Cluster opened, saved as 'cl' on global environment. Do not forget to stopCluster. \n")
   return(cl)
+}
+
+terminateCL <- function(silent = FALSE){
+  if("cl" %in% objects(envir = .GlobalEnv)){
+    stopCluster(cl)
+    setDefaultCluster()
+    rm(cl, envir =  .GlobalEnv)
+    if(!silent) message("Cluster terminated.")
+  } else {
+    warning("Cluster not found and was not closed. If cluster is not saved as 'cl' you must close the cluster manually!")
+  }
 }
 
 powerMatrix <- function(MATR, pow){
   eigenMat <- eigen(MATR)
   return(eigenMat$vectors %*% diag(eigenMat$values ^ pow) %*% t(eigenMat$vectors))
+}
+
+regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"), const = 1, OnlyIfSing = TRUE){
+  method <- method[1]
+  if(!is.square.matrix(MATR)) stop("Matrix is not square.")
+  if(OnlyIfSing & !is.singular.matrix(MATR)) {
+    message("Matrix is invertible and was not changed.")
+    return(MATR)
+  }
+  
+  p <- nrow(MATR)
+  if(method == "diag") {
+    pelet <- MATR + diag(p)
+  }
+  if(method == "constant"){
+    if(const <= 0) stop("In method 'constant' const must be greater than 0.")
+    pelet <- MATR + const*diag(p)
+  }
+  if(method == "avg.diag"){
+    if(const < 0 | const > 1) stop("In method 'avg.diag' const must be between 0-1")
+    pelet <- (1 - const)*MATR + const*mean(diag(MATR))*diag(p)
+  } 
+  if(method == "increase.diag"){
+    if(const < 0 | const > 1) stop("In method 'avg.diag' const must be between 0-1")
+    pelet <- (1 - const)*MATR + const*diag(diag(MATR))
+  }
+  
+  if(is.singular.matrix(pelet)){
+    warning("Matrix still not invertible.")
+  } else{
+    message("Matrix is singular and was regularized.")
+  }
+  return(pelet)
 }
 
 #Calculate mean Correlation
@@ -53,7 +123,7 @@ summatrix <- function(ARRAY, index, constants = NULL, weights = FALSE){
 }
 
 sumvector <- function(MATR, index, constants = NULL, weights = FALSE){
-  if(is.null(weights)) constants <- rep(1, length(index))
+  if(is.null(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- numeric(ncol(MATR))
   for(i in 1:length(index)){

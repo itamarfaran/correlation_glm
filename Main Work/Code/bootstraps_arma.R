@@ -1,7 +1,6 @@
 source("Main Work/Code/generalFunctions.R")
 source("Main Work/code/estimationFunctions2.R")
 source("Main Work/code/simulationFunctions.R")
-source("Main Work/code/main_code_noPlots.R")
 
 tt <- rep(Sys.time(), 2)
 ncores <- detectCores() - 1 #### Enter here!
@@ -10,7 +9,7 @@ if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
                                      "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR",
                                      "minusloglik", "bootstrapFunction")
 
-Tlength <- 200
+Tlength <- 600
 ARMAdetails <- list(ARsick = c(0.4, -0.2), MAsick = c(0.4),
                     ARhealth = c(0.2, -0.1), MAhealth = c(0.4))
 all(sapply(ARMAdetails, checkInv))

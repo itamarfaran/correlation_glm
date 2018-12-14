@@ -11,3 +11,5 @@
 *.tex
 desktop.ini
 .Rproj.user
+credentials-2.csv
+connect_to_ssh.txt

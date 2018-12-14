@@ -1,6 +1,6 @@
-source("Main Work/Code/generalFunctions.R")
-source("Main Work/Code/estimationFunctions2.R")
-source("Main Work/Code/simulationFunctions.R")
+source("main_work/code/01_generalFunctions.R")
+source("main_work/code/02_estimationFunctions2.R")
+source("main_work/code/03_simulationFunctions.R")
 
 Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,

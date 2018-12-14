@@ -1,6 +1,6 @@
-source("Main Work/Code/generalFunctions.R")
-source("Main Work/Code/estimationFunctions2.R")
-source("Main Work/Code/simulationFunctions.R")
+source("main_work/code/01_generalFunctions.R")
+source("main_work/code/02_estimationFunctions2.R")
+source("main_work/code/03_simulationFunctions.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
@@ -200,7 +200,7 @@ EstNRatio <- gather(BiasRatioEstN, key = MA, value = Bias) %>%
   geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "MA", y = "Relative Loss of DF")
 
 
-link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
+link2 <- gsub(":", "-", paste0("main_work/data/enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)
 

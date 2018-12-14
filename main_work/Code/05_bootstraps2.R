@@ -1,6 +1,6 @@
-source("Main Work/Code/generalFunctions.R")
-source("Main Work/Code/estimationFunctions2.R")
-source("Main Work/Code/simulationFunctions.R")
+source("main_work/code/01_generalFunctions.R")
+source("main_work/code/02_estimationFunctions2.R")
+source("main_work/code/03_simulationFunctions.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
@@ -116,11 +116,16 @@ emp_sds <- matrix(nrow = lngth_Tlist, ncol = p)
 coeffs <- matrix(0, nrow = lngth_Tlist, ncol = 3)
 estNT_all <- matrix(0, nrow = B, ncol = lngth_Tlist)
 
+pb <- progress_bar$new(
+  format = "Computing hessians [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
+  total = lngth_MAlist, clear = FALSE, width= 90)
+
 for(t in 1:lngth_Tlist){
   for(b in 1:B) {
     alpha_simul[b,,t] <- simuldatT[[t]][[b]]$alpha
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
   }
+  pb$tick()
   tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Grad", silent = TRUE) %>% solve
   tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
@@ -134,6 +139,7 @@ for(t in 1:lngth_Tlist){
   coeffs[t, 2] <- lm(emp_sds[t,] ~ 0 + alpha_sdHess[t,])$coef
   coeffs[t, 3] <- lm(emp_sds[t,] ~ 0 + alpha_sdComb[t,])$coef
 }
+rm(pb)
 
 coeffs <- as.data.frame(coeffs)
 colnames(coeffs) <- c("Grad", "Hess", "Combination")
@@ -178,7 +184,7 @@ EstNRatio <- gather(BiasRatioEstN, key = DF, value = Bias) %>%
   geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Relative Bias")
 
 
-link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
+link2 <- gsub(":", "-", paste0("main_work/data/enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)
 

@@ -111,6 +111,8 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = .Glob
 createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, loc_scale = c(0,1), 
                           ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, seed = NULL){
   
+  use_RwishartArma <- !is.null(c(ARsick, ARhealth, MAsick, MAhealth)) | p > Tlength
+  
   parameters <- build_parameters(p, percent_alpha, range_alpha, loc_scale, seed)
   real.theta <- parameters$Corr.mat
   real.sigma <- parameters$Cov.mat
@@ -123,13 +125,14 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
                                                               AR = ARsick, MA = MAsick),
                          real.theta = real.theta, real.sigma = real.sigma, alpha = alpha))
   
-  message("In 'createSamples': Clusters 'cl' opened, saved to global environment.")
+  if(use_RwishartArma){
+    message("In 'createSamples': Clusters 'cl' opened, saved to global environment.")
+    pb <- progress_bar$new(
+      format = "Simulating data [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
+      total = B, clear = FALSE, width= 90)
+  }
   
   pelet <- list(real.theta = real.theta, real.sigma = real.sigma, alpha = alpha, samples = list())
-  
-  pb <- progress_bar$new(
-    format = "Simulating data [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
-    total = B, clear = FALSE, width= 90)
   
   for(b in 1:B){
     pelet$samples[[b]] <-
@@ -137,7 +140,7 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
                                                  AR = ARsick, MA = MAsick, silent = TRUE),
            sick = create_correlation_matrices(real.theta*alpha.mat, nS, Tlength,
                                               AR = ARsick, MA = MAsick, silent = TRUE))
-    pb$tick()
+    if(use_RwishartArma) pb$tick()
   }
   if("cl" %in% objects()) message("'cl' Cluster not terminated!")
   return(pelet)

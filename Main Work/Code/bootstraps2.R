@@ -4,7 +4,7 @@ source("Main Work/code/simulationFunctions.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
-                                     "cor.matrix_to_norm.matrix", "triangle_to_vector","vector_to_triangle",
+                                     "cor.matrix_to_norm.matrix", "triangle2vector","vector2triangle",
                                      "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR",
                                      "minusloglik", "bootstrapFunction")
 Tlength <- 115
@@ -121,8 +121,8 @@ for(t in 1:lngth_Tlist){
     alpha_simul[b,,t] <- simuldatT[[t]][[b]]$alpha
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
   }
-  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Grad") %>% solve
-  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Hess") %>% solve
+  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Grad", silent = TRUE) %>% solve
+  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
   
   alpha_sdGrad[t,] <- sqrt(diag(tmpG))

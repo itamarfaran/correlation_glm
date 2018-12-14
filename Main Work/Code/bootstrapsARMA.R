@@ -142,7 +142,7 @@ for(t in 1:lngth_MAlist){
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
   }
   pb$tick()
-  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Grad") %>% solve
+  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Grad", silent = TRUE) %>% solve
   tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
   

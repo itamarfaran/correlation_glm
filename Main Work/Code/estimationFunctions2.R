@@ -211,10 +211,10 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     tnai0 <- FALSE
     if(i > min_reps) tnai0 <- (dist <= epsIter) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
     
-    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt)*60)
-                            ,convergence[i],", ",round(dist, 5) , "); "))
+    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt)), "s, ",
+                            convergence[i],", ",round(dist, 5) , "); "))
   }
-  message(paste0("Total time: ", Sys.time() - tt))
+  message(paste0("\nTotal time: ", round(Sys.time() - tt), " seconds."))
 
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )

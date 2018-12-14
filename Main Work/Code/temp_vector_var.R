@@ -1,6 +1,6 @@
 # source("Main Work/Code/generalFunctions.R")
-# source("Main Work/code/estimationFunctions2.R")
-# source("Main Work/code/simulationFunctions.R")
+# source("Main Work/Code/estimationFunctions2.R")
+# source("Main Work/Code/simulationFunctions.R")
 
 p <- 50
 MATR <- build_parameters(p, 0.5, c(0,1))$Corr.mat

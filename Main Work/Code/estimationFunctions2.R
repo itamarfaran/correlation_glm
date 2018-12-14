@@ -1,6 +1,6 @@
 clean_sick <- function(sick.data, alpha){
   if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix()
-  sick.data/(rep(1, nrow(sick.data)) %*% t(alpha %>% create_alpha_mat() %>% triangle_to_vector()))
+  sick.data/(rep(1, nrow(sick.data)) %*% t(alpha %>% create_alpha_mat() %>% triangle2vector()))
 }
 
 minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.N = NULL, DET = TRUE){
@@ -24,7 +24,7 @@ minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.
     
     g10 <- as.matrix(theta)
     
-    g20 <- vector_var_matrix_calc_COR(vector_to_triangle(theta))
+    g20 <- vector_var_matrix_calc_COR(vector2triangle(theta))
     if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data)*(nrow(healthy.data) - 1)/nrow(healthy.data), g20)
     e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
     U0 <- e20$vectors
@@ -33,9 +33,9 @@ minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.
     dist0 <- (healthy.data - rep(1, Nh) %*% t(g10)) %*% U0
   }
   
-  g11 <- as.matrix(theta*triangle_to_vector(create_alpha_mat(alpha)))
+  g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(alpha)))
   
-  g21 <- vector_var_matrix_calc_COR(vector_to_triangle(theta)*create_alpha_mat(alpha))
+  g21 <- vector_var_matrix_calc_COR(vector2triangle(theta)*create_alpha_mat(alpha))
   if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data), g21)
   e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
   U1 <- e21$vectors
@@ -72,20 +72,15 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
   p <- dim(MATR)[1]
   m <- p*(p-1)/2
   
-  v1 <- numeric(0)
-  v2 <- numeric(0)
-  for(i in 1:(p - 1)){
-    v1 <- c(v1, rep(i, p - i))
-    v2 <- c(v2, (i + 1):p)
-  }
-  order_vect <- cbind(v1,v2)
+  order_vect <- cbind(unlist(lapply(1:(p - 1), function(i) rep(i, p - i))),
+                      unlist(lapply(1:(p - 1), function(i) (i + 1):p)))
   
   pelet <- matrix(nrow = m, ncol = m)
   for(i in 1:m){
     for(j in i:m){
       indexes <- c(order_vect[i,], order_vect[j,])
       pelet[i,j] <- real.cov2(indexes[1], indexes[2], indexes[3], indexes[4])
-      pelet[j,i] <- pelet[i,j]
+      pelet[j,i] <- pelet[i,j] # todo : check for profiler which tells you how much takes every line
     }
   }
   
@@ -93,7 +88,7 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
   pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
-}
+} # todo : try exporting to c Rcpp if not sapply method
 
 compute_estimated_N <- function(est, theo){
   x <- diag(theo)
@@ -112,7 +107,7 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
   N <- c("H" = nrow(Healthy_List), "S" = nrow(Sick_List))
   p <- 0.5 + sqrt(1 + 8*length(sickMean))/2
   
-  for.optim <- function(alpha, theta) sum((theta*triangle_to_vector(create_alpha_mat(alpha)) - sickMean)^2)
+  for.optim <- function(alpha, theta) sum((theta*triangle2vector(create_alpha_mat(alpha)) - sickMean)^2)
   
   Steps <- list()
   temp.theta <- healthyMean
@@ -151,14 +146,14 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   
   compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
     return(min( compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data),
-                                    vector_var_matrix_calc_COR(vector_to_triangle(theta)*create_alpha_mat(alpha))),
+                                    vector_var_matrix_calc_COR(vector2triangle(theta)*create_alpha_mat(alpha))),
                 threshold ))
   }
   
   temp.theta <- theta0
   temp.alpha <- alpha0
-  if( !(is.positive.definite(vector_to_triangle(theta0)) &
-        is.positive.definite(vector_to_triangle(theta0)*create_alpha_mat(alpha0))) ){
+  if( !(is.positive.definite(vector2triangle(theta0)) &
+        is.positive.definite(vector2triangle(theta0)*create_alpha_mat(alpha0))) ){
     stop("Initial parameters dont result with positive-definite matrices")
   }
   
@@ -224,16 +219,20 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
 }
+# todo : try updating eigenvector/values every 3 iterations
+# todo : check elemntal library, instalation via R
+# todo : Build function that does michael and shahar method (4000 comparisons) and compare power
+# todo : Add another minus loglik fun
 
 loglik_uni <- function(obs, theta, alpha = NULL, Eff.N){
   
   if(length(alpha) == 0){
-    meanMat <- vector_to_triangle(theta)
+    meanMat <- vector2triangle(theta)
   } else {
-    meanMat <- vector_to_triangle(theta)*create_alpha_mat(alpha)
+    meanMat <- vector2triangle(theta)*create_alpha_mat(alpha)
   }
   varMat <- vector_var_matrix_calc_COR(meanMat)/Eff.N
-  meanVect <- triangle_to_vector(meanMat)
+  meanVect <- triangle2vector(meanMat)
   
   eigenDec <- eigen(varMat, symmetric = TRUE)
   U <- eigenDec$vectors
@@ -261,8 +260,8 @@ computeBmatr <- function(sickDat, CovObj, silent = FALSE, ncores = .GlobalEnv$nc
     clusterEvalQ(cl, library(numDeriv))
     clusterEvalQ(cl, library(matrixcalc))
     clusterExport(cl, c("sickDat", "CovObj"), envir = environment())
-    clusterExport(cl, c("loglik_uni", "loglikgrad_uni", "vector_to_triangle","create_alpha_mat",
-                        "vector_var_matrix_calc_COR", "triangle_to_vector"), envir = .GlobalEnv)
+    clusterExport(cl, c("loglik_uni", "loglikgrad_uni", "vector2triangle","create_alpha_mat",
+                        "vector_var_matrix_calc_COR", "triangle2vector"), envir = .GlobalEnv)
     Bmatr <- parLapply(cl = cl, 1:nrow(sickDat), rawFun)
     terminateCL(silent)
   }
@@ -285,7 +284,7 @@ ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), silent = 
                                                                        alpha = A,
                                                                        sick.data = sickDat,
                                                                        effective.N = CovObj$Est_N))
-  if(method == "Grad") pelet <- computeBmatr(sickDat, CovObj, silent = FALSE)
+  if(method == "Grad") pelet <- computeBmatr(sickDat, CovObj, silent = silent)
   
   return(pelet)
 }
@@ -345,9 +344,9 @@ wilksTest <- function(covObj, healthy.dat, sick.dat){
 
 # minusloglik_onlyalpha <- function(theta, alpha, sick.data, effective.N){
 #   Nd <- nrow(sick.data)
-#   meanmat <- vector_to_triangle(theta)*create_alpha_mat(alpha)
+#   meanmat <- vector2triangle(theta)*create_alpha_mat(alpha)
 #   
-#   g11 <- as.matrix(triangle_to_vector(meanmat))
+#   g11 <- as.matrix(triangle2vector(meanmat))
 #   g21 <- vector_var_matrix_calc_COR(meanmat)/effective.N
 #   eigen21 <- eigen(g21)
 #   
@@ -361,7 +360,7 @@ wilksTest <- function(covObj, healthy.dat, sick.dat){
 ###
 
 # compute_estimated_N <- function(est, theo){
-#   x <- triangle_to_vector(theo, diag = TRUE)
-#   y <- triangle_to_vector(est, diag = TRUE)
+#   x <- triangle2vector(theo, diag = TRUE)
+#   y <- triangle2vector(est, diag = TRUE)
 #   return(lm(x ~ 0 + y)$coef)
 # }

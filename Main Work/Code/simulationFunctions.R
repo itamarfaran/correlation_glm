@@ -123,10 +123,9 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
                                                               AR = ARsick, MA = MAsick),
                          real.theta = real.theta, real.sigma = real.sigma, alpha = alpha))
   
+  message("In 'createSamples': Clusters 'cl' opened, saved to global environment.")
   
   pelet <- list(real.theta = real.theta, real.sigma = real.sigma, alpha = alpha, samples = list())
-  
-  message("In 'createSamples': Clusters 'cl' opened, saved to global environment.")
   
   pb <- progress_bar$new(
     format = "Simulating data [:bar] :percent. Elapsed: :elapsed, ETA: :eta",

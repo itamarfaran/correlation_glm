@@ -16,7 +16,7 @@ promptForCores <- function(){
   userans2 <- "0"
   while(userans2 != "y"){
     ncores <- 0
-    userans1 <- -1
+    userans1 <- 1
     userans2 <- "0"
     while(userans1 != ncores){
       ncores <- 0
@@ -24,7 +24,7 @@ promptForCores <- function(){
         ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
         ncores <- floor(as.numeric(ncores))
       }
-      userans1 <- as.numeric(readline("Please re-enter number of cores to use: "))
+      if(ncores != 1) userans1 <- as.numeric(readline("Please re-enter number of cores to use: "))
     }
     userans2 <- readline(paste0(det, " cores detected. ", ncores, " cores will be used. Confirm (y)? "))
   }
@@ -157,7 +157,7 @@ central.moment <- function(x,norm=TRUE) {
 }
 
 #Take array of symmetric matrices and convert them to one data matrix
-cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle_to_vector))
+cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle2vector))
 
 #Build the alpha matrix according to the model
 create_alpha_mat <- function(VECT){
@@ -204,7 +204,7 @@ SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
 }
 
 #Retrieve lower/upper triangle of a matrix as a vector
-triangle_to_vector <- function(MATR , diag = FALSE){
+triangle2vector <- function(MATR , diag = FALSE){
   if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
   return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
 }
@@ -217,16 +217,22 @@ trim_num <- function(x, lower = -Inf, upper = Inf){
   return(pelet)
 }
 
-#Create a symmetric matrix from a vector
-vector_to_triangle <- function(VECT){
+vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
   m <- length(VECT)
-  p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
-  p <- p[which( (p==round(p))&p==abs(p) )]
+  
+  one <- ifelse(diag, -1, 1)
+  p <- 0.5*c(one + sqrt(1 + 8*m), one - sqrt(1 + 8*m))
+  p <- p[which( (p==round(p)) & p==abs(p) )]
   if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
   pelet <- matrix(0, ncol = p, nrow = p)
-  pelet[lower.tri(pelet)] <- VECT
-  pelet <- pelet+t(pelet)
-  diag(pelet) <- 1
+  pelet[lower.tri(pelet, diag = diag)] <- VECT
+  
+  if(diag){
+    pelet <- pelet + t(pelet) - diag(diag(pelet))
+  } else {
+    pelet <- pelet + t(pelet)
+    if(!is.null(truncdiag)) diag(pelet) <- truncdiag
+  }
   return(pelet)
 }
 
@@ -238,3 +244,16 @@ vnorm <- function(x, MATR = NULL, sqroot = FALSE, solve_matr = FALSE){
   return(pelet)
 }
 
+#Create a symmetric matrix from a vector
+# vector2triangle_old <- function(VECT){
+#   m <- length(VECT)
+#   p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
+#   p <- p[which( (p==round(p))&p==abs(p) )]
+#   if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+#   pelet <- matrix(0, ncol = p, nrow = p)
+#   pelet[lower.tri(pelet)] <- VECT
+#   pelet <- pelet+t(pelet)
+#   diag(pelet) <- 1
+#   return(pelet)
+# }
+# 

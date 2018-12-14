@@ -6,8 +6,8 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
-                                percent_alpha = 0.1, range_alpha = c(0.82, 0.95),
+sampleData <- createSamples(nH = 57, nS = 42, p = 12, Tlength = Tlength,
+                                percent_alpha = 0.1, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
 
@@ -18,9 +18,9 @@ all(abind(sampleData$healthy, sampleData$sick, along = 3) %>%
 
 Pelet_IID <- Estimate.Loop(sampleData$healthy, sampleData$sick, MaxLoop = 100)
 
-# emp <- sampleData$healthy %>% cor.matrix_to_norm.matrix() %>% cov() %>% triangle_to_vector(diag = TRUE)
+# emp <- sampleData$healthy %>% cor.matrix_to_norm.matrix() %>% cov() %>% triangle2vector(diag = TRUE)
 # theo <- sampleData$healthy %>% calculate_mean_matrix() %>% vector_var_matrix_calc_COR() %>%
-#   triangle_to_vector(diag = TRUE)
+#   triangle2vector(diag = TRUE)
 # 
 # data.frame(Theoretical = theo, Empirical = emp) %>% ggplot(aes(x = Theoretical, y = Empirical)) + 
 #   geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +

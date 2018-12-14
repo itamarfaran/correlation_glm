@@ -4,7 +4,7 @@ source("Main Work/code/simulationFunctions.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
-                                     "cor.matrix_to_norm.matrix", "triangle_to_vector","vector_to_triangle",
+                                     "cor.matrix_to_norm.matrix", "triangle2vector","vector2triangle",
                                      "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR",
                                      "minusloglik", "bootstrapFunction")
 
@@ -73,20 +73,20 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Loss of DF")
 
-p <- 7
+p <- 10
 B <- 100
 Tlength <- 115
-ARlist <- c(-0.5, -0.25, 0, 0.1, 0.25, 0.4, 0.6)
-lngth_ARlist <- length(ARlist)
+MAlist <- c(-0.5, -0.25, 0, 0.1, 0.25, 0.4, 0.6)
+lngth_MAlist <- length(MAlist)
 seed <- sample(1:10000, 3)
-sampleDataBT <- list()
+sampleDataBT_ARMA <- list()
 
-for(t in 1:lngth_ARlist){
-  message(paste0("With AR = ", ARlist[t], "; ", t, "/", lngth_ARlist, " ", round(100*t/lngth_ARlist), "%"))
+for(t in 1:lngth_MAlist){
+  message(paste0("With MA = ", MAlist[t], "; ", t, "/", lngth_MAlist, " ", round(100*t/lngth_MAlist), "%"))
   sampleDataBT_ARMA[[t]] <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
-                                     ARsick = ARlist[t], ARhealth = ARlist[t],
+                                     MAsick = MAlist[t], MAhealth = MAlist[t],
                                      percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed) %>%
-    append(c("AR" = ARlist[t]), 0)
+    append(c("MA" = MAlist[t]), 0)
 }
 
 bootstrapFunction <- function(b, k){
@@ -105,38 +105,38 @@ simuldatT <- list()
 
 pb <- progress_bar$new(
   format = "Estimating models [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
-  total = lngth_ARlist, clear = FALSE, width= 90)
+  total = lngth_MAlist, clear = FALSE, width= 90)
 
 tt2 <- Sys.time()
 if(ncores > 1){
   buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
   clusterExport(cl = cl, "sampleDataBT_ARMA")
-  for(t in 1:lngth_ARlist){
+  for(t in 1:lngth_MAlist){
     pb$tick()
     clusterExport(cl = cl, "t")
     simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
   }
   terminateCL()
-} else for(t in 1:lngth_ARlist){
+} else for(t in 1:lngth_MAlist){
   pb$tick()
   simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
 } 
 tt2 <- Sys.time() - tt2
 rm(pb)
 
-alpha_simul <- array(dim = c(B, p, lngth_ARlist))
-alpha_sdGrad <- matrix(0, nrow = lngth_ARlist, ncol = p)
-alpha_sdHess <- matrix(0, nrow = lngth_ARlist, ncol = p)
-alpha_sdComb <- matrix(0, nrow = lngth_ARlist, ncol = p)
-emp_sds <- matrix(nrow = lngth_ARlist, ncol = p)
-coeffs <- matrix(0, nrow = lngth_ARlist, ncol = 3)
-estNT_all <- matrix(0, nrow = B, ncol = lngth_ARlist)
+alpha_simul <- array(dim = c(B, p, lngth_MAlist))
+alpha_sdGrad <- matrix(0, nrow = lngth_MAlist, ncol = p)
+alpha_sdHess <- matrix(0, nrow = lngth_MAlist, ncol = p)
+alpha_sdComb <- matrix(0, nrow = lngth_MAlist, ncol = p)
+emp_sds <- matrix(nrow = lngth_MAlist, ncol = p)
+coeffs <- matrix(0, nrow = lngth_MAlist, ncol = 3)
+estNT_all <- matrix(0, nrow = B, ncol = lngth_MAlist)
 
 pb <- progress_bar$new(
   format = "Computing hessians [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
-  total = lngth_ARlist, clear = FALSE, width= 90)
+  total = lngth_MAlist, clear = FALSE, width= 90)
 
-for(t in 1:lngth_ARlist){
+for(t in 1:lngth_MAlist){
   for(b in 1:B) {
     alpha_simul[b,,t] <- simuldatT[[t]][[b]]$alpha
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
@@ -159,45 +159,45 @@ rm(pb)
 
 coeffs <- as.data.frame(coeffs)
 colnames(coeffs) <- c("Grad", "Hess", "Combination")
-coeffs$AR <- ARlist
+coeffs$MA <- MAlist
 
-CoefByDF <- gather(coeffs, key = Type, value = Coef, -AR) %>% ggplot(aes(x = AR, y = Coef, col = Type)) +
-  geom_smooth(se = FALSE) + geom_point()
+CoefByDF <- gather(coeffs, key = Type, value = Coef, -MA) %>% ggplot(aes(x = MA, y = Coef, col = Type)) +
+  geom_smooth(method = "lm", formula = y ~ (x + I(x^2)), se = FALSE) + geom_point()
 
 ErrorByDF_Grad <- 
-  inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
-             cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  inner_join(by = c("MAlist", "P"), cbind(MAlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist),
+             cbind(MAlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(MAlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
   geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
 ErrorByDF_Hess <- 
-  inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
-             cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  inner_join(by = c("MAlist", "P"), cbind(MAlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist),
+             cbind(MAlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(MAlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
 ErrorByDF_Combined <-
-  inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
-             cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  inner_join(by = c("MAlist", "P"), cbind(MAlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist),
+             cbind(MAlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -MAlist) ) %>%
+  ggplot(aes(x = Value.x, y = Value.y, col = factor(MAlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
 
 BiasDiffEstN <- as.data.frame(estNT_all - Tlength)
-colnames(BiasDiffEstN) <- ARlist
+colnames(BiasDiffEstN) <- MAlist
 
-EstNDiff <- gather(BiasDiffEstN, key = AR, value = Bias) %>%
-  ggplot(aes(x = factor(AR, levels = ARlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "AR", y = "Absolute Loss of DF")
+EstNDiff <- gather(BiasDiffEstN, key = MA, value = Bias) %>%
+  ggplot(aes(x = factor(MA, levels = MAlist, ordered = TRUE), y = Bias)) +
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "MA", y = "Absolute Loss of DF")
 
 BiasRatioEstN <- as.data.frame(estNT_all / Tlength - 1)
-colnames(BiasRatioEstN) <- ARlist
+colnames(BiasRatioEstN) <- MAlist
 
-EstNRatio <- gather(BiasRatioEstN, key = AR, value = Bias) %>%
-  ggplot(aes(x = factor(AR, levels = ARlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "AR", y = "Relative Loss of DF")
+EstNRatio <- gather(BiasRatioEstN, key = MA, value = Bias) %>%
+  ggplot(aes(x = factor(MA, levels = MAlist, ordered = TRUE), y = Bias)) +
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "MA", y = "Relative Loss of DF")
 
 
 link2 <- gsub(":", "-", paste0("Main Work/Data/Enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )

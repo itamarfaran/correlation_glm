@@ -1,6 +1,6 @@
-source("Main Work/Code/generalFunctions.R")
-source("Main Work/code/estimationFunctions2.R")
-source("Main Work/code/simulationFunctions.R")
+source("main_work/Code/01_generalFunctions.R")
+source("main_work/Code/02_simulationFunctions.R")
+source("main_work/Code/03_estimationFunctions2.R")
 
 link <- "Main Work/Data/NMDA_all_data_AAL90.mat"
 Real.dta <- readMat(link)

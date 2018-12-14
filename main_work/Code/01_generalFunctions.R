@@ -12,19 +12,12 @@ ipak(packages)
 promptForCores <- function(){
   det <- detectCores()
   ncores <- 0
-  userans1 <- -1
   userans2 <- "0"
   while(userans2 != "y"){
     ncores <- 0
-    userans1 <- 1
-    userans2 <- "0"
-    while(userans1 != ncores){
-      ncores <- 0
-      while(ncores < 1 | ncores  >= det){
-        ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
-        ncores <- floor(as.numeric(ncores))
-      }
-      if(ncores != 1) userans1 <- as.numeric(readline("Please re-enter number of cores to use: "))
+    while(ncores < 1 | ncores >= det){
+      ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
+      ncores <- floor(as.numeric(ncores))
     }
     userans2 <- readline(paste0(det, " cores detected. ", ncores, " cores will be used. Confirm (y)? "))
   }

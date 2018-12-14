@@ -1,6 +1,6 @@
-source("main_work/code/01_generalFunctions.R")
-source("main_work/code/02_simulationFunctions.R")
-source("main_work/code/03_estimationFunctions2.R")
+source("main_work/Code/01_generalFunctions.R")
+source("main_work/Code/02_simulationFunctions.R")
+source("main_work/Code/03_estimationFunctions2.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",

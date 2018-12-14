@@ -200,7 +200,7 @@ EstNRatio <- gather(BiasRatioEstN, key = MA, value = Bias) %>%
   geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "MA", y = "Relative Loss of DF")
 
 
-link2 <- gsub(":", "-", paste0("main_work/data/enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
+link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)
 

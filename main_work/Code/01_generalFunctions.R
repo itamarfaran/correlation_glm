@@ -19,7 +19,7 @@ promptForCores <- function(){
       ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
       ncores <- floor(as.numeric(ncores))
     }
-    userans2 <- readline(paste0(det, " cores detected. ", ncores, " cores will be used. Confirm (y)? "))
+    userans2 <- readline(paste0(det, " detected, ", ncores, " used. Confirm (y)? "))
   }
   ncores <<- ncores
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))

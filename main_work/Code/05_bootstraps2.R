@@ -119,7 +119,6 @@ estNT_all <- matrix(0, nrow = B, ncol = lngth_Tlist)
 pb <- progress_bar$new(
   format = "Computing hessians [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
   total = lngth_Tlist, clear = FALSE, width= 90)
-pb$tick()
 
 for(t in 1:lngth_Tlist){
   for(b in 1:B) {
@@ -185,7 +184,7 @@ EstNRatio <- gather(BiasRatioEstN, key = DF, value = Bias) %>%
   geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Relative Bias")
 
 
-link2 <- gsub(":", "-", paste0("main_work/data/enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
+link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)
 

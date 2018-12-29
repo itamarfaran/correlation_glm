@@ -6,8 +6,8 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 12, Tlength = Tlength,
-                                percent_alpha = 0.1, range_alpha = c(0.65, 0.95),
+sampleData <- createSamples(nH = 57, nS = 42, p = 20, Tlength = Tlength,
+                                percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
 
@@ -37,6 +37,7 @@ fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
 HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
 HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
+gc()
 
 Pelet_Cov$returns
 Pelet_Cov$convergence
@@ -50,6 +51,3 @@ HypTestResComb$Results[order(HypTestResComb$Results$Real),]
 #for(i in 2:Pelet_Cov$returns) print(Pelet_Cov$Log_Optim[[i]]$counts)
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick)
-
-
-

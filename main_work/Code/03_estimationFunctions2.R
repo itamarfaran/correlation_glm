@@ -62,30 +62,38 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
     if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
     } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
   
-  real.cov2 <- function(i, j, k, l) {
-    (MATR[i,j]*MATR[k,l]/2) * (MATR[i,k]^2 + MATR[i,l]^2 + MATR[j,k]^2 + MATR[j,l]^2) -
-      MATR[i,j]*(MATR[i,k]*MATR[i,l] + MATR[j,k]*MATR[j,l]) -
-      MATR[k,l]*(MATR[i,k]*MATR[j,k] + MATR[i,l]*MATR[j,l]) +
-      (MATR[i,k]*MATR[j,l] + MATR[i,l]*MATR[j,k])
-  }
-  
-  p <- dim(MATR)[1]
+  p <- nrow(MATR)
   m <- p*(p-1)/2
+  order_vecti <- unlist(lapply(1:(p - 1), function(i) rep(i, p - i)))
+  order_vectj <- unlist(lapply(1:(p - 1), function(i) (i + 1):p))
   
-  order_vect <- cbind(unlist(lapply(1:(p - 1), function(i) rep(i, p - i))),
-                      unlist(lapply(1:(p - 1), function(i) (i + 1):p)))
-  
-  pelet <- matrix(nrow = m, ncol = m)
-  for(i in 1:m){
-    for(j in i:m){
-      indexes <- c(order_vect[i,], order_vect[j,])
-      pelet[i,j] <- real.cov2(indexes[1], indexes[2], indexes[3], indexes[4])
-      pelet[j,i] <- pelet[i,j] # todo : check for profiler which tells you how much takes every line
+  pelet <- matrix(0, nrow = m, ncol = m)
+  for(i1 in 1:m){
+    for(j1 in i1:m){
+      i <- order_vecti[i1]
+      j <- order_vectj[i1]
+      k <- order_vecti[j1]
+      l <- order_vectj[j1]
+      
+      MATRij <- MATR[i,j]
+      MATRkl <- MATR[k,l]
+      MATRik <- MATR[i,k]
+      MATRil <- MATR[i,l]
+      MATRjk <- MATR[j,k]
+      MATRjl <- MATR[j,l]
+      
+      pelet[i1,j1] <-
+        (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
+        MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
+        MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
+        (MATRik*MATRjl + MATRil*MATRjk)
     }
   }
   
+  pelet <- pelet + t(pelet) - diag(diag(pelet))
+  
   if((reg_par < 0) | (reg_par > 1)) warning("Regularization Parameter not between 0,1")
-  pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
 } # todo : try exporting to c Rcpp if not sapply method
@@ -141,7 +149,7 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
 }
 
 Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
-                           max.loop = 50, epsIter = 10^(-3), min_reps = 3, method = "Nelder-Mead",
+                           max.loop = 50, epsIter = 2*10^(-3), min_reps = 3, method = "Nelder-Mead",
                            epsOptim = 10^(-5), progress = TRUE){
   
   compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
@@ -211,10 +219,15 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     tnai0 <- FALSE
     if(i > min_reps) tnai0 <- (dist <= epsIter) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
     
-    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt)), "s, ",
+    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
                             convergence[i],", ",round(dist, 5) , "); "))
   }
-  message(paste0("\nTotal time: ", round(Sys.time() - tt), " seconds."))
+  if(progress){
+    tt <- Sys.time() - tt
+    units(tt) <- "secs"
+    tt <- as.numeric(tt)
+    message(paste0("\nTotal time: ", floor(tt/60), " minutes and ", round(tt %% 60, 1), " seconds."))
+  }
 
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )

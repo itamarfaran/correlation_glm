@@ -12,14 +12,18 @@ ipak(c(packages, "profvis"))
 promptForCores <- function(){
   det <- detectCores()
   ncores <- 0
-  userans2 <- "0"
-  while(userans2 != "y"){
+  userans <- "0"
+  while(!(userans %in% c("y", "Y"))){
     ncores <- 0
     while(ncores < 1 | ncores >= det){
       ncores <- readline(paste0(det, " cores where detected. Please enter number of cores to use: "))
       ncores <- floor(as.numeric(ncores))
     }
-    userans2 <- readline(paste0(det, " detected, ", ncores, " used. Confirm (y)? "))
+    if(ncores > 1){
+      userans <- readline(paste0(det, " detected, ", ncores, " used. Confirm (y)? "))
+    } else {
+      userans <- "y"
+    }
   }
   ncores <<- ncores
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))

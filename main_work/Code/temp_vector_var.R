@@ -2,7 +2,21 @@ source("main_work/Code/01_generalFunctions.R")
 source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions2.R")
 
-p <- 50
+real.cov2 <- function(i, j, k, l, MATR) {
+  MATRij <- MATR[i,j]
+  MATRkl <- MATR[k,l]
+  MATRik <- MATR[i,k]
+  MATRil <- MATR[i,l]
+  MATRjk <- MATR[j,k]
+  MATRjl <- MATR[j,l]
+  
+  (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
+    MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
+    MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
+    (MATRik*MATRjl + MATRil*MATRjk)
+}
+
+p <- 100
 MATR <- build_parameters(p, 0.5, c(0,1))$Corr.mat
 
 vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
@@ -13,42 +27,91 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
     if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
     } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
   
-  real.cov2 <- function(i, j, k, l, MATR) {
-    MATRij <- MATR[i,j]
-    MATRkl <- MATR[k,l]
-    MATRik <- MATR[i,k]
-    MATRil <- MATR[i,l]
-    MATRjk <- MATR[j,k]
-    MATRjl <- MATR[j,l]
-    
-    (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
-      MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
-      MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
-      (MATRik*MATRjl + MATRil*MATRjk)
-  }
-  
-  p <- dim(MATR)[1]
+  p <- nrow(MATR)
   m <- p*(p-1)/2
+  order_vecti <- unlist(lapply(1:(p - 1), function(i) rep(i, p - i)))
+  order_vectj <- unlist(lapply(1:(p - 1), function(i) (i + 1):p))
   
-  order_vect <- cbind(unlist(lapply(1:(p - 1), function(i) rep(i, p - i))),
-                      unlist(lapply(1:(p - 1), function(i) (i + 1):p)))
-  
-  pelet <- matrix(nrow = m, ncol = m)
-  for(i in 1:m){
-    for(j in i:m){
-      indexes <- c(order_vect[i,], order_vect[j,])
-      pelet[i,j] <- real.cov2(indexes[1], indexes[2], indexes[3], indexes[4], MATR)
-      pelet[j,i] <- pelet[i,j] # todo : check for profiler which tells you how much takes every line
+  pelet <- matrix(0, nrow = m, ncol = m)
+  for(i1 in 1:m){
+    for(j1 in i1:m){
+      i <- order_vecti[i1]
+      j <- order_vectj[i1]
+      k <- order_vecti[j1]
+      l <- order_vectj[j1]
+      
+      MATRij <- MATR[i,j]
+      MATRkl <- MATR[k,l]
+      MATRik <- MATR[i,k]
+      MATRil <- MATR[i,l]
+      MATRjk <- MATR[j,k]
+      MATRjl <- MATR[j,l]
+      
+      pelet[i1,j1] <-
+        (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
+        MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
+        MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
+        (MATRik*MATRjl + MATRil*MATRjk)
     }
   }
   
+  pelet <- pelet + t(pelet) - diag(diag(pelet))
+  
   if((reg_par < 0) | (reg_par > 1)) warning("Regularization Parameter not between 0,1")
-  pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
 } # todo : try exporting to c Rcpp if not sapply method
 
-vector_var_matrix_calc_COR3 <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+vector_var_matrix_calc_COR_C <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+                                         reg_par = 0){
+  
+  if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
+  if(!is.positive.definite(MATR)){
+    if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
+    } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
+  
+  p <- nrow(MATR)
+  m <- p*(p-1)/2
+  order_vecti <- unlist(lapply(1:(p - 1), function(i) rep(i, p - i)))
+  order_vectj <- unlist(lapply(1:(p - 1), function(i) (i + 1):p))
+  
+  cFun <- function(MATR, m, order_vecti, order_vectj){
+    pelet <- matrix(0, nrow = m, ncol = m)
+    for(i1 in 1:m){
+      for(j1 in i1:m){
+        i <- order_vecti[i1]
+        j <- order_vectj[i1]
+        k <- order_vecti[j1]
+        l <- order_vectj[j1]
+        
+        MATRij <- MATR[i,j]
+        MATRkl <- MATR[k,l]
+        MATRik <- MATR[i,k]
+        MATRil <- MATR[i,l]
+        MATRjk <- MATR[j,k]
+        MATRjl <- MATR[j,l]
+        
+        pelet[i1,j1] <-
+          (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
+          MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
+          MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
+          (MATRik*MATRjl + MATRil*MATRjk)
+      }
+    }
+    return(pelet)
+  }
+  
+  pelet <- cFun(MATR, m, order_vecti, order_vectj)
+  pelet <- pelet + t(pelet) - diag(diag(pelet))
+  
+  if((reg_par < 0) | (reg_par > 1)) warning("Regularization Parameter not between 0,1")
+  if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  
+  return(pelet)
+} # todo : try exporting to c Rcpp if not sapply method
+
+vector_var_matrix_calc_COR_par <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
                                        reg_par = 0){
   
   if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
@@ -89,21 +152,31 @@ vector_var_matrix_calc_COR3 <- function(MATR, nonpositive = c("Stop", "Force", "
   pelet <- vector2triangle(unlist(pelet), diag = T)
   
   if((reg_par < 0) | (reg_par > 1)) warning("Regularization Parameter not between 0,1")
-  pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
 }
 
 profvis({
   tt1 <- Sys.time()
-  pelet <- vector_var_matrix_calc_COR(MATR)
+  pelet1 <- vector_var_matrix_calc_COR(MATR)
   tt1 <- Sys.time() - tt1
+  tt2 <- Sys.time()
+  pelet2 <- vector_var_matrix_calc_COR2(MATR)
+  tt2 <- Sys.time() - tt2
   tt3 <- Sys.time()
-  pelet3 <- vector_var_matrix_calc_COR3(MATR)
+  pelet3 <- vector_var_matrix_calc_COR_C(MATR)
   tt3 <- Sys.time() - tt3
-  
+  # tt4 <- Sys.time()
+  # pelet4 <- vector_var_matrix_calc_COR_par(MATR)
+  # tt4 <- Sys.time() - tt4
 })
 
-identical(round(pelet, 2), round(pelet3 ,2))
+identical(round(pelet1, 2), round(pelet2 ,2))
 tt1
+tt2
 tt3
+#tt4
+
+# rm(pelet1, pelet2, pelet3, pelet4)
+gc()

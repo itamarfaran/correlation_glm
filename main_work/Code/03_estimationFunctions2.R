@@ -3,11 +3,11 @@ clean_sick <- function(sick.data, alpha){
   sick.data/(rep(1, nrow(sick.data)) %*% t(alpha %>% create_alpha_mat() %>% triangle2vector()))
 }
 
-minusloglik <- function(theta, alpha, healthy.data = NULL, sick.data, effective.N = NULL, DET = TRUE){
-  calcHealth <- length(healthy.data) > 0
+minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET = TRUE){
+  calcHealth <- !missing(healthy.data)
   
   calc_n <- TRUE
-  if(length(effective.N) > 0){
+  if(!missing(effective.N)){
     calc_n <- FALSE
     if(calcHealth){
       n.effective_H <- effective.N[1]
@@ -237,9 +237,9 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
 # todo : Build function that does michael and shahar method (4000 comparisons) and compare power
 # todo : Add another minus loglik fun
 
-loglik_uni <- function(obs, theta, alpha = NULL, Eff.N){
+loglik_uni <- function(obs, theta, alpha, Eff.N){
   
-  if(length(alpha) == 0){
+  if(missing(alpha)){
     meanMat <- vector2triangle(theta)
   } else {
     meanMat <- vector2triangle(theta)*create_alpha_mat(alpha)
@@ -302,8 +302,8 @@ ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), silent = 
   return(pelet)
 }
 
-build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, Real = NULL, test = c("lower", "upper", "two-sided"),
-                             qval = 0.05, MH_method = "none", const = 1, effectiveN = NULL){
+build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, Real, test = c("lower", "upper", "two-sided"),
+                             qval = 0.05, MH_method = "none", const = 1, effectiveN){
   
   if(length(test) > 1) test <- test[1]
   obj <- Estimate.Loop2_object
@@ -315,7 +315,7 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, Real = NULL, test 
   colnames(A) <- c("Est.", "Std.", "Z-val", "P-val", "Adj.P-val", "Reject_H0")
   
   dist_fun <- function(q) pnorm(q)
-  if(length(effectiveN) > 0){
+  if(!missing(effectiveN)){
     colnames(A)[3] <- "T-val"
     dist_fun <- function(q) pt(q, effectiveN)
   }
@@ -331,7 +331,7 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, Real = NULL, test 
   A[,5] <- p.adjust(A[,4], method = MH_method)
   A[,6] <- A[,5] < qval
   
-  if(length(Real) > 0) A <- cbind(A, Real)
+  if(!missing(Real)) A <- cbind(A, Real)
   
   return(list(Results = as.data.frame(A), DF = effectiveN, Test = test, Significance = qval, MH_method = MH_method, SD_origin = alpha_sd, Var_Mat = alpha_var_mat))
 }

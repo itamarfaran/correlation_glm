@@ -109,8 +109,8 @@ checkInv <- function(coefs, perc = 0.001){
   return(all(x == 1) | all(x == -1))
 }
 
-summatrix <- function(ARRAY, index, constants = NULL, weights = FALSE){
-  if(is.null(constants)) constants <- rep(1, length(index))
+summatrix <- function(ARRAY, index, constants, weights = FALSE){
+  if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
   for(i in 1:length(index)){
@@ -119,8 +119,8 @@ summatrix <- function(ARRAY, index, constants = NULL, weights = FALSE){
   return(pelet)
 }
 
-sumvector <- function(MATR, index, constants = NULL, weights = FALSE){
-  if(is.null(constants)) constants <- rep(1, length(index))
+sumvector <- function(MATR, index, constants, weights = FALSE){
+  if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- numeric(ncol(MATR))
   for(i in 1:length(index)){
@@ -234,9 +234,9 @@ vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
 }
 
 #Calculate Maholonobis norm of a vector. Default is regular norm.
-vnorm <- function(x, MATR = NULL, sqroot = FALSE, solve_matr = FALSE){
+vnorm <- function(x, MATR, sqroot = FALSE, solve_matr = FALSE){
   if(solve_matr) MATR <- solve(MATR)
-  if(length(MATR)==0) { pelet <- sum(x^2) } else{ pelet <- as.vector(t(x)%*%MATR%*%x) }
+  if(missing(MATR)) { pelet <- sum(x^2) } else{ pelet <- as.vector(t(x)%*%MATR%*%x) }
   if(sqroot) pelet <- sqrt(pelet)
   return(pelet)
 }

@@ -5,9 +5,9 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab",
+packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab", "Matrix",
               "stats4", "tidyverse", "data.table", "parallel", "mvtnorm", "progress")
-ipak(packages)
+ipak(c(packages, "profvis"))
 
 promptForCores <- function(){
   det <- detectCores()

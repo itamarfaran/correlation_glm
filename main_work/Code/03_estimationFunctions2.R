@@ -96,7 +96,7 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
   if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
-} # todo : try exporting to c Rcpp if not sapply method
+}
 
 compute_estimated_N <- function(est, theo){
   x <- diag(theo)

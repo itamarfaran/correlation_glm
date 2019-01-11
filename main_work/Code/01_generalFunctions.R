@@ -4,15 +4,25 @@ ipak <- function(pkg){
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 }
-
-packages <- c("abind", "corrplot", "numDeriv", "matrixcalc", "R.matlab", "Matrix",
-              "stats4", "tidyverse", "data.table", "parallel", "mvtnorm", "progress")
-ipak(c(packages, "profvis"))
+packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
+              "mvtnorm", "numDeriv", "parallel", "profvis", "progress",
+              "Rcpp", "R.matlab", "stats4", "tidyverse")
+ipak(packages)
 
 promptForCores <- function(){
   det <- detectCores()
-  ncores <- 0
-  userans <- "0"
+  
+  newPrompt <- TRUE
+  
+  if("ncores" %in% objects(name = .GlobalEnv))
+    if(ncores > 0 & ncores < det) newPrompt <- FALSE
+
+  if(newPrompt){
+    ncores <- 0
+    userans <- "0"
+  } else {
+    userans <- "y"
+  }
   while(!(userans %in% c("y", "Y"))){
     ncores <- 0
     while(ncores < 1 | ncores >= det){
@@ -28,7 +38,6 @@ promptForCores <- function(){
   ncores <<- ncores
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))
 }
-
 promptForCores()
 
 buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){

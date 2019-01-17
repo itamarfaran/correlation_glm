@@ -24,7 +24,7 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET 
     
     g10 <- as.matrix(theta)
     
-    g20 <- vector_var_matrix_calc_COR(vector2triangle(theta))
+    g20 <- vector_var_matrix_calc_COR_C(vector2triangle(theta))
     if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data)*(nrow(healthy.data) - 1)/nrow(healthy.data), g20)
     e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
     U0 <- e20$vectors
@@ -35,7 +35,7 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET 
   
   g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(alpha)))
   
-  g21 <- vector_var_matrix_calc_COR(vector2triangle(theta)*create_alpha_mat(alpha))
+  g21 <- vector_var_matrix_calc_COR_C(vector2triangle(theta)*create_alpha_mat(alpha))
   if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data), g21)
   e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
   U1 <- e21$vectors
@@ -54,8 +54,60 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET 
   return(0.5*SSE)
 }
 
-vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
-                                       reg_par = 0){
+cppFunction(
+  'NumericMatrix corcalc_c(NumericMatrix MATR,
+  int p, int m, NumericVector order_vecti, NumericVector order_vectj) {
+  
+  NumericMatrix pelet(m, m); 
+  
+  for (int i1 = 0; i1 < m; i1++) {
+  for (int j1 = i1; j1 < m; j1++) {
+  int i = order_vecti[i1];
+  int j = order_vectj[i1];
+  int k = order_vecti[j1];
+  int l = order_vectj[j1];
+  
+  double MATRij = MATR(i,j);
+  double MATRkl = MATR(k,l);
+  double MATRik = MATR(i,k);
+  double MATRil = MATR(i,l);
+  double MATRjk = MATR(j,k);
+  double MATRjl = MATR(j,l);
+  
+  pelet(i1,j1) =
+  (MATRij*MATRkl/2) * (pow(MATRik, 2) + pow(MATRil, 2) + pow(MATRjk, 2) + pow(MATRjl, 2)) -
+  MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
+  MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
+  (MATRik*MATRjl + MATRil*MATRjk);
+  }
+  }
+  return(pelet);
+  }')
+
+vector_var_matrix_calc_COR_C <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+                                         reg_par = 0){
+  
+  if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
+  if(!is.positive.definite(MATR)){
+    if(nonpositive == "Force") {MATR <- force_positive_definiteness(MATR)$Matrix
+    } else if(nonpositive != "Ignore") stop("MATR not positive definite") }
+  
+  p <- nrow(MATR)
+  m <- p*(p-1)/2
+  order_vecti <- unlist(lapply(1:(p - 1), function(i) rep(i, p - i))) - 1
+  order_vectj <- unlist(lapply(1:(p - 1), function(i) (i + 1):p)) - 1
+  
+  pelet <- corcalc_c(MATR, p, m, order_vecti, order_vectj)
+  pelet <- pelet + t(pelet) - diag(diag(pelet))
+  
+  if((reg_par < 0) | (reg_par > 1)) warning("Regularization Parameter not between 0,1")
+  if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
+  
+  return(pelet)
+}
+
+vector_var_matrix_calc_COR_R <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
+                                         reg_par = 0){
   
   if(length(nonpositive) > 1) nonpositive <- nonpositive[1]
   if(!is.positive.definite(MATR)){
@@ -154,7 +206,7 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   
   compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
     return(min( compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data),
-                                    vector_var_matrix_calc_COR(vector2triangle(theta)*create_alpha_mat(alpha))),
+                                    vector_var_matrix_calc_COR_C(vector2triangle(theta)*create_alpha_mat(alpha))),
                 threshold ))
   }
   
@@ -244,7 +296,7 @@ loglik_uni <- function(obs, theta, alpha, Eff.N){
   } else {
     meanMat <- vector2triangle(theta)*create_alpha_mat(alpha)
   }
-  varMat <- vector_var_matrix_calc_COR(meanMat)/Eff.N
+  varMat <- vector_var_matrix_calc_COR_C(meanMat)/Eff.N
   meanVect <- triangle2vector(meanMat)
   
   eigenDec <- eigen(varMat, symmetric = TRUE)
@@ -274,7 +326,7 @@ computeBmatr <- function(sickDat, CovObj, silent = FALSE, ncores = .GlobalEnv$nc
     clusterEvalQ(cl, library(matrixcalc))
     clusterExport(cl, c("sickDat", "CovObj"), envir = environment())
     clusterExport(cl, c("loglik_uni", "loglikgrad_uni", "vector2triangle","create_alpha_mat",
-                        "vector_var_matrix_calc_COR", "triangle2vector"), envir = .GlobalEnv)
+                        "vector_var_matrix_calc_COR_C", "triangle2vector"), envir = .GlobalEnv)
     Bmatr <- parLapply(cl = cl, 1:nrow(sickDat), rawFun)
     terminateCL(silent)
   }
@@ -354,26 +406,3 @@ wilksTest <- function(covObj, healthy.dat, sick.dat){
     "Pval" = 1 - pchisq(chisq, length(covObj$alpha)))
   
 }
-
-# minusloglik_onlyalpha <- function(theta, alpha, sick.data, effective.N){
-#   Nd <- nrow(sick.data)
-#   meanmat <- vector2triangle(theta)*create_alpha_mat(alpha)
-#   
-#   g11 <- as.matrix(triangle2vector(meanmat))
-#   g21 <- vector_var_matrix_calc_COR(meanmat)/effective.N
-#   eigen21 <- eigen(g21)
-#   
-#   U <- eigen21$vectors
-#   D <- eigen21$values
-#   dist <- (sick.data - rep(1,nrow(sick.data))%*%t(g11))%*%U
-#   
-#   return( Nd*sum(log(D)) + sum(diag(dist %*% diag(1/D) %*% t(dist))) )
-# }
-
-###
-
-# compute_estimated_N <- function(est, theo){
-#   x <- triangle2vector(theo, diag = TRUE)
-#   y <- triangle2vector(est, diag = TRUE)
-#   return(lm(x ~ 0 + y)$coef)
-# }

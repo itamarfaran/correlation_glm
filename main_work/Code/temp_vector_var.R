@@ -16,7 +16,7 @@ real.cov2 <- function(i, j, k, l, MATR) {
     (MATRik*MATRjl + MATRil*MATRjk)
 }
 
-p <- 10
+p <- 90
 MATR <- build_parameters(p, 0.5, c(0,1))$Corr.mat
 # MATR <- matrix(1:9, ncol = 3)
 # MATR <- MATR + t(MATR) + diag(3)*9
@@ -72,18 +72,18 @@ cppFunction(
   NumericMatrix pelet(m, m); 
 
   for (int i1 = 0; i1 < m; i1++) {
-    for (int j1 = 0; j1 < m; j1++) {
+    for (int j1 = i1; j1 < m; j1++) {
       int i = order_vecti[i1];
       int j = order_vectj[i1];
       int k = order_vecti[j1];
       int l = order_vectj[j1];
 
-      int MATRij = MATR(i,j);
-      int MATRkl = MATR(k,l);
-      int MATRik = MATR(i,k);
-      int MATRil = MATR(i,l);
-      int MATRjk = MATR(j,k);
-      int MATRjl = MATR(j,l);
+      double MATRij = MATR(i,j);
+      double MATRkl = MATR(k,l);
+      double MATRik = MATR(i,k);
+      double MATRil = MATR(i,l);
+      double MATRjk = MATR(j,k);
+      double MATRjl = MATR(j,l);
 
       pelet(i1,j1) =
         (MATRij*MATRkl/2) * (pow(MATRik, 2) + pow(MATRil, 2) + pow(MATRjk, 2) + pow(MATRjl, 2)) -

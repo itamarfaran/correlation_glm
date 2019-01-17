@@ -16,7 +16,7 @@ real.cov2 <- function(i, j, k, l, MATR) {
     (MATRik*MATRjl + MATRil*MATRjk)
 }
 
-p <- 90
+p <- 10
 MATR <- build_parameters(p, 0.5, c(0,1))$Corr.mat
 # MATR <- matrix(1:9, ncol = 3)
 # MATR <- MATR + t(MATR) + diag(3)*9
@@ -66,9 +66,11 @@ vector_var_matrix_calc_COR <- function(MATR, nonpositive = c("Stop", "Force", "I
 }
 
 cppFunction(
-'NumericMatrix corcalc_c(NumericMatrix MATR, int p, int m, NumericVector order_vecti, NumericVector order_vectj) {
-  NumericMatrix pelet(m, m);
+'NumericMatrix corcalc_c(NumericMatrix MATR,
+  int p, int m, NumericVector order_vecti, NumericVector order_vectj) {
   
+  NumericMatrix pelet(m, m); 
+
   for (int i1 = 0; i1 < m; i1++) {
     for (int j1 = 0; j1 < m; j1++) {
       int i = order_vecti[i1];
@@ -84,13 +86,13 @@ cppFunction(
       int MATRjl = MATR(j,l);
 
       pelet(i1,j1) =
-        (MATRij*MATRkl/2) * (MATRik^2 + MATRil^2 + MATRjk^2 + MATRjl^2) -
+        (MATRij*MATRkl/2) * (pow(MATRik, 2) + pow(MATRil, 2) + pow(MATRjk, 2) + pow(MATRjl, 2)) -
         MATRij*(MATRik*MATRil + MATRjk*MATRjl) -
         MATRkl*(MATRik*MATRjk + MATRil*MATRjl) +
         (MATRik*MATRjl + MATRil*MATRjk);
     }
   }
-  return pelet;
+  return(pelet);
 }')
 
 corcalc_R <- function(MATR, p, m, order_vecti, order_vectj){
@@ -209,7 +211,7 @@ vector_var_matrix_calc_COR_par <- function(MATR, nonpositive = c("Stop", "Force"
   return(pelet)
 }
 
-profvis({
+# profvis({
   tt1 <- Sys.time()
   pelet1 <- vector_var_matrix_calc_COR(MATR)
   tt1 <- Sys.time() - tt1
@@ -219,7 +221,7 @@ profvis({
   tt3 <- Sys.time()
   #pelet3 <- vector_var_matrix_calc_COR_par(MATR)
   tt3 <- Sys.time() - tt3
-})
+# })
 
 identical(round(pelet1, 2), round(pelet2 ,2))
 #identical(round(pelet2, 2), round(pelet3 ,2))

@@ -1,12 +1,13 @@
 source("main_work/Code/01_generalFunctions.R")
 source("main_work/Code/02_simulationFunctions.R")
-source("main_work/Code/03_estimationFunctions2.R")
+source("main_work/Code/03_estimationFunctions.R")
+source("main_work/Code/04_inferenceFunctions.R")
 
 tt <- rep(Sys.time(), 2)
 if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
                                      "cor.matrix_to_norm.matrix", "triangle2vector","vector2triangle",
-                                     "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR",
-                                     "minusloglik", "bootstrapFunction")
+                                     "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR_C",
+                                     "minusloglik", "bootstrapFunction", "corcalc_c")
 Tlength <- 115
 B <- 100
 p <- 10

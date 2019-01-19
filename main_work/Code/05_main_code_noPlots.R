@@ -1,12 +1,16 @@
 source("main_work/Code/01_generalFunctions.R")
 source("main_work/Code/02_simulationFunctions.R")
-source("main_work/Code/03_estimationFunctions2.R")
+source("main_work/Code/03_estimationFunctions.R")
+source("main_work/Code/04_inferenceFunctions.R")
+
+tt <- Sys.time()
+# profvis({
 
 Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 20, Tlength = Tlength,
+sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
                                 percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
@@ -34,9 +38,9 @@ fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess")  %>% regular
 fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad")  %>% regularizeMatrix()
 fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 
-HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
-HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
-HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, sampleData$alpha, MH_method = "holm", const = 1, effectiveN = Pelet_Cov$Est_N)
+HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, sampleData$alpha, Real = sampleData$alpha)
+HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, Real = sampleData$alpha)
+HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, sampleData$alpha, Real = sampleData$alpha)
 gc()
 
 Pelet_Cov$returns
@@ -51,3 +55,8 @@ HypTestResComb$Results[order(HypTestResComb$Results$Real),]
 #for(i in 2:Pelet_Cov$returns) print(Pelet_Cov$Log_Optim[[i]]$counts)
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick)
+
+tt <- Sys.time() - tt
+
+# })
+tt

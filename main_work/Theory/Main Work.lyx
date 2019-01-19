@@ -2025,18 +2025,6 @@ f_{X_{n}}(x_{n}) & =(2\pi)^{-\frac{m}{2}}\cdot\det\left(g_{2}^{\pi\left(n\right)
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2} & =\nabla_{\alpha}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{t}g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)^{-1}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)\\
- & =\nabla_{\alpha}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)^{t}g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)^{-1}\left(x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 denote 
 \begin_inset Formula $\psi=\nabla_{\alpha}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)$
 \end_inset
@@ -2046,6 +2034,109 @@ denote
 \end_inset
 
  then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ell_{n}\left(\hat{\theta}\right)=\ln f_{\left(\hat{\Theta},\hat{\alpha}\right)}\left(X_{n}=x_{n}\right)=-\frac{1}{2}\left(\psi+\xi_{n}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we have:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\psi=\nabla_{\alpha}\ln\det\left(g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)\right)=\nabla_{\alpha}\ln\left(\prod\Lambda_{ii}\left(g_{2}^{\pi\left(n\right)}\right)\right)=\nabla_{\alpha}\sum\ln\Lambda_{ii}\left(g_{2}^{\pi\left(n\right)}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\xi_{n} & =\nabla_{\alpha}||x_{n}-g_{1}^{\pi\left(n\right)}\left(\Theta,\alpha\right)||_{g_{2}^{\pi\left(n\right)}\left(\Theta,\alpha\right)}^{2}\\
+ & =\nabla_{\alpha}\left(x_{n}^{t}-g_{1}^{t}\right)g_{2}^{-1}\left(x_{n}-g_{1}\right)\\
+ & =\nabla_{\alpha}x_{n}^{t}g_{2}^{-1}x_{n}-2\cdot\nabla_{\alpha}x_{n}^{t}g_{2}^{-1}g_{1}+\nabla_{\alpha}g_{1}^{t}g_{2}^{-1}g_{1}\\
+ & =x_{n}^{t}\left(\nabla_{\alpha}g_{2}^{-1}x_{n}-2\nabla_{\alpha}g_{2}^{-1}g_{1}\right)+\eta\\
+ & =x_{n}^{t}\left(\nabla_{\alpha}g_{2}^{-1}x_{n}-2\zeta\right)+\eta\\
+ & =x_{n}^{t}\nabla_{\alpha}g_{2}^{-1}\left(x_{n}-2g_{1}\right)+\eta\\
+ & =x_{n}^{t}\left(\left(\nabla_{\alpha}g_{2}^{-1}\right)\left(x_{n}-2g_{1}\right)+g_{2}^{-1}\left(x_{n}-2\nabla_{\alpha}g_{1}\right)\right)+\eta
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial g_{2}^{-1}}{\partial\alpha_{j}}=-g_{2}^{-1}\cdot\frac{\partial g_{2}}{\partial\alpha_{j}}\cdot g_{2}^{-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\alpha_{j}}g_{2}^{-1}x_{n} & =\frac{\partial g_{2}^{-1}}{\partial\alpha_{j}}x_{n}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\alpha_{j}}g_{2}^{-1}g_{1} & =\frac{\partial g_{2}^{-1}}{\partial\alpha_{j}}g_{1}+g_{2}^{-1}\frac{\partial g_{1}}{\partial\alpha_{j}}\\
+ & =g_{2}^{-1}\frac{\partial g_{1}}{\partial\alpha_{j}}-g_{2}^{-1}\cdot\frac{\partial g_{2}}{\partial\alpha_{j}}\cdot g_{2}^{-1}g_{1}\\
+ & =g_{2}^{-1}\left(\frac{\partial g_{1}}{\partial\alpha_{j}}-\frac{\partial g_{2}}{\partial\alpha_{j}}\cdot g_{2}^{-1}g_{1}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\alpha}\ell_{n}\left(\hat{\theta}\right)=\nabla_{\alpha}\ln f_{X_{n}}(x_{n})=-\frac{1}{2}\left(\psi+\xi_{n}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{\alpha}\ell_{n}\left(\hat{\theta}\right)\nabla_{\alpha}\ell_{n}\left(\hat{\theta}\right)^{t} & =-\frac{1}{2}\left(\psi+\xi_{n}\right)\cdot-\frac{1}{2}\left(\psi+\xi_{n}\right)^{t}\\
+ & =\frac{1}{4}\left(\psi+\xi_{n}\right)\left(\psi^{t}+\xi_{n}^{t}\right)\\
+ & =\frac{1}{4}\left(\psi\psi^{t}+\psi\xi_{n}^{t}+\xi_{n}\psi^{t}+\xi_{n}\xi_{n}^{t}\right)\\
+ & =\frac{1}{4}\left(\psi\psi^{t}+\left(\xi_{n}\psi^{t}\right)^{t}+\xi_{n}\psi^{t}+\xi_{n}\xi_{n}^{t}\right)
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

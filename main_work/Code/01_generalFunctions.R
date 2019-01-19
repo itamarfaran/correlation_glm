@@ -112,12 +112,14 @@ calculate_mean_matrix <- function(matrix_array){
   return(temp/returns)
 }
 
+#Check stationarity/invertability of AR/MA process
 checkInv <- function(coefs, perc = 0.001){
   polfun <- function(x) 1 - sum(coefs*x^(1:length(coefs)))
   x <- sign(sapply(seq(-1, 1, by = perc), polfun))
   return(all(x == 1) | all(x == -1))
 }
 
+#Generate weighted sum of matrices from array
 summatrix <- function(ARRAY, index, constants, weights = FALSE){
   if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
@@ -128,6 +130,7 @@ summatrix <- function(ARRAY, index, constants, weights = FALSE){
   return(pelet)
 }
 
+#Generate weighted sum of vectors from matrices
 sumvector <- function(MATR, index, constants, weights = FALSE){
   if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
@@ -137,7 +140,6 @@ sumvector <- function(MATR, index, constants, weights = FALSE){
   }
   return(pelet)
 }
-
 
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
 central.moment <- function(x,norm=TRUE) {

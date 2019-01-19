@@ -2142,9 +2142,21 @@ Now we have:
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
+\sum_{n}\nabla_{\alpha}\ell_{n}\left(\hat{\theta}\right)\nabla_{\alpha}\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\sum_{n}\left(\psi\psi^{t}+\psi\xi_{n}^{t}+\xi_{n}\psi^{t}+\xi_{n}\xi_{n}^{t}\right)\\
+ & =\frac{1}{4}\left(N\cdot\psi\psi^{t}+\psi\left(\sum_{n}\xi_{n}\right)^{t}+\left(\sum_{n}\xi_{n}\right)\psi^{t}+\sum_{n}\xi_{n}\xi_{n}^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
 \nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\left(\psi\psi^{t}+\xi_{n}\psi^{t}+\psi\xi_{n}^{t}+\xi_{n}\xi_{n}^{t}\right)\\
  & =\frac{1}{4}\left(\psi\psi^{t}+\left(\psi\xi_{n}^{t}\right)^{t}+\psi\xi_{n}^{t}+\xi_{n}\xi_{n}^{t}\right)\\
-\frac{1}{N}\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\psi\psi^{t}+\frac{1}{4N}\left(\left(\psi\sum_{n=1}^{N}\xi_{n}^{t}\right)^{t}+\psi\sum_{n=1}^{N}\xi_{n}^{t}+\sum_{n=1}^{N}\xi_{n}\xi_{n}^{t}\right)
+\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t} & =\frac{1}{4}\psi\psi^{t}+\frac{1}{4N}\left(\left(\psi\sum_{n=1}^{N}\xi_{n}^{t}\right)^{t}+\psi\sum_{n=1}^{N}\xi_{n}^{t}+\sum_{n=1}^{N}\xi_{n}\xi_{n}^{t}\right)
 \end{align*}
 
 \end_inset

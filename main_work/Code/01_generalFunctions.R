@@ -10,9 +10,14 @@ packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
 ipak(packages)
 
 promptForCores <- function(){
-  det <- detectCores()
-  
   newPrompt <- TRUE
+  
+  if(tolower(.Platform$OS.type) == "windows"){
+    ncores <<- 1
+    newPrompt <- FALSE
+  }
+  
+  det <- detectCores()
   
   if("ncores" %in% objects(name = .GlobalEnv))
     if(ncores > 0 & ncores < det) newPrompt <- FALSE
@@ -39,6 +44,13 @@ promptForCores <- function(){
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))
 }
 promptForCores()
+
+get.ncores <- function(){
+  if(tolower(.Platform$OS.type) == "windows") return(1)
+  if("ncores" %in% objects(parent.frame())) return(parent.frame()$ncores)
+  if("ncores" %in% objects(.GlobalEnv)) return(.GlobalEnv$ncores)
+  return(1)
+}
 
 buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){
   J <- length(packageList)

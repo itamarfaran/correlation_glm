@@ -9,7 +9,7 @@ if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
                                      "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR_C",
                                      "minusloglik", "bootstrapFunction", "corcalc_c")
 Tlength <- 115
-B <- 100
+B <- 2
 p <- 10
 sampleDataB <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
                             percent_alpha = 0.4, range_alpha = c(0.6, 0.8))
@@ -103,9 +103,11 @@ if(ncores > 1){
     simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
   }
   terminateCL()
-} else for(t in 1:lngth_Tlist){
-  cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
-  simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
+} else {
+  for(t in 1:lngth_Tlist){
+    cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
+    simuldatT[[t]] <- lapply(1:B, bootstrapFunction, k = t)
+  }
 } 
 tt2 <- Sys.time() - tt2
 

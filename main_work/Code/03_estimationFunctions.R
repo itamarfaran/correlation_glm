@@ -3,7 +3,7 @@ clean_sick <- function(sick.data, alpha){
   sick.data/(rep(1, nrow(sick.data)) %*% t(alpha %>% create_alpha_mat() %>% triangle2vector()))
 }
 
-minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET = TRUE){
+minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, U0 = NULL, U1 = NULL, DET = TRUE){
   calcHealth <- !missing(healthy.data)
   
   calc_n <- TRUE
@@ -26,9 +26,14 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET 
     
     g20 <- vector_var_matrix_calc_COR_C(vector2triangle(theta))
     if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data)*(nrow(healthy.data) - 1)/nrow(healthy.data), g20)
-    e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
-    U0 <- e20$vectors
+    if(is.null(U0)){
+      e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
+      U0 <- e20$vectors
+    } else {
+      e20 <- eigen(g20/n.effective_H, symmetric = TRUE, only.values = TRUE)
+    }
     D0 <- e20$values
+    
     
     dist0 <- (healthy.data - rep(1, Nh) %*% t(g10)) %*% U0
   }
@@ -37,8 +42,12 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, DET 
   
   g21 <- vector_var_matrix_calc_COR_C(vector2triangle(theta)*create_alpha_mat(alpha))
   if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data), g21)
-  e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
-  U1 <- e21$vectors
+  if(is.null(U1)){
+    e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
+    U1 <- e21$vectors
+  } else {
+    e21 <- eigen(g21/n.effective_D, symmetric = TRUE, only.values = TRUE)
+  }
   D1 <- e21$values
   
   dist1 <- (sick.data - rep(1, Nd) %*% t(g11)) %*% U1
@@ -174,7 +183,7 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
 
 Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
                            max.loop = 50, epsIter = 2*10^(-3), min_reps = 3, method = "Nelder-Mead",
-                           epsOptim = 10^(-5), progress = TRUE){
+                           epsOptim = 10^(-5), updateU = 1, progress = TRUE){
   
   compute_estimated_N_2 <- function(sick.data, theta, alpha, threshold){
     return(min( compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data),
@@ -215,13 +224,17 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     i <- i + 1
     
     effective.N <- compute_estimated_N_2(sick.data, temp.theta, temp.alpha, T_thresh)
-
+    
+    U1 <- NULL
+    if(updateU != 0) if((i - 2) %% updateU == 0)
+      U1 <- eigen(vector_var_matrix_calc_COR_R(vector2triangle(temp.theta) * create_alpha_mat(temp.alpha)),
+                  symmetric = T, only.values = F)$vectors
     temp.theta <- rbind(healthy.data, clean_sick(sick.data, temp.alpha)) %>% colMeans()
     
     #Optimize Alpha
     optim.alpha <- optim(temp.alpha,
                          function(A) minusloglik(theta = temp.theta,
-                                                 alpha = A,
+                                                 alpha = A, U1 = U1,
                                                  sick.data = sick.data,
                                                  effective.N = effective.N),
                          method = method,
@@ -256,7 +269,6 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
 }
-# todo : try updating eigenvector/values every 3 iterations
 # todo : check elemntal library, instalation via R
 # todo : Build function that does michael and shahar method (4000 comparisons) and compare power
 # todo : Add another minus loglik fun

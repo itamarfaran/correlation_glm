@@ -6,8 +6,8 @@ source("main_work/Code/04_inferenceFunctions.R")
 linkFun <- linkFunctions$Exponent
 
 Tlength <- 115
-B <- 3
-p <- 22
+B <- 100
+p <- 32
 sampleDataB <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
                              percent_alpha = 0.4, range_alpha = c(0.6, 0.8), ncores = ncores)
 
@@ -49,8 +49,8 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 
-p <- 22
-B <- 50
+p <- 32
+B <- 70
 Tlist <- c(10, 30, 50, 70, 100, 120, 150, 170, 200, 250, 300, 400, 700, 1000, 1500, 2000, 3000, 4000)
 lngth_Tlist <- length(Tlist)
 seed <- sample(1:10000, 3)

@@ -111,11 +111,12 @@ regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "i
 }
 
 #Calculate mean Correlation
-calculate_mean_matrix <- function(matrix_array){
+calculate_mean_matrix <- function(matrix_array, do.mean = TRUE){
   temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])
   returns <- dim(matrix_array)[3]
   for(i in 1:returns) temp <- temp + matrix_array[,,i]
-  return(temp/returns)
+  if(do.mean) return(temp/returns)
+  return(temp)
 }
 
 #Check stationarity/invertability of AR/MA process

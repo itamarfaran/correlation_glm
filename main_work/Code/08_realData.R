@@ -33,10 +33,32 @@ rm(which.drop, p, All.data, healthy.Real_t, healthy.Real, sick.Real_t, sick.Real
 abind(sampleData$healthy, sampleData$sick) %>% apply(3, is.positive.definite) %>% all()
 sum(is.na(sampleData$healthy)) + sum(is.na(sampleData$sick))
 
+linkFun <- linkFunctions$Exponent
+
+tt.est <- Sys.time()
 Pelet.Real <- estimateAlpha(healthy.data = sampleData$healthy, sick.data = sampleData$healthy,
-                            T_thresh = 320, linkFun = linkFunctions$Identity, updateU = 1,
+                            T_thresh = 320, linkFun = linkFun, updateU = 1,
                             progress = TRUE)
+tt.est <- Sys.time() - tt.est
 
 save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
 
+tt.grad <- Sys.time()
+fisherMatrGrad <- ComputeFisher(Pelet.Real, sampleData$sick, "Grad", linkFun = linkFun, ncores = ncores)  %>% regularizeMatrix()
+tt.grad <- Sys.time() - tt.grad
 
+save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+
+tt.hess <- Sys.time()
+fisherMatrHess <- ComputeFisher(Pelet.Real, sampleData$sick, "Hess", linkFun = linkFun)  %>% regularizeMatrix()
+tt.hess <- Sys.time() - tt.hess
+
+save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+
+fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
+
+HypTestResHess <- build_hyp.test(Pelet.Real, fisherMatrHess, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
+HypTestResGrad <- build_hyp.test(Pelet.Real, fisherMatrGrad, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
+HypTestResComb <- build_hyp.test(Pelet.Real, fisherMatrComb, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
+
+save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))

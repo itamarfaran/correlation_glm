@@ -10,9 +10,9 @@ ARMAdetails <- list(ARsick = c(0.4, -0.2), ARhealth = c(0.2, -0.1),
                     MAsick = c(0.4), MAhealth = c(0.4))
 sapply(ARMAdetails, checkInv)
 
-Tlength <- 115
+Tlength <- 100
 B <- 100
-p <- 22
+p <- 32
 sampleDataB_ARMA <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
                              percent_alpha = 0.4, range_alpha = c(0.6, 0.8), 
                              ARsick = ARMAdetails$ARsick , ARhealth = ARMAdetails$ARhealth,
@@ -58,9 +58,9 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Loss of DF")
 
-p <- 22
+p <- 32
 B <- 100
-Tlength <- 115
+Tlength <- 100
 MAlist <- c(-0.5, -0.25, 0, 0.1, 0.25, 0.4, 0.6)
 lngth_MAlist <- length(MAlist)
 seed <- sample(1:10000, 3)

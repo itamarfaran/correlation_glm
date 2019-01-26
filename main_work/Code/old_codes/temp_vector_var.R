@@ -139,7 +139,7 @@ vector_var_matrix_calc_COR_CR <- function(MATR, nonpositive = c("Stop", "Force",
   if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
-} # todo : try exporting to c Rcpp if not sapply method
+}
 
 vector_var_matrix_calc_COR_C <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
                                           reg_par = 0){
@@ -161,7 +161,7 @@ vector_var_matrix_calc_COR_C <- function(MATR, nonpositive = c("Stop", "Force", 
   if(reg_par != 0) pelet <- (1 - reg_par)*pelet + reg_par*diag(diag(pelet))
   
   return(pelet)
-} # todo : try exporting to c Rcpp if not sapply method
+}
 
 vector_var_matrix_calc_COR_par <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
                                        reg_par = 0){

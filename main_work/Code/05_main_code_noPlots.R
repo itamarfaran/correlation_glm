@@ -3,6 +3,8 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
+linkFun <- linkFunctions$Benjamini
+
 tt.all <- Sys.time()
 # profvis({
 
@@ -10,7 +12,7 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 22, Tlength = Tlength,
+sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
                             percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
@@ -20,28 +22,25 @@ sampleData <- createSamples(nH = 57, nS = 42, p = 22, Tlength = Tlength,
 all(abind(sampleData$healthy, sampleData$sick, along = 3) %>%
       apply(3, is.positive.definite))
 
-
-Pelet_IID <- Estimate.Loop(sampleData$healthy, sampleData$sick, MaxLoop = 100)
-
 tt.est <- Sys.time()
-Pelet_Cov <- Estimate.Loop2(theta0 = Pelet_IID$theta, alpha0 = Pelet_IID$alpha,
-                            healthy.data = sampleData$healthy, sick.data = sampleData$sick,
-                            T_thresh = Tlength, method = "Nelder-Mead", updateU = 1, progress = T)
+Pelet_Cov <- estimateAlpha(healthy.data = sampleData$healthy, sick.data = sampleData$sick,
+                            T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun)
 tt.est <- Sys.time() - tt.est
 
+
 tt.hess <- Sys.time()
-fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess")  %>% regularizeMatrix()
+fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess", linkFun = linkFun)  %>% regularizeMatrix()
 tt.hess <- Sys.time() - tt.hess
 
 tt.grad <- Sys.time()
-fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad", ncores = ncores)  %>% regularizeMatrix()
+fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad", linkFun = linkFun, ncores = ncores)  %>% regularizeMatrix()
 tt.grad <- Sys.time() - tt.grad
 
 fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 
-HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, sampleData$alpha, Real = sampleData$alpha)
-HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, sampleData$alpha, Real = sampleData$alpha)
-HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, sampleData$alpha, Real = sampleData$alpha)
+HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
+HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
+HypTestResComb <- build_hyp.test(Pelet_Cov, fisherMatrComb, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
 gc()
 
 Pelet_Cov$returns
@@ -54,9 +53,11 @@ HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 tt.hyp <- Sys.time() - tt.hyp
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]
 HypTestResComb$Results[order(HypTestResComb$Results$Real),]
+# select(HypTestResComb$Results, Est., Lower, Upper) %>% exp()
 
-wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick)
+wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick, linkFun = linkFun)
 
 tt.all <- Sys.time() - tt.all
+
 
 # })

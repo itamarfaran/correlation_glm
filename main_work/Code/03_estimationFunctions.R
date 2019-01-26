@@ -1,9 +1,16 @@
+linkFunctions <- list("Identity" = list(FUN = function(x) x, INV = function(x) x),
+                      "Exponent" = list(FUN = function(x) exp(x), INV = function(x) log(x)),
+                      "Logarithm" = list(FUN = function(x) log(x), INV = function(x) exp(x)),
+                      "Inverse" =  list(FUN = function(x) 1/x, INV = function(x) 1/x),
+                      "Benjamini" = list(FUN = function(x) 1/(1 + x), INV = function(x) 1/x - 1) )
+
 clean_sick <- function(sick.data, alpha){
   if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix()
   sick.data/(rep(1, nrow(sick.data)) %*% t(alpha %>% create_alpha_mat() %>% triangle2vector()))
 }
 
-minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, U0 = NULL, U1 = NULL, DET = TRUE){
+minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, linkFun = function(x) x,
+                        U0 = NULL, U1 = NULL, DET = TRUE){
   calcHealth <- !missing(healthy.data)
   
   calc_n <- TRUE
@@ -24,7 +31,7 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, U0 =
     
     g10 <- as.matrix(theta)
     
-    g20 <- vector_var_matrix_calc_COR_C(vector2triangle(theta))
+    g20 <- vector_var_matrix_calc_COR_C(vector2triangle(g10))
     if(calc_n) n.effective_H <- compute_estimated_N(cov(healthy.data)*(nrow(healthy.data) - 1)/nrow(healthy.data), g20)
     if(is.null(U0)){
       e20 <- eigen(g20/n.effective_H, symmetric = TRUE)
@@ -38,9 +45,9 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, U0 =
     dist0 <- (healthy.data - rep(1, Nh) %*% t(g10)) %*% U0
   }
   
-  g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(alpha)))
+  g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(alpha))))
   
-  g21 <- vector_var_matrix_calc_COR_C(vector2triangle(theta)*create_alpha_mat(alpha))
+  g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))
   if(calc_n) n.effective_D <- compute_estimated_N(cov(sick.data)*(nrow(sick.data) - 1)/nrow(sick.data), g21)
   if(is.null(U1)){
     e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
@@ -137,22 +144,25 @@ compute_estimated_N <- function(est, theo){
   return(lm(x ~ 0 + y)$coef)
 }
 
-Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001, method = "BFGS"){
+Estimate.Loop <- function(healthy.data, sick.data, linkFun, iniAlpha,
+                          MaxLoop = 500, Persic = 0.001, method = "BFGS"){
   
-  if(class(Healthy_List) == "array") Healthy_List <- cor.matrix_to_norm.matrix(Healthy_List)
-  if(class(Sick_List) == "array") Sick_List <- cor.matrix_to_norm.matrix(Sick_List)
+  if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
+  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
   
-  healthyMean <- colMeans(Healthy_List)
-  sickMean <- colMeans(Sick_List)
+  healthyMean <- colMeans(healthy.data)
+  sickMean <- colMeans(sick.data)
   
-  N <- c("H" = nrow(Healthy_List), "S" = nrow(Sick_List))
+  N <- c("H" = nrow(healthy.data), "S" = nrow(sick.data))
   p <- 0.5 + sqrt(1 + 8*length(sickMean))/2
+  if(length(iniAlpha) == 1) iniAlpha <- rep(iniAlpha, p)
+  if(length(iniAlpha) != p) stop("Initial alpha paramaters aren't of length p")
   
-  for.optim <- function(alpha, theta) sum((theta*triangle2vector(create_alpha_mat(alpha)) - sickMean)^2)
+  for.optim <- function(alpha, theta) sum((theta*triangle2vector(create_alpha_mat(linkFun(alpha))) - sickMean)^2)
   
   Steps <- list()
   temp.theta <- healthyMean
-  temp.alpha <- optim(rep(0.8,p), function(A) for.optim(A, temp.theta), method = method)$par
+  temp.alpha <- optim(iniAlpha, function(A) for.optim(A, temp.theta), method = method)$par
   Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
   
   
@@ -162,26 +172,24 @@ Estimate.Loop <- function(Healthy_List, Sick_List, MaxLoop = 500, Persic = 0.001
   distanceT <- 100
   while((i <= MaxLoop) & (distanceA > Persic) & (distanceT > Persic)){
     
-    temp.theta <- rbind(clean_sick(Sick_List, temp.alpha), Healthy_List) %>% colMeans()
+    temp.theta <- rbind(clean_sick(sick.data, linkFun(temp.alpha)), healthy.data) %>% colMeans()
     
-    temp.alpha <- optim(temp.alpha,function(A) for.optim(A,temp.theta), method = method)$par
+    temp.alpha <- optim(temp.alpha, function(A) for.optim(A, temp.theta), method = method)$par
     Steps[[i+1]] <- list(theta = temp.theta, alpha = temp.alpha)
     
     distanceA <- vnorm(Steps[[i+1]]$alpha - Steps[[i]]$alpha, sqroot = TRUE)
     distanceT <- vnorm(Steps[[i+1]]$theta - Steps[[i]]$theta, sqroot = TRUE)
     
-    if(i%%10==0) cat(paste(i,","))
     i <- i + 1
   }
-  cat("\n")
-  
+
   return(list(theta = temp.theta,
               alpha = temp.alpha,
               "Returns" = i,
               Steps = Steps))
 }
 
-Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
+Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh, linkFun,
                            max.loop = 50, epsIter = 2*10^(-3), min_reps = 3, method = "Nelder-Mead",
                            epsOptim = 10^(-5), updateU = 1, progress = TRUE){
   
@@ -194,7 +202,7 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   temp.theta <- theta0
   temp.alpha <- alpha0
   if( !(is.positive.definite(vector2triangle(theta0)) &
-        is.positive.definite(vector2triangle(theta0)*create_alpha_mat(alpha0))) ){
+        is.positive.definite(vector2triangle(theta0)*create_alpha_mat(linkFun(alpha0)))) ){
     stop("Initial parameters dont result with positive-definite matrices")
   }
   
@@ -223,18 +231,19 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   while((i <= max.loop) & (!tnai0)){
     i <- i + 1
     
-    effective.N <- compute_estimated_N_2(sick.data, temp.theta, temp.alpha, T_thresh)
+    effective.N <- compute_estimated_N_2(sick.data, temp.theta, linkFun(temp.alpha), T_thresh)
     
     U1 <- NULL
     if(updateU != 0) if((i - 2) %% updateU == 0)
-      U1 <- eigen(vector_var_matrix_calc_COR_R(vector2triangle(temp.theta) * create_alpha_mat(temp.alpha)),
+      U1 <- eigen(vector_var_matrix_calc_COR_R(vector2triangle(temp.theta) * create_alpha_mat(linkFun(temp.alpha))),
                   symmetric = T, only.values = F)$vectors
-    temp.theta <- rbind(healthy.data, clean_sick(sick.data, temp.alpha)) %>% colMeans()
+    temp.theta <- rbind(healthy.data, clean_sick(sick.data, linkFun(temp.alpha))) %>% colMeans()
     
     #Optimize Alpha
     optim.alpha <- optim(temp.alpha,
                          function(A) minusloglik(theta = temp.theta,
                                                  alpha = A, U1 = U1,
+                                                 linkFun = linkFun,
                                                  sick.data = sick.data,
                                                  effective.N = effective.N),
                          method = method,
@@ -269,6 +278,34 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
   return( list(theta = temp.theta, alpha = temp.alpha, convergence = convergence[1:(min(which(convergence == -1)) - 1)],
                returns = i, Est_N = effective.N, Steps = Steps, Log_Optim = log_optim) )
 }
+
+estimateAlpha <- function(healthy.data, sick.data, T_thresh, linkFun, updateU = 1, progress = TRUE,
+                          INIconfig = list(iniAlpha = 0.8, MaxLoop = 500, Persic = 0.001, method = "BFGS"),
+                          FULconfig = list(max.loop = 50, epsIter = 2*10^(-3),
+                                           min_reps = 3, method = "Nelder-Mead", epsOptim = 10^(-5))){
+  
+  if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
+  
+  INIconfig <- modifyList(list(iniAlpha = 0.8, MaxLoop = 500, Persic = 0.001, method = "BFGS"), INIconfig)
+  FULconfig <- modifyList(list(max.loop = 50, epsIter = 2*10^(-3),
+                               min_reps = 3, method = "Nelder-Mead", epsOptim = 10^(-5)),
+                          FULconfig)
+  
+
+  IID <- Estimate.Loop(healthy.data = healthy.data, sick.data = sick.data, linkFun = linkFun$FUN,
+                       iniAlpha = linkFun$INV(INIconfig$iniAlpha), MaxLoop = INIconfig$MaxLoop, Persic = INIconfig$Persic, method = INIconfig$method)
+  
+  COV <- Estimate.Loop2(theta0 = IID$theta, alpha0 = IID$alpha,
+                        healthy.data = healthy.data, sick.data = sick.data, T_thresh = T_thresh,
+                        linkFun = linkFun$FUN,
+                        max.loop = FULconfig$max.loop, epsIter = FULconfig$epsIter, min_reps = FULconfig$min_reps,
+                        method = FULconfig$method, epsOptim = FULconfig$epsOptim,
+                        updateU = updateU, progress = progress)
+  
+  return(COV)
+  
+}
+
 # todo : check elemntal library, instalation via R
 # todo : Build function that does michael and shahar method (4000 comparisons) and compare power
 # todo : Add another minus loglik fun

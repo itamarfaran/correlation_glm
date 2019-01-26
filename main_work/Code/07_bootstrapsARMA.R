@@ -16,17 +16,10 @@ sampleDataB_ARMA <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tle
                              ARsick = ARMAdetails$ARsick , ARhealth = ARMAdetails$ARhealth,
                              MAsick = ARMAdetails$MAsick, MAhealth = ARMAdetails$MAhealth, ncores = ncores)
 
-bootstrapFunction <- function(b){
-  res_unspecified <- Estimate.Loop(Healthy_List = sampleDataB_ARMA$samples[[b]]$healthy,
-                                   Sick_List = sampleDataB_ARMA$samples[[b]]$sick)
-  
-  res_specified <- Estimate.Loop2(theta0 = res_unspecified$theta,
-                                  alpha0 = res_unspecified$alpha,
-                                  healthy.data = sampleDataB_ARMA$samples[[b]]$healthy,
-                                  sick.data = sampleDataB_ARMA$samples[[b]]$sick,
-                                  T_thresh = 10^4, progress = FALSE)
-  return(res_specified)
-}
+bootstrapFunction <- function(b) estimateAlpha(healthy.data = sampleDataB_ARMA$samples[[b]]$healthy,
+                                               sick.data = sampleDataB_ARMA$samples[[b]]$sick,
+                                               T_thresh = 10^4, updateU = 1, progress = F)
+
 
 tt1 <- Sys.time()
 simuldat <- mclapply(1:B, bootstrapFunction, mc.cores = ncores)
@@ -79,17 +72,10 @@ for(t in 1:lngth_MAlist){
     append(c("MA" = MAlist[t]), 0)
 }
 
-bootstrapFunction <- function(b, k){
-  res_unspecified <- Estimate.Loop(Healthy_List = sampleDataBT_ARMA[[k]]$samples[[b]]$healthy,
-                                   Sick_List = sampleDataBT_ARMA[[k]]$samples[[b]]$sick)
-  
-  res_specified <- Estimate.Loop2(theta0 = res_unspecified$theta,
-                                  alpha0 = res_unspecified$alpha,
-                                  healthy.data = sampleDataBT_ARMA[[k]]$samples[[b]]$healthy,
-                                  sick.data = sampleDataBT_ARMA[[k]]$samples[[b]]$sick,
-                                  T_thresh = 10^4, progress = FALSE)
-  return(res_specified)
-}
+
+bootstrapFunction <- function(b, k) estimateAlpha(healthy.data = sampleDataBT_ARMA[[k]]$samples[[b]]$healthy,
+                                               sick.data = sampleDataBT_ARMA[[k]]$samples[[b]]$sick,
+                                               T_thresh = 10^4, updateU = 1, progress = F)
 
 simuldatT <- list()
 
@@ -114,7 +100,7 @@ coeffs <- matrix(0, nrow = lngth_MAlist, ncol = 3)
 estNT_all <- matrix(0, nrow = B, ncol = lngth_MAlist)
 
 pb <- progress_bar$new(
-  format = "Computing hessians [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
+  format = "Computing Fisher information [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
   total = lngth_MAlist, clear = FALSE, width= 90)
 
 for(t in 1:lngth_MAlist){

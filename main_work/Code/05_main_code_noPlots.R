@@ -10,10 +10,11 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
-                                percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
+sampleData <- createSamples(nH = 57, nS = 42, p = 22, Tlength = Tlength,
+                            percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
-                            ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth)
+                            ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
+                            ncores = ncores)
 
 #Are all matrices positive definite?
 all(abind(sampleData$healthy, sampleData$sick, along = 3) %>%
@@ -33,7 +34,7 @@ fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess")  %>% regular
 tt.hess <- Sys.time() - tt.hess
 
 tt.grad <- Sys.time()
-fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad")  %>% regularizeMatrix()
+fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad", ncores = ncores)  %>% regularizeMatrix()
 tt.grad <- Sys.time() - tt.grad
 
 fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess

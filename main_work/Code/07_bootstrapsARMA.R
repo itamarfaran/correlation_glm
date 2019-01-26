@@ -4,22 +4,17 @@ source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
 tt <- rep(Sys.time(), 2)
-if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
-                                     "cor.matrix_to_norm.matrix", "triangle2vector","vector2triangle",
-                                     "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR_C",
-                                     "minusloglik", "bootstrapFunction", "corcalc_c")
-
 ARMAdetails <- list(ARsick = c(0.4, -0.2), ARhealth = c(0.2, -0.1), 
                     MAsick = c(0.4), MAhealth = c(0.4))
 sapply(ARMAdetails, checkInv)
 
 Tlength <- 115
 B <- 100
-p <- 10
+p <- 12
 sampleDataB_ARMA <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
                              percent_alpha = 0.4, range_alpha = c(0.6, 0.8), 
                              ARsick = ARMAdetails$ARsick , ARhealth = ARMAdetails$ARhealth,
-                             MAsick = ARMAdetails$MAsick, MAhealth = ARMAdetails$MAhealth)
+                             MAsick = ARMAdetails$MAsick, MAhealth = ARMAdetails$MAhealth, ncores = ncores)
 
 bootstrapFunction <- function(b){
   res_unspecified <- Estimate.Loop(Healthy_List = sampleDataB_ARMA$samples[[b]]$healthy,
@@ -34,15 +29,9 @@ bootstrapFunction <- function(b){
 }
 
 tt1 <- Sys.time()
-if(ncores > 1){
-  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
-  clusterExport(cl = cl, "sampleDataB_ARMA")
-  simuldat <- parLapply(cl = cl, 1:B, bootstrapFunction)
-  terminateCL()
-} else {
-  simuldat <- lapply(1:B, bootstrapFunction)
-}
+simuldat <- mclapply(1:B, bootstrapFunction, mc.cores = ncores)
 tt1 <- Sys.time() - tt1
+
 alpha_simul <- matrix(nrow = B, ncol = p)
 estN_all <- numeric(B)
 
@@ -52,7 +41,7 @@ for(b in 1:B){
 }
 
 VarAlphaByHess <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Hess") %>% solve
-VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Grad") %>% solve
+VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Grad", ncores = ncores) %>% solve
 VarAlphaCombined <- VarAlphaByHess %*% solve(VarAlphaByGrad) %*% VarAlphaByHess
 
 Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
@@ -74,7 +63,7 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Loss of DF")
 
-p <- 10
+p <- 12
 B <- 100
 Tlength <- 115
 MAlist <- c(-0.5, -0.25, 0, 0.1, 0.25, 0.4, 0.6)
@@ -83,10 +72,10 @@ seed <- sample(1:10000, 3)
 sampleDataBT_ARMA <- list()
 
 for(t in 1:lngth_MAlist){
-  message(paste0("With MA = ", MAlist[t], "; ", t, "/", lngth_MAlist, " ", round(100*t/lngth_MAlist), "%"))
+  # cat(paste0("With MA = ", MAlist[t], "; ", t, "/", lngth_MAlist, " ", round(100*t/lngth_MAlist), "%; "))
   sampleDataBT_ARMA[[t]] <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
                                      MAsick = MAlist[t], MAhealth = MAlist[t],
-                                     percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed) %>%
+                                     percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed, ncores = ncores) %>%
     append(c("MA" = MAlist[t]), 0)
 }
 
@@ -109,19 +98,10 @@ pb <- progress_bar$new(
   total = lngth_MAlist, clear = FALSE, width= 90)
 
 tt2 <- Sys.time()
-if(ncores > 1){
-  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
-  clusterExport(cl = cl, "sampleDataBT_ARMA")
-  for(t in 1:lngth_MAlist){
-    pb$tick()
-    clusterExport(cl = cl, "t")
-    simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
-  }
-  terminateCL()
-} else for(t in 1:lngth_MAlist){
+for(t in 1:lngth_MAlist){
   pb$tick()
-  simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
-} 
+  simuldatT[[t]] <- mclapply(1:B, bootstrapFunction, k = t, mc.cores = ncores)
+}
 tt2 <- Sys.time() - tt2
 rm(pb)
 
@@ -144,7 +124,7 @@ for(t in 1:lngth_MAlist){
   }
   pb$tick()
   tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Grad", silent = TRUE) %>% solve
-  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
+  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Hess", silent = TRUE, ncores = ncores) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
   
   alpha_sdGrad[t,] <- sqrt(diag(tmpG))

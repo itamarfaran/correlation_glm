@@ -45,13 +45,6 @@ promptForCores <- function(){
 }
 promptForCores()
 
-get.ncores <- function(){
-  if(tolower(.Platform$OS.type) == "windows") return(1)
-  if("ncores" %in% objects(parent.frame())) return(parent.frame()$ncores)
-  if("ncores" %in% objects(.GlobalEnv)) return(.GlobalEnv$ncores)
-  return(1)
-}
-
 buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){
   J <- length(packageList)
   cl <<- makeCluster(ncores)

@@ -63,7 +63,7 @@ minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N, U0 =
   return(0.5*SSE)
 }
 
-cppFunction(paste0(scan("main_work/code/corcalc_c.cpp", what = "character", sep = "\n"), collapse = "\n"))
+cppFunction(paste0(scan("main_work/Code/corcalc_c.cpp", what = "character", sep = "\n", quiet = TRUE), collapse = "\n"))
 
 vector_var_matrix_calc_COR_C <- function(MATR, nonpositive = c("Stop", "Force", "Ignore"),
                                          reg_par = 0){

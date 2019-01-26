@@ -3,16 +3,11 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-tt <- rep(Sys.time(), 2)
-if(ncores > 1) requiredFunction <- c("Estimate.Loop", "Estimate.Loop2",
-                                     "cor.matrix_to_norm.matrix", "triangle2vector","vector2triangle",
-                                     "create_alpha_mat", "clean_sick", "vnorm", "compute_estimated_N","vector_var_matrix_calc_COR_C",
-                                     "minusloglik", "bootstrapFunction", "corcalc_c")
 Tlength <- 115
-B <- 2
-p <- 10
+B <- 100
+p <- 12
 sampleDataB <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
-                            percent_alpha = 0.4, range_alpha = c(0.6, 0.8))
+                            percent_alpha = 0.4, range_alpha = c(0.6, 0.8), ncores = ncores)
 
 
 bootstrapFunction <- function(b){
@@ -28,14 +23,7 @@ bootstrapFunction <- function(b){
 }
 
 tt1 <- Sys.time()
-if(ncores > 1){
-  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
-  clusterExport(cl = cl, "sampleDataB")
-  simuldat <- parLapply(cl = cl, 1:B, bootstrapFunction)
-  terminateCL()
-} else {
-  simuldat <- lapply(1:B, bootstrapFunction)
-}
+simuldat <- mclapply(1:B, bootstrapFunction, mc.cores = ncores)
 tt1 <- Sys.time() - tt1
 alpha_simul <- matrix(nrow = B, ncol = p)
 estN_all <- numeric(B)
@@ -67,8 +55,8 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 
-p <- 7
-B <- 100
+p <- 12
+B <- 50
 Tlist <- c(10, 30, 50, 70, 100, 120, 150, 170, 200, 250, 300, 400, 700, 1000, 1500, 2000, 3000, 4000)
 lngth_Tlist <- length(Tlist)
 seed <- sample(1:10000, 3)
@@ -76,7 +64,7 @@ sampleDataBT <- list()
 
 for(t in 1:lngth_Tlist){
   sampleDataBT[[t]] <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlist[t],
-                                    percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed) %>%
+                                    percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed, ncores = ncores) %>%
     append(c("Tlength" = Tlist[t]), 0)
 }
 
@@ -93,22 +81,15 @@ bootstrapFunction <- function(b, k){
 }
 simuldatT <- list()
 
+pb <- progress_bar$new(
+  format = "Estimating models [:bar] :percent. Elapsed: :elapsed, ETA: :eta",
+  total = lngth_Tlist, clear = FALSE, width= 90)
+
 tt2 <- Sys.time()
-if(ncores > 1){
-  buildCL(ncores, c("dplyr", "matrixcalc"), requiredFunction)
-  clusterExport(cl = cl, "sampleDataBT")
-  for(t in 1:lngth_Tlist){
-    cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
-    clusterExport(cl = cl, "t")
-    simuldatT[[t]] <- parLapply(cl = cl, 1:B, bootstrapFunction, k = t)
-  }
-  terminateCL()
-} else {
-  for(t in 1:lngth_Tlist){
-    cat(paste0(Tlist[t], " (", round(100*t/lngth_Tlist), "%); "))
-    simuldatT[[t]] <- lapply(1:B, bootstrapFunction, k = t)
-  }
-} 
+for(t in 1:lngth_Tlist){
+  simuldatT[[t]] <- mclapply(1:B, bootstrapFunction, k = t, mc.cores = ncores)
+  pb$tick()
+}
 tt2 <- Sys.time() - tt2
 
 alpha_simul <- array(dim = c(B, p, lngth_Tlist))
@@ -129,7 +110,7 @@ for(t in 1:lngth_Tlist){
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
   }
   pb$tick()
-  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Grad", silent = TRUE) %>% solve
+  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Grad", silent = TRUE, ncores = ncores) %>% solve
   tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
   

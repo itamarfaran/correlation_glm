@@ -22,38 +22,23 @@ loglik_uni <- function(obs, theta, alpha, Eff.N, use.C = TRUE){
 }
 
 loglikgrad_uni <- function(obs, CovObj, use.C = TRUE){
-  grad(function(x) loglik_uni(obs = obs, theta = CovObj$theta, alpha = x, Eff.N = CovObj$Est_N, use.C = use.C),
-       CovObj$alpha) %>% (function(x) x %*% t(x))
+  x <- grad(function(x) loglik_uni(obs = obs, theta = CovObj$theta, alpha = x, Eff.N = CovObj$Est_N, use.C = use.C),
+       CovObj$alpha)
+  return(x %*% t(x))
 }
 
-computeBmatr <- function(CovObj, sickDat, silent = FALSE, ncores = .GlobalEnv$ncores){
-  if(ncores == 1) {
-    Bmatr <- lapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj))
-  } else {
-    rawFun <- function(j) loglikgrad_uni(sickDat[j,], CovObj, use.C = F)
-    cl <<- makeCluster(ncores)
-    if(!silent) message("In 'computeBmatr': Cluster 'cl' opened, saved to global environment.")
-    clusterEvalQ(cl, library(mvtnorm))
-    clusterEvalQ(cl, library(dplyr))
-    clusterEvalQ(cl, library(numDeriv))
-    clusterEvalQ(cl, library(matrixcalc))
-    clusterExport(cl, c("sickDat", "CovObj"), envir = environment())
-    clusterExport(cl, c("loglik_uni", "loglikgrad_uni", "vector2triangle","create_alpha_mat",
-                        "vector_var_matrix_calc_COR_R", "triangle2vector"), envir = .GlobalEnv)
-    Bmatr <- parLapply(cl = cl, 1:nrow(sickDat), rawFun)
-    terminateCL(silent)
-  }
+computeBmatr <- function(CovObj, sickDat, silent = FALSE, ncores = 1){
+  Bmatr <- mclapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj), mc.cores = ncores)
   Bmatr <- Bmatr %>% (function(list){
     L <- length(list)
     pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))
     for(i in 1:L) pelet <- pelet + list[[i]]
     pelet
     })
-  
   return(Bmatr)
 }
 
-ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), silent = FALSE){
+ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), ncores = 1, silent = FALSE){
   if(class(sickDat) == "array") sickDat <- cor.matrix_to_norm.matrix(sickDat) 
   
   method <- method[1]
@@ -62,7 +47,7 @@ ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), silent = 
                                                                        alpha = A,
                                                                        sick.data = sickDat,
                                                                        effective.N = CovObj$Est_N))
-  if(method == "Grad") pelet <- computeBmatr(CovObj, sickDat, silent = silent)
+  if(method == "Grad") pelet <- computeBmatr(CovObj, sickDat, silent = silent, ncores = ncores)
   
   return(pelet)
 }

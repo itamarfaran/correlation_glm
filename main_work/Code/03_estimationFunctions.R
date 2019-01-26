@@ -284,8 +284,10 @@ estimateAlpha <- function(healthy.data, sick.data, T_thresh, linkFun, updateU = 
                           FULconfig = list(max.loop = 50, epsIter = 2*10^(-3),
                                            min_reps = 3, method = "Nelder-Mead", epsOptim = 10^(-5))){
   
-  if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
-  
+  if(missing(linkFun)){
+    message("No linkFun given in input. Using Identity link function.")
+    linkFun <- list(FUN = function(x) x, INV = function(x) x)
+  }
   INIconfig <- modifyList(list(iniAlpha = 0.8, MaxLoop = 500, Persic = 0.001, method = "BFGS"), INIconfig)
   FULconfig <- modifyList(list(max.loop = 50, epsIter = 2*10^(-3),
                                min_reps = 3, method = "Nelder-Mead", epsOptim = 10^(-5)),
@@ -306,7 +308,7 @@ estimateAlpha <- function(healthy.data, sick.data, T_thresh, linkFun, updateU = 
   
 }
 
+# todo : Improve 'Grad' Fisher Information
 # todo : check elemntal library, instalation via R
 # todo : Build function that does michael and shahar method (4000 comparisons) and compare power
-# todo : Add another minus loglik fun
-# todo : Add another dimension to alpha
+# todo : Add larger dimensions to alpha

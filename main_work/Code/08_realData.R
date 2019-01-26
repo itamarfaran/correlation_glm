@@ -14,9 +14,7 @@ p <- dim(Real.dta$group.all)[1] - length(which.drop)
 All.data <- array(dim = c(p, p, dim(Real.dta$group.all)[3]))
 
 #Clean data from unknown coloumns
-for(i in 1:dim(All.data)[3]){
-  All.data[,,i] <- force_symmetry(Real.dta$group.all[-which.drop,-which.drop,i])
-}
+for(i in 1:dim(All.data)[3]) All.data[,,i] <- force_symmetry(Real.dta$group.all[-which.drop,-which.drop,i])
 
 #Some observations still have NAs. Remove those observations:
 healthy.Real_t <- All.data[,,Real.dta$CONTROLS]
@@ -41,19 +39,19 @@ Pelet.Real <- estimateAlpha(healthy.data = sampleData$healthy, sick.data = sampl
                             progress = TRUE)
 tt.est <- Sys.time() - tt.est
 
-save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+save(Pelet.Real, file = paste0("main_work/Data/Enviroments/NMDArun_", Sys.Date(), ".RData"))
 
 tt.grad <- Sys.time()
 fisherMatrGrad <- ComputeFisher(Pelet.Real, sampleData$sick, "Grad", linkFun = linkFun, ncores = ncores)  %>% regularizeMatrix()
 tt.grad <- Sys.time() - tt.grad
 
-save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+save(Pelet.Real, fisherMatrGrad, file = paste0("main_work/Data/Enviroments/NMDArun_", Sys.Date(), ".RData"))
 
 tt.hess <- Sys.time()
 fisherMatrHess <- ComputeFisher(Pelet.Real, sampleData$sick, "Hess", linkFun = linkFun)  %>% regularizeMatrix()
 tt.hess <- Sys.time() - tt.hess
 
-save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+save(Pelet.Real, fisherMatrGrad, fisherMatrHess, file = paste0("main_work/Data/Enviroments/NMDArun_", Sys.Date(), ".RData"))
 
 fisherMatrComb <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 
@@ -61,4 +59,5 @@ HypTestResHess <- build_hyp.test(Pelet.Real, fisherMatrHess, linkFun = linkFun, 
 HypTestResGrad <- build_hyp.test(Pelet.Real, fisherMatrGrad, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
 HypTestResComb <- build_hyp.test(Pelet.Real, fisherMatrComb, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
 
-save(Pelet.Real, file = paste0("main_work/data/enviroments/NMDArun_", Sys.Date(), ".RData"))
+save(Pelet.Real, fisherMatrGrad, fisherMatrHess, fisherMatrComb,
+     HypTestResHess, HypTestResGrad, HypTestResComb, file = paste0("main_work/Data/Enviroments/NMDArun_", Sys.Date(), ".RData"))

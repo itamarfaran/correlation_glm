@@ -1,0 +1,357 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-std
+theorems-sec
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 0cm
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Estimating the Difference Between Large Scale Sample Correlation Matrices
+ with Small Sample Size
+\end_layout
+
+\begin_layout Author
+Dr Yuval Benjamini & Itamar Faran
+\begin_inset Newline newline
+\end_inset
+
+The Department of Statistics
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The Hebrew University of Jerusalem ©
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Correction of the MLE Model
+\end_layout
+
+\begin_layout Standard
+Under the MLE theory, 
+\begin_inset Formula $I\left(\theta\right)=E\left[\nabla\ell\left(\theta\right)^{t}\nabla\ell\left(\theta\right)\right]=-E\left[\nabla^{2}\ell\left(\theta\right)\right]$
+\end_inset
+
+.
+ However, when the model is mispecified, they differ.
+ Then, the variance of 
+\begin_inset Formula $\hat{\theta}_{mle}$
+\end_inset
+
+ is approximated by 
+\begin_inset Formula $\hat{J}^{-1}\hat{V}\hat{J}^{-1}$
+\end_inset
+
+ where 
+\begin_inset Formula $\hat{J}\coloneqq-\nabla^{2}\ell\left(\hat{\theta}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\hat{V}$
+\end_inset
+
+ is the estimator of 
+\begin_inset Formula $E\left[\nabla\ell\left(\theta\right)^{t}\nabla\ell\left(\theta\right)\right]$
+\end_inset
+
+.
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ can be esimated by 
+\begin_inset Formula 
+\[
+\hat{V}=\sum_{n=1}^{N}\nabla\ell_{n}\left(\hat{\theta}\right)\nabla\ell_{n}\left(\hat{\theta}\right)^{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $X_{i}\sim N_{m}\left(\mu,\Sigma\right)$
+\end_inset
+
+ then we have:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+f_{X_{i}}\left(x\right) & =\left(2\pi\right)^{-\frac{m}{2}}\left(\det\Sigma\right)^{-\frac{1}{2}}\exp\left[-\frac{1}{2}\left(x-\mu\right)^{t}\Sigma^{-1}\left(x-\mu\right)\right]\\
+\ln f_{X_{i}}\left(x\right) & =-\frac{1}{2}\left(m\ln\left(2\pi\right)+\ln\det\Sigma+\left(x-\mu\right)^{t}\Sigma^{-1}\left(x-\mu\right)\right)\\
+\nabla_{w}\ln f_{X_{i}}\left(x\right) & =-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+\nabla_{w}\left(x-\mu\right)^{t}\Sigma^{-1}\left(x-\mu\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{w}\left(x-\mu\right)^{t}\Sigma^{-1}\left(x-\mu\right) & =\nabla_{w}\left(x^{t}\Sigma^{-1}x-2x^{t}\Sigma^{-1}\mu+\mu^{t}\Sigma^{-1}\mu\right)\\
+ & =\nabla_{w}x^{t}\Sigma^{-1}x-\nabla_{w}2x^{t}\Sigma^{-1}\mu+\nabla_{w}\mu^{t}\Sigma^{-1}\mu\\
+ & =x^{t}\nabla_{w}\Sigma^{-1}\left(x-2\mu\right)+\nabla_{w}\mu^{t}\Sigma^{-1}\mu
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{w}\ln f_{X_{i}}\left(x\right)=-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+x^{t}\nabla_{w}\Sigma^{-1}\left(x-2\mu\right)+\nabla_{w}\mu^{t}\Sigma^{-1}\mu\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Define
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\psi\coloneqq\nabla_{w}\ln\det\Sigma$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\xi\coloneqq\nabla_{w}\mu^{t}\Sigma^{-1}\mu$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\gamma=\psi+\xi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\kappa_{i}=x_{i}^{t}\nabla_{w}\Sigma^{-1}\left(x_{i}-2\mu\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{\kappa}_{n}=\sum_{i}\kappa_{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: 
+\begin_inset Formula $\ln\det\Sigma=\ln\prod_{i}\lambda_{i}\left(\Sigma\right)=\sum_{i}\ln\lambda_{i}\left(\Sigma\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: in 
+\begin_inset Formula $\kappa_{i}$
+\end_inset
+
+, 
+\begin_inset Formula $\nabla_{w}\Sigma^{-1}\left(x_{i}-2\mu\right)$
+\end_inset
+
+ is a gradiant of a vector, therefore a 
+\bar under
+Jacobian matrix
+\end_layout
+
+\begin_layout Standard
+then we get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)\cdot\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)^{t} & =-\frac{1}{2}\left(\psi+\kappa_{i}+\xi\right)\cdot-\frac{1}{2}\left(\psi+\kappa_{i}+\xi\right)^{t}\\
+ & =\frac{1}{4}\cdot\left(\gamma+\kappa_{i}\right)\left(\gamma+\kappa_{i}\right)^{t}\\
+ & =\frac{1}{4}\cdot\left(\gamma\gamma^{t}+\gamma\kappa_{i}^{t}+\kappa_{i}\gamma^{t}+\kappa_{i}\kappa_{i}^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{i=1}^{n}\nabla_{w}\nabla_{w}^{t} & =\frac{1}{4}\left(\sum_{i=1}^{n}\gamma\gamma^{t}+\sum_{i=1}^{n}\gamma\kappa_{i}^{t}+\sum_{i=1}^{n}\kappa_{i}\gamma^{t}+\sum_{i=1}^{n}\kappa_{i}\kappa_{i}^{t}\right)\\
+ & =\frac{1}{4}\left(n\cdot\gamma\gamma^{t}+\gamma\tilde{\kappa}_{n}^{t}+\tilde{\kappa}_{n}\gamma^{t}+\sum_{i=1}^{n}\kappa_{i}\kappa_{i}^{t}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now in our case, replace 
+\begin_inset Formula $i$
+\end_inset
+
+ index with 
+\begin_inset Formula $n$
+\end_inset
+
+ and total sample 
+\begin_inset Formula $N$
+\end_inset
+
+ instead of 
+\begin_inset Formula $n$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\psi\coloneqq\nabla_{w}\ln\det\Sigma=\nabla_{w}\ln\det g_{2}=\nabla_{w}\sum_{i}\ln\lambda_{i}\left(g_{2}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\xi\coloneqq\nabla_{w}g_{1}^{t}g_{2}^{-1}g_{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\gamma=\psi+\xi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\kappa_{n}=x_{n}^{t}\nabla_{w}g_{2}^{-1}\left(x_{n}-2g_{1}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{\kappa}_{n}=\sum_{i}\kappa_{i}$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

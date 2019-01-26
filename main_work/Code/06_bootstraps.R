@@ -3,11 +3,13 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
+linkFun <- linkFunctions$Exponent
+
 Tlength <- 115
 B <- 3
-p <- 12
+p <- 22
 sampleDataB <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
-                            percent_alpha = 0.4, range_alpha = c(0.6, 0.8), ncores = ncores)
+                             percent_alpha = 0.4, range_alpha = c(0.6, 0.8), ncores = ncores)
 
 
 bootstrapFunction <- function(b) estimateAlpha(healthy.data = sampleDataB$samples[[b]]$healthy,
@@ -25,7 +27,7 @@ for(b in 1:B){
   estN_all[b] <- simuldat[[b]]$Est_N
 } 
 VarAlphaByHess <- ComputeFisher(simuldat[[1]], sampleDataB$samples[[1]]$sick, "Hess") %>% solve
-VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB$samples[[1]]$sick, "Grad") %>% solve
+VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB$samples[[1]]$sick, "Grad", ncores = ncores) %>% solve
 VarAlphaCombined <- VarAlphaByHess %*% solve(VarAlphaByGrad) %*% VarAlphaByHess
 
 Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
@@ -36,7 +38,7 @@ Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
          QuotentGrad = TheoreticGrad/Empiric,
          QuotentCombined = TheoreticCombined/Empiric,
          QuotentBetween = TheoreticHess/TheoreticGrad)
-  
+
 SDErrorByFunction <- Emp_vs_Theo %>% gather(key = Type, value = Thoeretic, -Empiric, -starts_with("Quotent")) %>%
   ggplot(aes(x = Thoeretic, y = Empiric, col = Type)) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
   geom_abline(intercept = 0, slope = 1, size = 0.9, linetype = 3) + 
@@ -47,7 +49,7 @@ BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 
-p <- 12
+p <- 22
 B <- 50
 Tlist <- c(10, 30, 50, 70, 100, 120, 150, 170, 200, 250, 300, 400, 700, 1000, 1500, 2000, 3000, 4000)
 lngth_Tlist <- length(Tlist)
@@ -56,14 +58,14 @@ sampleDataBT <- list()
 
 for(t in 1:lngth_Tlist){
   sampleDataBT[[t]] <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlist[t],
-                                    percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed, ncores = ncores) %>%
+                                     percent_alpha = 0.4, range_alpha = c(0.6, 0.8), seed = seed, ncores = ncores) %>%
     append(c("Tlength" = Tlist[t]), 0)
 }
 
 
 bootstrapFunction <- function(b, k) estimateAlpha(healthy.data = sampleDataBT[[k]]$samples[[b]]$healthy,
-                                               sick.data = sampleDataBT[[k]]$samples[[b]]$sick,
-                                               T_thresh = 10^4, updateU = 1, progress = F)
+                                                  sick.data = sampleDataBT[[k]]$samples[[b]]$sick,
+                                                  T_thresh = 10^4, updateU = 1, progress = F)
 
 simuldatT <- list()
 

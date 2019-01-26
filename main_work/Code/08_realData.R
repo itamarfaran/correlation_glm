@@ -3,7 +3,8 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-link <- "main_work/data/NMDA_all_data_AAL90.mat"
+link <- "main_work/Data/NMDA_all_data_AAL90.mat"
+# link <- "main_work/Data/Amnesia_all_AAL.mat"
 Real.dta <- readMat(link)
 
 #Which coloumns are NA? (Usually, 87-88)

@@ -43,6 +43,7 @@ promptForCores <- function(){
   ncores <<- ncores
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))
 }
+ncores <- ifelse(tolower(.Platform$OS.type) == "windows", 1, detectCores() - 2)
 promptForCores()
 
 buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){

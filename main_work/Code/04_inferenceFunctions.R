@@ -53,7 +53,7 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, effectiveN, linkFu
                              sig.level = 0.05, p.adjust.method = p.adjust.methods, const = 1, Real){
   
   if(length(p.adjust.method) > 1) p.adjust.method <- p.adjust.method[1]
-  if(length(test) > 1) test <- test[1]
+  if(length(test) > 1) test <- test[3]
   if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
   obj <- Estimate.Loop2_object
   

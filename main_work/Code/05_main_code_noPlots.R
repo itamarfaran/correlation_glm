@@ -12,7 +12,7 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 57, nS = 42, p = 10, Tlength = Tlength,
+sampleData <- createSamples(nH = 19, nS = 12, p = 25, Tlength = Tlength,
                             percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
@@ -53,11 +53,15 @@ HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 tt.hyp <- Sys.time() - tt.hyp
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]
 HypTestResComb$Results[order(HypTestResComb$Results$Real),]
-# select(HypTestResComb$Results, Est., Lower, Upper) %>% exp()
+select(HypTestResComb$Results, Est., Lower, Upper) %>% linkFun$FUN()
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick, linkFun = linkFun)
 
+multiRes <- multipleComparison(healthy.data = sampleData$healthy, sick.data = sampleData$sick,
+                               Tlength = Pelet_Cov$Est_N, p.adjust.method = "BH") %>%
+  round(3) %>% vector2triangle()
+corrplot(1 - multiRes, is.corr = F)
+corrplot(multiRes < 0.05, is.corr = F)
+select(HypTestResComb$Results, Est., 'Adj.P-val', Reject_H0)
 tt.all <- Sys.time() - tt.all
-
-
 # })

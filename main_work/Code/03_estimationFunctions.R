@@ -308,7 +308,26 @@ estimateAlpha <- function(healthy.data, sick.data, T_thresh, linkFun, updateU = 
   
 }
 
+multipleComparison <- function(healthy.data, sick.data, Tlength,
+                               p.adjust.method = p.adjust.methods, test = c("lower", "upper", "both")){
+  fisherZ <- function(z) 0.5*log((1 + z)/(1 - z))
+  if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
+  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
+  if(length(p.adjust.method > 1)) p.adjust.method <- p.adjust.method[1]
+  if(length(test > 1)) test <- test[3]
+  
+  H_fisherR <- healthy.data %>% fisherZ() %>% colMeans()
+  S_fisherR <- sick.data %>% fisherZ() %>% colMeans()
+  
+  vars <- (1/nrow(healthy.data) + 1/nrow(sick.data))/(Tlength - 3)
+  
+  Zvals <- (S_fisherR - H_fisherR)/sqrt(vars)
+  if(test == "lower") Pvals <- pnorm(Zvals)
+  if(test == "upper") Pvals <- 1 - pnorm(Zvals)
+  if(test == "both") Pvals <- 2*(1 - pnorm(abs(Zvals)))
+  p.adjust(Pvals, p.adjust.method)
+}
+
 # todo : Improve 'Grad' Fisher Information
 # todo : check elemntal library, instalation via R
-# todo : Build function that does michael and shahar method (4000 comparisons) and compare power
 # todo : Add larger dimensions to alpha

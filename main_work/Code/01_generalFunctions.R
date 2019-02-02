@@ -5,7 +5,7 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
-              "mvtnorm", "numDeriv", "parallel", "profvis", "progress",
+              "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
               "Rcpp", "R.matlab", "stats4", "tidyverse")
 ipak(packages)
 

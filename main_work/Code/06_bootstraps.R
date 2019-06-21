@@ -125,21 +125,24 @@ ErrorByDF_Grad <-
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
 
 ErrorByDF_Hess <- 
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
 
 ErrorByDF_Combined <-
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
+
+# ggmatrix(list(ErrorByDF_Grad, ErrorByDF_Hess, ErrorByDF_Combined),
+#          nrow = 1, ncol = 3)
 
 BiasDiffEstN <- as.data.frame(estNT_all - rep(1, B) %*% t(Tlist))
 colnames(BiasDiffEstN) <- Tlist

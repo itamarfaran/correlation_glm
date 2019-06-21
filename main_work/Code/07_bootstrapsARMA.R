@@ -138,21 +138,21 @@ ErrorByDF_Grad <-
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
 
 ErrorByDF_Hess <- 
   inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
 
 ErrorByDF_Combined <-
   inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
   ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric") + xlim(0, 0.15) + ylim(0, 0.15)
+  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
 
 BiasDiffEstN <- as.data.frame(estNT_all - Tlength)
 colnames(BiasDiffEstN) <- ARlist

@@ -51,7 +51,7 @@ Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
 SDErrorByFunction <- Emp_vs_Theo %>% gather(key = Type, value = Thoeretic, -Empiric, -starts_with("Quotent")) %>%
   ggplot(aes(x = Thoeretic, y = Empiric, col = Type)) + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
   geom_abline(intercept = 0, slope = 1, size = 0.9, linetype = 3) + 
-  geom_point() + geom_smooth(method = "lm", formula = y ~ 0 + x, se = FALSE, linetype = 2)
+  geom_point() + geom_smooth(method = "lm", formula = y ~ 0 + x, se = FALSE, linetype = 2) 
 
 BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
   geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Loss of DF")
@@ -133,41 +133,70 @@ coeffs$AR <- ARlist
 CoefByDF <- gather(coeffs, key = Type, value = Coef, -AR) %>% ggplot(aes(x = AR, y = Coef, col = Type)) +
   geom_smooth(method = "lm", formula = y ~ (x + I(x^2)), se = FALSE) + geom_point()
 
-ErrorByDF_Grad <- 
+ErrorByDF_Grad <-
   inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
+  scale_color_gradient2(midpoint = 0, low = "#f44150", mid = "#686868", high = "#4286f4", space ="Lab") +
+# scale_colour_continuous(trans = scales::sqrt_trans()) + 
+  geom_point() + labs(title = "Gradient Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "AR Absolute Value") +
+  xlim(0, 0.08) + ylim(0, 0.08)
 
 ErrorByDF_Hess <- 
   inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
+  scale_color_gradient2(midpoint = 0, low = "#f44150", mid = "#686868", high = "#4286f4", space ="Lab") +
+  geom_point() + labs(title = "Hessian Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "AR Absolute Value") +
+  xlim(0, 0.08) + ylim(0, 0.08)
 
 ErrorByDF_Combined <-
   inner_join(by = c("ARlist", "P"), cbind(ARlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist),
              cbind(ARlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -ARlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (ARlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric", col = "AR Value") + xlim(0, 0.05) + ylim(0, 0.05)
+  scale_color_gradient2(midpoint = 0, low = "#f44150", mid = "#686868", high = "#4286f4", space ="Lab") +
+  geom_point() + labs(title = "Sandwich Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "AR Absolute Value") +
+  xlim(0, 0.08) + ylim(0, 0.08)
 
 BiasDiffEstN <- as.data.frame(estNT_all - Tlength)
 colnames(BiasDiffEstN) <- ARlist
 
 EstNDiff <- gather(BiasDiffEstN, key = AR, value = Bias) %>%
   ggplot(aes(x = factor(AR, levels = ARlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "AR", y = "Absolute Loss of DF")
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") +
+  labs(title = "Estimate of Degrees of Freedom", x = "AR Coefficient", y = "#Obs - DF")
+
+EstNDiff <-
+  gather(BiasDiffEstN, key = AR, value = Bias) %>%
+  ggplot(aes(x = as.numeric(AR), y = Bias, label = AR)) +
+  geom_smooth(method = "lm", formula = y ~ AR_var(x)) + 
+  geom_hline(yintercept = 0) + geom_boxplot(aes(group = AR), fill = "lightblue") +
+  geom_label(aes(x = AR, y = Means, label = AR),
+             data.frame(AR = ARlist, Means = colMeans(BiasDiffEstN))) +
+  labs(title = "Estimate of Degrees of Freedom", x = "AR Coefficient", y = "#Obs/DF - 1") + 
+  xlim(-0.75, 0.75)
+
 
 BiasRatioEstN <- as.data.frame(estNT_all / Tlength - 1)
 colnames(BiasRatioEstN) <- ARlist
 
-EstNRatio <- gather(BiasRatioEstN, key = AR, value = Bias) %>%
-  ggplot(aes(x = factor(AR, levels = ARlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "AR", y = "Relative Loss of DF")
+AR_var <- function(x) 1/(1 - x^2)
+lm_ar <- lm(Bias ~ I(AR_var(AR)), mutate(gather(BiasRatioEstN, key = AR, value = Bias), AR = as.numeric(AR)))
+summary(lm_ar)
+lm_coefs <- coef(lm_ar)
 
+EstNRatio <-
+  gather(BiasRatioEstN, key = AR, value = Bias) %>%
+  ggplot(aes(x = as.numeric(AR), y = Bias, label = AR)) +
+  geom_smooth(method = "lm", formula = y ~ AR_var(x)) + 
+  geom_hline(yintercept = 0) + geom_boxplot(aes(group = AR), fill = "lightblue") +
+  geom_label(aes(x = AR, y = Means, label = AR),
+             data.frame(AR = ARlist, Means = colMeans(BiasRatioEstN))) +
+  labs(title = "Estimate of Degrees of Freedom", x = "AR Coefficient", y = "#Obs/DF - 1") + 
+  scale_y_continuous(labels = scales::percent) + xlim(-0.75, 0.75)
 
 link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
 
@@ -177,6 +206,11 @@ save.image(file = link2)
 ErrorByDF_Combined
 ErrorByDF_Grad
 ErrorByDF_Hess
+GGally::ggmatrix(
+  list(ErrorByDF_Grad, ErrorByDF_Hess, ErrorByDF_Combined),
+  nrow = 1, ncol = 3, xlab = "Estimated Variance", ylab = "Empiric Variance",
+  xAxisLabels = c("Gradient", "Hessian", "Sandwich"), showStrips = TRUE, legend = 3) +
+  theme(legend.position = "bottom")
 
 SDErrorByFunction
 CoefByDF

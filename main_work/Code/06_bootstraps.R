@@ -45,9 +45,9 @@ SDErrorByFunction <- Emp_vs_Theo %>% gather(key = Type, value = Thoeretic, -Empi
   geom_point() + geom_smooth(method = "lm", formula = y ~ 0 + x, se = FALSE, linetype = 2)
 
 BiasDiff <- ggplot(data.frame(Bias = estN_all - Tlength), aes(x = Bias)) +
-  geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
+  geom_histogram(bins = 4*log(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 BiasRatio <- ggplot(data.frame(Bias = estN_all/Tlength - 1), aes(x = Bias)) +
-  geom_histogram(bins = sqrt(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
+  geom_histogram(bins = 4*log(B), col = "white", fill = "lightblue") + labs(title = "Bias of Estimated N")
 
 p <- 32
 B <- 80
@@ -123,23 +123,26 @@ CoefByDF <- gather(coeffs, key = Type, value = Coef, -Tlength) %>% ggplot(aes(x 
 ErrorByDF_Grad <- 
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdGrad) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Grad", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
+  scale_colour_continuous(trans = scales::log10_trans()) + 
+  geom_point() + labs(title = "Gradient Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "#Obs") + xlim(0, 0.08) + ylim(0, 0.08)
 
 ErrorByDF_Hess <- 
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdHess) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Hess", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
+  scale_colour_continuous(trans = scales::log10_trans()) + 
+  geom_point() + labs(title = "Hessian Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "#Obs") + xlim(0, 0.08) + ylim(0, 0.08)
 
 ErrorByDF_Combined <-
   inner_join(by = c("Tlist", "P"), cbind(Tlist, alpha_sdComb) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist),
              cbind(Tlist, emp_sds) %>% as.data.frame() %>% gather(key = P, value = Value, -Tlist) ) %>%
-  ggplot(aes(x = Value.x, y = Value.y, col = factor(Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
+  ggplot(aes(x = Value.x, y = Value.y, col = (Tlist))) + geom_vline(xintercept = 0) + geom_hline(yintercept = 0) +
   geom_abline(slope = 1, intercept = 0, col = "blue", linetype = 2, size = 1) +
-  geom_point() + labs(x = "Theoritcal by Combined", y = "Empiric", col = "DF") + xlim(0, 0.15) + ylim(0, 0.15)
+  scale_colour_continuous(trans = scales::log10_trans()) + 
+  geom_point() + labs(title = "Sandwich Based Estimate",x = "Estimated Variance", y = "Empiric Variance", col = "#Obs") + xlim(0, 0.08) + ylim(0, 0.08)
 
 # ggmatrix(list(ErrorByDF_Grad, ErrorByDF_Hess, ErrorByDF_Combined),
 #          nrow = 1, ncol = 3)
@@ -149,14 +152,17 @@ colnames(BiasDiffEstN) <- Tlist
 
 EstNDiff <- gather(BiasDiffEstN, key = DF, value = Bias) %>%
   ggplot(aes(x = factor(DF, levels = Tlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Absolute Bias")
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") +
+  labs(title = "Estimate of Degrees of Freedom", x = "#Obs", y = "#Obs - DF")
 
 BiasRatioEstN <- as.data.frame(estNT_all / rep(1, B) %*% t(Tlist) - 1)
 colnames(BiasRatioEstN) <- Tlist
 
 EstNRatio <- gather(BiasRatioEstN, key = DF, value = Bias) %>%
   ggplot(aes(x = factor(DF, levels = Tlist, ordered = TRUE), y = Bias)) +
-  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") + labs(x = "DF", y = "Relative Bias")
+  geom_hline(yintercept = 0) + geom_boxplot(fill = "lightblue") +
+  labs(title = "Estimate of Degrees of Freedom", x = "#Obs", y = "#Obs/DF - 1") + 
+  scale_y_continuous(labels = scales::percent)
 
 
 link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "fullRunNoARMA ", Sys.time(), ".RData") )
@@ -167,6 +173,12 @@ save.image(file = link2)
 ErrorByDF_Combined
 ErrorByDF_Grad
 ErrorByDF_Hess
+GGally::ggmatrix(
+  list(ErrorByDF_Grad, ErrorByDF_Hess, ErrorByDF_Combined),
+  nrow = 1, ncol = 3, xlab = "Estimated Variance", ylab = "Empiric Variance",
+  xAxisLabels = c("Gradient", "Hessian", "Sandwich"), legend = 3) +
+  theme(legend.position = "bottom")
+
 
 SDErrorByFunction
 CoefByDF

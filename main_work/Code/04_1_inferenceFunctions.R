@@ -13,12 +13,12 @@ loglik_uni <- function(obs, theta, alpha, Eff.N, linkFun){
     dists <- t(U) %*% (obs - meanVect)
     -0.5*(sum(log(D)) + sum(dists^2/D))
   }
-  
-  loglikgrad_uni <- function(obs, CovObj, linkFun){
-    x <- grad(function(x) loglik_uni(obs = obs, theta = CovObj$theta, alpha = x, Eff.N = CovObj$Est_N, linkFun = linkFun),
-              CovObj$alpha)
-    return(x %*% t(x))
-  }
+}
+
+loglikgrad_uni <- function(obs, CovObj, linkFun){
+  x <- grad(function(x) loglik_uni(obs = obs, theta = CovObj$theta, alpha = x, Eff.N = CovObj$Est_N, linkFun = linkFun),
+            CovObj$alpha)
+  return(x %*% t(x))
 }
 
 computeBmatr <- function(CovObj, sickDat, silent = FALSE, linkFun, ncores = 1){

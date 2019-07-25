@@ -1,47 +1,59 @@
 computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1){
-  gamma <- function(theta, alpha, eff_N, linkFun){
+  U1 = TRUE
+  # U1 == TRUE    =>   Compute U1 every differntiation
+  # U1 == FALSE   =>   Compute U1 once, before differntiation
+  # U1 == matrix  =>   use given U1
+  
+  if(is.logical(U1)){
+    if(U1) {
+      U1 = NULL
+    } else {
+      g11 <- as.matrix(CovObj$theta*triangle2vector(create_alpha_mat(linkFun(CovObj$alpha))))
+      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/CovObj$Est_N
+      e21 <- eigen(g21, symmetric = TRUE)
+      U1 <- e21$vectors
+    }
+  }
+  
+  gamma <- function(theta, alpha, eff_N, linkFun, U1){
     forGrad <- function(A, i){
       A <- replace(alpha, i, A)
       g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A))))
-      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))
-      e21 <- eigen(g21/eff_N, symmetric = TRUE)
-      U1 <- e21$vectors
+      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/eff_N
+      if(is.null(U1)){
+        e21 <- eigen(g21, symmetric = TRUE)
+        U1 <- e21$vectors
+      } else {
+        e21 <- eigen(g21, symmetric = TRUE, only.values = TRUE)
+      }
       D1 <- e21$values
       
       return(sum(log(D1)) + t(g11) %*% U1 %*% diag(1/D1) %*% t(U1) %*% g11)
     }
     mclapply(1:length(alpha), function(i) grad(func = forGrad, x = alpha[i], i = i), mc.cores = ncores) %>% unlist()
   }
-  kappa <- function(x, theta, alpha, eff_N, linkFun, U1 = TRUE){
-    if(U1){
-      U1 <- NULL
-    } else {
-      e21 <- eigen(g21/n.effective_D, symmetric = TRUE)
-      U1 <- e21$vectors
-    }
+  kappa <- function(x, theta, alpha, eff_N, linkFun, U1){
     forGrad <- function(A){
       g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A))))
-      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))
+      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/eff_N
       if(is.null(U1)){
-        SigSolve <- solve(g21)
+        sig_solve <- solve(g21)
       } else {
-        e21 <- eigen(g21/eff_N, symmetric = TRUE, only.values = T)
-        D1 <- e21$values
-        
-        SigSolve <- U1 %*% diag(1/D1) %*% t(U1)
+        D1 <- eigen(g21, symmetric = TRUE, only.values = TRUE)$values
+        sig_solve <- U1 %*% diag(1/D1) %*% t(U1)
       }
-      return(SigSolve %*% (x - 2*g11) )
+      return(t(x) %*% sig_solve %*% (x - 2*g11) )
     }
-    t(x) %*% jacobian(forGrad, alpha)
+    grad(forGrad, alpha)
   }
   
-  gammares <- gamma(theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N, linkFun = linkFun)
-  kappares <- mclapply(1:nrow(sickDat),
-                       function(i) kappa(x = sickDat[i,], theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N,
-                                         linkFun = linkFun, U1 = U1),
-                       mc.cores = ncores)
+  gammares <- gamma(theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N, linkFun = linkFun, U1 = U1)
+  kappares <- do.call(rbind, mclapply(
+    1:nrow(sickDat),
+    function(i) kappa(x = sickDat[i,], theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N,
+                      linkFun = linkFun, U1 = U1),
+    mc.cores = ncores))
   
-  kappares <- do.call(rbind, kappares)
   kapgam <- gammares %o% colSums(kappares)
   kapkap <- mclapply(1:nrow(sickDat), function(i) kappares[i,] %o% kappares[i,], mc.cores = ncores) %>%
     simplify2array() %>% calculate_mean_matrix(do.mean = FALSE)

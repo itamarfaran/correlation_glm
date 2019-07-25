@@ -195,6 +195,7 @@ f_{X_{i}}\left(x\right) & =\left(2\pi\right)^{-\frac{m}{2}}\left(\det\Sigma\righ
 \begin{align*}
 \nabla_{w}\left(x-\mu\right)^{t}\Sigma^{-1}\left(x-\mu\right) & =\nabla_{w}\left(x^{t}\Sigma^{-1}x-2x^{t}\Sigma^{-1}\mu+\mu^{t}\Sigma^{-1}\mu\right)\\
  & =\nabla_{w}x^{t}\Sigma^{-1}x-\nabla_{w}2x^{t}\Sigma^{-1}\mu+\nabla_{w}\mu^{t}\Sigma^{-1}\mu\\
+ & =\nabla_{w}\left(\left(x-2\mu\right)^{t}\Sigma^{-1}x\right)+\nabla_{w}\mu^{t}\Sigma^{-1}\mu\\
  & =x^{t}\nabla_{w}\Sigma^{-1}\left(x-2\mu\right)+\nabla_{w}\mu^{t}\Sigma^{-1}\mu
 \end{align*}
 
@@ -205,9 +206,10 @@ f_{X_{i}}\left(x\right) & =\left(2\pi\right)^{-\frac{m}{2}}\left(\det\Sigma\righ
 
 \begin_layout Standard
 \begin_inset Formula 
-\[
-\nabla_{w}\ln f_{X_{i}}\left(x\right)=-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+x^{t}\nabla_{w}\Sigma^{-1}\left(x-2\mu\right)+\nabla_{w}\mu^{t}\Sigma^{-1}\mu\right)
-\]
+\begin{align*}
+\nabla_{w}\ln f_{X_{i}}\left(x\right) & =-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+\nabla_{w}\mu^{t}\Sigma^{-1}\mu+x^{t}\nabla_{w}\Sigma^{-1}\left(x-2\mu\right)\right)\\
+ & =-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+\nabla_{w}\mu^{t}\Sigma^{-1}\mu+\nabla_{w}\left(\left(x-2\mu\right)^{t}\Sigma^{-1}x\right)\right)
+\end{align*}
 
 \end_inset
 

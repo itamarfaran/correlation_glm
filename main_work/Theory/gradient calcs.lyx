@@ -281,7 +281,19 @@ then we get
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)\cdot\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)^{t} & =-\frac{1}{2}\left(\psi+\kappa_{i}+\xi\right)\cdot-\frac{1}{2}\left(\psi+\kappa_{i}+\xi\right)^{t}\\
+\nabla_{w}\ln f_{X_{i}}\left(x\right) & =-\frac{1}{2}\left(\nabla_{w}\ln\det\Sigma+\nabla_{w}\mu^{t}\Sigma^{-1}\mu+\nabla_{w}\left(x-2\mu\right)^{t}\Sigma^{-1}x\right)\\
+ & =-\frac{1}{2}\left(\psi+\xi+\kappa_{i}\right)=-\frac{1}{2}\left(\gamma+\kappa_{i}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)\cdot\nabla_{w}\ln f_{X_{i}}\left(x_{i}\right)^{t} & =-\frac{1}{2}\left(\gamma+\kappa_{i}\right)\cdot-\frac{1}{2}\left(\gamma+\kappa_{i}\right)^{t}\\
  & =\frac{1}{4}\cdot\left(\gamma+\kappa_{i}\right)\left(\gamma+\kappa_{i}\right)^{t}\\
  & =\frac{1}{4}\cdot\left(\gamma\gamma^{t}+\gamma\kappa_{i}^{t}+\kappa_{i}\gamma^{t}+\kappa_{i}\kappa_{i}^{t}\right)
 \end{align*}
@@ -294,7 +306,8 @@ then we get
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\sum_{i=1}^{n}\nabla_{w}\nabla_{w}^{t} & =\frac{1}{4}\left(\sum_{i=1}^{n}\gamma\gamma^{t}+\sum_{i=1}^{n}\gamma\kappa_{i}^{t}+\sum_{i=1}^{n}\kappa_{i}\gamma^{t}+\sum_{i=1}^{n}\kappa_{i}\kappa_{i}^{t}\right)\\
+\sum_{i=1}^{n}\nabla_{w}\nabla_{w}^{t} & =\frac{1}{4}\cdot\sum_{i=1}^{n}\left(\gamma\gamma^{t}+\gamma\kappa_{i}^{t}+\kappa_{i}\gamma^{t}+\kappa_{i}\kappa_{i}^{t}\right)\\
+ & =\frac{1}{4}\cdot\left(n\cdot\gamma\gamma^{t}+\gamma\sum_{i=1}^{n}\kappa_{i}^{t}+\kappa_{i}\sum_{i=1}^{n}\gamma^{t}+\sum_{i=1}^{n}\kappa_{i}\kappa_{i}^{t}\right)\\
  & =\frac{1}{4}\left(n\cdot\gamma\gamma^{t}+\gamma\tilde{\kappa}_{n}^{t}+\tilde{\kappa}_{n}\gamma^{t}+\sum_{i=1}^{n}\kappa_{i}\kappa_{i}^{t}\right)
 \end{align*}
 

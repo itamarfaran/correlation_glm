@@ -1,4 +1,4 @@
-computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1){
+computeFisherByGrad <- function(CovObj, sickDat, linkFun, dim_alpha = 1, U1 = TRUE, ncores = 1){
   U1 = TRUE
   # U1 == TRUE    =>   Compute U1 every differntiation
   # U1 == FALSE   =>   Compute U1 once, before differntiation
@@ -15,10 +15,10 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
     }
   }
   
-  gamma <- function(theta, alpha, eff_N, linkFun, U1){
+  gamma <- function(theta, alpha, eff_N, linkFun, dim_alpha, U1){
     forGrad <- function(A, i){
       A <- replace(alpha, i, A)
-      g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A))))
+      g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A), dim_alpha = dim_alpha)))
       g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/eff_N
       if(is.null(U1)){
         e21 <- eigen(g21, symmetric = TRUE)
@@ -30,11 +30,13 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
       
       return(sum(log(D1)) + t(g11) %*% U1 %*% diag(1/D1) %*% t(U1) %*% g11)
     }
-    mclapply(1:length(alpha), function(i) grad(func = forGrad, x = alpha[i], i = i), mc.cores = ncores) %>% unlist()
+    unlist(mclapply(
+      1:length(alpha), function(i) grad(func = forGrad, x = alpha[i], i = i), mc.cores = ncores
+      ))
   }
-  kappa <- function(x, theta, alpha, eff_N, linkFun, U1){
+  kappa <- function(x, theta, alpha, eff_N, linkFun, dim_alpha, U1){
     forGrad <- function(A){
-      g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A))))
+      g11 <- as.matrix(theta*triangle2vector(create_alpha_mat(linkFun(A), dim_alpha = dim_alpha)))
       g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/eff_N
       if(is.null(U1)){
         sig_solve <- solve(g21)
@@ -47,11 +49,11 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
     grad(forGrad, alpha)
   }
   
-  gammares <- gamma(theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N, linkFun = linkFun, U1 = U1)
+  gammares <- gamma(theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N, linkFun = linkFun, dim_alpha = dim_alpha, U1 = U1)
   kappares <- do.call(rbind, mclapply(
     1:nrow(sickDat),
     function(i) kappa(x = sickDat[i,], theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N,
-                      linkFun = linkFun, U1 = U1),
+                      linkFun = linkFun, dim_alpha = dim_alpha, U1 = U1),
     mc.cores = ncores))
   
   kapgam <- gammares %o% colSums(kappares)
@@ -61,29 +63,29 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
   return(0.25*(nrow(sickDat) * gammares %o% gammares + kapgam + t(kapgam) + kapkap))
 }
 
-ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), linkFun, ncores = 1, silent = FALSE){
+ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), linkFun, dim_alpha = 1, ncores = 1, silent = FALSE){
   if(class(sickDat) == "array") sickDat <- cor.matrix_to_norm.matrix(sickDat) 
   if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
   
   method <- method[1]
-  if(method == "Hess") pelet <- hessian(x = CovObj$alpha,
+  if(method == "Hess") output <- hessian(x = CovObj$alpha,
                                         func = function(A) minusloglik(theta = CovObj$theta,
                                                                        alpha = A, linkFun = linkFun$FUN,
                                                                        sick.data = sickDat,
-                                                                       effective.N = CovObj$Est_N))
-  if(method == "Grad") pelet <- computeFisherByGrad(CovObj, sickDat, linkFun = linkFun$FUN, ncores = ncores)
+                                                                       effective.N = CovObj$Est_N, 
+                                                                       dim_alpha = dim_alpha))
+  if(method == "Grad") output <- computeFisherByGrad(CovObj, sickDat, linkFun = linkFun$FUN, dim_alpha = dim_alpha, ncores = ncores)
   
-  return(pelet)
+  return(output)
 }
 
-build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, effectiveN, linkFun, test = c("lower", "upper", "two-sided"),
+build_hyp.test <- function(CovObj, FisherMatr, effectiveN, linkFun, test = c("lower", "upper", "two-sided"),
                              sig.level = 0.05, p.adjust.method = p.adjust.methods, const = 1, Real){
   
   if(length(p.adjust.method) > 1) p.adjust.method <- p.adjust.method[1]
   if(length(test) > 1) test <- test[3]
   if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
-  obj <- Estimate.Loop2_object
-  
+
   alpha_var_mat <- solve(FisherMatr)
   alpha_sd <- sqrt(diag(alpha_var_mat))
   
@@ -92,10 +94,10 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, effectiveN, linkFu
   #   critical_value <- qmvt(1 - sig.level/2, corr = cov2cor(alpha_var_mat), df = ceiling(effectiveN))$quantile
   # } else {
     dist_fun <- function(q) pnorm(q)
-    critical_value <- qmvnorm(1 - sig.level/2, corr = cov2cor(alpha_var_mat))$quantile
+    critical_value <- qnorm(1 - sig.level/2)#qmvnorm(1 - sig.level/2, corr = cov2cor(alpha_var_mat))$quantile
   # }
   
-  res <- data.frame(Est. = obj$alpha)
+  res <- data.frame(Est. = CovObj$alpha)
   res$Std. <- const*alpha_sd
   res$'Z-val' <- (res$Est. - linkFun$INV(1))/res$Std.
 
@@ -109,7 +111,7 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, effectiveN, linkFu
   res$'Adj.P-val' <- p.adjust(res$'P-val', method = p.adjust.method)
   res$Reject_H0 <- res$'Adj.P-val' < sig.level
   
-  if(!missing(Real)) res$Real <- linkFun$INV(Real)
+  if(!missing(Real)) res$Real <- linkFun$INV(as.vector(Real))
   # if(!missing(effectiveN)){
   #   colnames(res)[colnames(res) == "Z-val"] <- "T-val"
   # }
@@ -118,7 +120,7 @@ build_hyp.test <- function(Estimate.Loop2_object, FisherMatr, effectiveN, linkFu
               p.adjust.method = p.adjust.method, CriticalVal = critical_value, Var_Mat = alpha_var_mat))
 }
 
-wilksTest <- function(covObj, healthy.dat, sick.dat, linkFun){
+wilksTest <- function(covObj, healthy.dat, sick.dat, dim_alpha = 1, linkFun){
   if(class(healthy.dat) == "array") healthy.dat <- cor.matrix_to_norm.matrix(healthy.dat)
   if(class(sick.dat) == "array") sick.dat <- cor.matrix_to_norm.matrix(sick.dat)
   if(missing(linkFun)) linkFun <- list(FUN = function(x) x, INV = function(x) x)
@@ -127,13 +129,14 @@ wilksTest <- function(covObj, healthy.dat, sick.dat, linkFun){
   chisq <- -2*( minusloglik(theta = covObj$theta,
                             alpha = linkFun$FUN(covObj$alpha),
                             healthy.data = healthy.dat,
-                            sick.data = sick.dat) -
+                            sick.data = sick.dat,
+                            dim_alpha = dim_alpha) -
                   minusloglik(theta = rbind(healthy.dat, sick.dat) %>% colMeans(),
                               alpha = rep(1, length(covObj$alpha)),
                               healthy.data = healthy.dat,
-                              sick.data = sick.dat) )
+                              sick.data = sick.dat,
+                              dim_alpha = dim_alpha) )
   
   c("Chisq_val" = chisq, "DF" = length(covObj$alpha),
     "Pval" = 1 - pchisq(chisq, length(covObj$alpha)))
-  
 }

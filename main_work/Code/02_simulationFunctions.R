@@ -1,4 +1,4 @@
-build_parameters <- function(p, percent_alpha, range_alpha, loc_scale = c(0,1), seed){
+build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), seed){
   #Build Real Sigma and Theta
   if(!missing(seed)) set.seed(seed[1])
   temp <- matrix(rnorm(2*p^2, loc_scale[1], loc_scale[2]), nrow = 2*p)
@@ -11,9 +11,12 @@ build_parameters <- function(p, percent_alpha, range_alpha, loc_scale = c(0,1), 
   real.sigma <- sqrt(diag(varss)) %*% real.theta %*% sqrt(diag(varss))
   
   #Build Real Alpha
-  alpha <- rep(1,p)
-  if(!missing(seed)) set.seed(seed[3])
-  alpha[sample(1:p, floor(percent_alpha * p))] <- runif(floor(percent_alpha * p), range_alpha[1], range_alpha[2])
+  sum_alpha <- rep(1, p)
+  sum_alpha[sample(p, floor(percent_alpha * p))] <- runif(floor(percent_alpha * p), range_alpha[1], range_alpha[2])
+  alpha <- matrix(runif(p*dim_alpha), nr = p)
+  alpha <- apply(alpha, 1, function(x) x/sum(x))
+  if(dim_alpha > 1) alpha <- t(alpha)
+  alpha <- alpha * (sum_alpha %o% rep(1, dim_alpha))
   
   return(list(Corr.mat = real.theta, Cov.mat = real.sigma, Alpha = alpha))
 }
@@ -102,14 +105,15 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, silent = FALSE
   return(simplify2array(mclapply(1:n, rawFun, mc.cores = ncores)))
 }
 
-createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, loc_scale = c(0,1), 
+createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), 
                           ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, seed = NULL, ncores = 1){
   
-  parameters <- build_parameters(p, percent_alpha, range_alpha, loc_scale, seed)
+  parameters <- build_parameters(p = p, percent_alpha = percent_alpha, range_alpha = range_alpha, dim_alpha = dim_alpha,
+                                 loc_scale = loc_scale, seed = seed)
   real.theta <- parameters$Corr.mat
   real.sigma <- parameters$Cov.mat
   alpha <- parameters$Alpha
-  alpha.mat <- create_alpha_mat(alpha)
+  alpha.mat <- create_alpha_mat(alpha, dim_alpha = dim_alpha)
   
   if(B == 1) return(list(healthy = create_correlation_matrices(real_corr = real.theta, sample_size = nH,
                                                                df = Tlength, AR = ARhealth, MA = MAhealth, ncores = ncores),

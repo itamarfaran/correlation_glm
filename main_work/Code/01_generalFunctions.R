@@ -77,6 +77,27 @@ powerMatrix <- function(MATR, pow){
   return(eigenMat$vectors %*% diag(eigenMat$values ^ pow) %*% t(eigenMat$vectors))
 }
 
+forceSolve <- function(MATR, method = "nearPD"){
+  invmat <- tryCatch(solve(MATR), error = function(e) FALSE)
+  if(is.logical(invmat[1])){
+    MATRnearPD <- nearPD(MATR)
+    message(paste0("frobenius norm difference: ", MATRnearPD$normF))
+    invmat <- solve(as.matrix(MATRnearPD$mat))
+  }
+  return(invmat)
+}
+
+forceEigen <- function(MATR, symmetric, only.values = FALSE, EISPACK = FALSE, method = "nearPD"){
+  if(missing(symmetric)) symmetric <- isSymmetric.matrix(MATR)
+  eig <- tryCatch(eigen(MATR, symmetric = symmetric, only.values = only.values, EISPACK = FALSE), error = function(e) FALSE)
+  if(is.logical(invmat[1])){
+    MATRnearPD <- nearPD(MATR)
+    message(paste0("frobenius norm difference: ", MATRnearPD$normF))
+    eig <- eigen(as.matrix(nearPD(MATR)), symmetric = symmetric, only.values = only.values)
+  }
+  return(eig)
+}
+
 regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"), const = 1, OnlyIfSing = TRUE){
   method <- method[1]
   if(!is.square.matrix(MATR)) stop("Matrix is not square.")
@@ -111,13 +132,7 @@ regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "i
 }
 
 #Calculate mean Correlation
-calculate_mean_matrix <- function(matrix_array, do.mean = TRUE){
-  temp <- matrix(0, ncol = dim(matrix_array)[2], nrow = dim(matrix_array)[1])
-  returns <- dim(matrix_array)[3]
-  for(i in 1:returns) temp <- temp + matrix_array[,,i]
-  if(do.mean) return(temp/returns)
-  return(temp)
-}
+calculate_mean_matrix <- function(matrix_array, do.mean = TRUE) summatrix(matrix_array, weights = do.mean)
 
 #Check stationarity/invertability of AR/MA process
 checkInv <- function(coefs, perc = 0.001){
@@ -128,6 +143,7 @@ checkInv <- function(coefs, perc = 0.001){
 
 #Generate weighted sum of matrices from array
 summatrix <- function(ARRAY, index, constants, weights = FALSE){
+  if(missing(index)) index <- 1:(dim(ARRAY)[3])
   if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
@@ -139,6 +155,7 @@ summatrix <- function(ARRAY, index, constants, weights = FALSE){
 
 #Generate weighted sum of vectors from matrices
 sumvector <- function(MATR, index, constants, weights = FALSE){
+  if(missing(index)) index <- 1:(nrow(MATR))
   if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- numeric(ncol(MATR))
@@ -149,7 +166,7 @@ sumvector <- function(MATR, index, constants, weights = FALSE){
 }
 
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
-central.moment <- function(x,norm=TRUE) {
+central.moment <- function(x, norm=TRUE) {
   n<-length(x)
   b<-vector()
   
@@ -175,10 +192,11 @@ central.moment <- function(x,norm=TRUE) {
 cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle2vector))
 
 #Build the alpha matrix according to the model
-create_alpha_mat <- function(VECT){
-  pelet <- VECT%*%t(VECT)
-  diag(pelet) <- rep(1, length(VECT))
-  return(pelet)
+create_alpha_mat <- function(alpha, dim_alpha = 1){
+  alpha <- matrix(alpha, nc = dim_alpha)
+  output <- alpha %*% t(alpha)
+  diag(output) <- 1
+  return(output)
 }
 
 #Force Positive Definiteness
@@ -239,16 +257,17 @@ vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
   p <- 0.5*c(one + sqrt(1 + 8*m), one - sqrt(1 + 8*m))
   p <- p[which( (p==round(p)) & p==abs(p) )]
   if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
-  pelet <- matrix(0, ncol = p, nrow = p)
-  pelet[lower.tri(pelet, diag = diag)] <- VECT
+  
+  output <- matrix(0, ncol = p, nrow = p)
+  output[lower.tri(output, diag = diag)] <- VECT
   
   if(diag){
-    pelet <- pelet + t(pelet) - diag(diag(pelet))
+    output <- output + t(output) - diag(diag(output))
   } else {
-    pelet <- pelet + t(pelet)
-    if(!is.null(truncdiag)) diag(pelet) <- truncdiag
+    output <- output + t(output)
+    if(!is.null(truncdiag)) diag(output) <- truncdiag
   }
-  return(pelet)
+  return(output)
 }
 
 #Calculate Maholonobis norm of a vector. Default is regular norm.

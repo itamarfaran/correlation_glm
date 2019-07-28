@@ -1,3 +1,4 @@
+### todo: need methodology for simulating alphas
 build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), seed){
   #Build Real Sigma and Theta
   if(!missing(seed)) set.seed(seed[1])

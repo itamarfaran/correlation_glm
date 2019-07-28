@@ -6,7 +6,6 @@ source("main_work/Code/04_inferenceFunctions.R")
 linkFun <- linkFunctions$Identity
 
 tt.all <- Sys.time()
-# profvis({
 
 Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
@@ -59,8 +58,4 @@ multiRes <- multipleComparison(healthy.data = sampleData$healthy, sick.data = sa
                                Tlength = Pelet_Cov$Est_N, p.adjust.method = "BH") %>%
   round(3) %>% vector2triangle()
 
-# corrplot(1 - multiRes, is.corr = F)
-# corrplot(multiRes < 0.05, is.corr = F)
-# select(HypTestResComb$Results, Est., 'Adj.P-val', Reject_H0)
 tt.all <- Sys.time() - tt.all
-# })

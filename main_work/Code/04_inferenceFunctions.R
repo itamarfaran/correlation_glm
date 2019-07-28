@@ -79,6 +79,7 @@ ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), linkFun, 
   return(output)
 }
 
+### todo: modify this according to hypothesis
 build_hyp.test <- function(CovObj, FisherMatr, effectiveN, linkFun, test = c("lower", "upper", "two-sided"),
                              sig.level = 0.05, p.adjust.method = p.adjust.methods, const = 1, Real){
   

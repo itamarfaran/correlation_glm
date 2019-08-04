@@ -3,7 +3,7 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-linkFun <- linkFunctions$Identity
+linkFun <- linkFunctions$additive_identity
 
 tt.all <- Sys.time()
 
@@ -50,7 +50,6 @@ c("Test" = HypTestResHess$Test, "Sig Level" = HypTestResHess$Significance, "FWER
 HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]
 HypTestResComb$Results[order(HypTestResComb$Results$Real),]
-select(HypTestResComb$Results, Est., Lower, Upper) %>% linkFun$FUN()
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick, linkFun = linkFun, dim_alpha = 1)
 

@@ -192,10 +192,17 @@ central.moment <- function(x, norm=TRUE) {
 cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle2vector))
 
 #Build the alpha matrix according to the model
-create_alpha_mat <- function(alpha, dim_alpha = 1){
+create_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 1){
   alpha <- matrix(alpha, nc = dim_alpha)
   output <- alpha %*% t(alpha)
-  diag(output) <- 1
+  diag(output) <- diag_val
+  return(output)
+}
+
+create_additive_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 0){
+  if(dim_alpha > 1) stop("currently support only dim_alpha = 1")
+  output <- replicate(length(a), a) + t(replicate(length(a), a))
+  diag(output) <- 0
   return(output)
 }
 

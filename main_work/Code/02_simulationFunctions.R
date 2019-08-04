@@ -1,4 +1,30 @@
 ### todo: need methodology for simulating alphas
+
+linkFunctions <- list(
+  "multiplicative_identity" = list(
+    FUN = function(t, a, d) vector2triangle(t)*create_alpha_mat(a, d),
+    INV = function(a) a,
+    CLEAN = function(dt, a, d)
+      return(dt / (rep(1, nrow(dt)) %*% t(a %>% create_alpha_mat(d) %>% triangle2vector()))),
+    NULL_VAL = 1
+  ),
+  "additive_identity" = list(
+    FUN = function(t, a, d) vector2triangle(t)*(1 + create_alpha_mat(a, d)),
+    INV = function(a) a,
+    CLEAN = function(dt, a, d)
+      return(dt / (1 + rep(1, nrow(dt)) %*% t(a %>% create_alpha_mat(d) %>% triangle2vector()))),
+    NULL_VAL = 0
+  ),
+  "additive_quotent" = list(
+    FUN = function(t, a, d) vector2triangle(t)/(1 + create_additive_alpha_mat(a)),
+    INV = function(a) a,
+    CLEAN = function(dt, a, d)
+      return(dt * (1 + rep(1, nrow(dt)) %*% t(a %>% create_additive_alpha_mat() %>% triangle2vector()))),
+    NULL_VAL = 0
+  )
+)
+
+
 build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), seed){
   #Build Real Sigma and Theta
   if(!missing(seed)) set.seed(seed[1])
@@ -106,7 +132,8 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, silent = FALSE
   return(simplify2array(mclapply(1:n, rawFun, mc.cores = ncores)))
 }
 
-createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), 
+createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1),
+                          linkFun = linkFunctions$multiplicative_identity,
                           ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, seed = NULL, ncores = 1){
   
   parameters <- build_parameters(p = p, percent_alpha = percent_alpha, range_alpha = range_alpha, dim_alpha = dim_alpha,
@@ -114,11 +141,11 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
   real.theta <- parameters$Corr.mat
   real.sigma <- parameters$Cov.mat
   alpha <- parameters$Alpha
-  alpha.mat <- create_alpha_mat(alpha, dim_alpha = dim_alpha)
+  g21 <- linkFun$FUN(t = real.theta, a = alpha, d = dim_alpha)
   
   if(B == 1) return(list(healthy = create_correlation_matrices(real_corr = real.theta, sample_size = nH,
                                                                df = Tlength, AR = ARhealth, MA = MAhealth, ncores = ncores),
-                           sick = create_correlation_matrices(real_corr = real.theta*alpha.mat, sample_size = nS,
+                           sick = create_correlation_matrices(real_corr = g21, sample_size = nS,
                                                               df = Tlength, AR = ARsick, MA = MAsick, ncores = ncores),
                          real.theta = real.theta, real.sigma = real.sigma, alpha = alpha))
   
@@ -127,7 +154,7 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
   rawFun <- function(b){
     list(healthy = create_correlation_matrices(real_corr = real.theta, sample_size = nH, df = Tlength,
                                                AR = ARsick, MA = MAsick, silent = TRUE, ncores = 1),
-         sick = create_correlation_matrices(real_corr = real.theta*alpha.mat, sample_size = nS, df = Tlength,
+         sick = create_correlation_matrices(real_corr = g21, sample_size = nS, df = Tlength,
                                             AR = ARsick, MA = MAsick, silent = TRUE, ncores = 1))
   }
   

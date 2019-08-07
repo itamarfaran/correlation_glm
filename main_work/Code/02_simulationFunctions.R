@@ -141,7 +141,7 @@ createSamples <- function(B = 1, nH, nS, p, Tlength, percent_alpha, range_alpha,
   real.theta <- parameters$Corr.mat
   real.sigma <- parameters$Cov.mat
   alpha <- parameters$Alpha
-  g21 <- linkFun$FUN(t = real.theta, a = alpha, d = dim_alpha)
+  g21 <- linkFun$FUN(t = triangle2vector(real.theta), a = alpha, d = dim_alpha)
   
   if(B == 1) return(list(healthy = create_correlation_matrices(real_corr = real.theta, sample_size = nH,
                                                                df = Tlength, AR = ARhealth, MA = MAhealth, ncores = ncores),

@@ -144,23 +144,47 @@ wilksTest <- function(covObj, healthy.dat, sick.dat, dim_alpha = 1, linkFun){
     "Pval" = 1 - pchisq(chisq, length(covObj$alpha)))
 }
 
-multipleComparison <- function(healthy.data, sick.data, Tlength,
+multipleComparison <- function(healthy.data, sick.data,
                                p.adjust.method = p.adjust.methods, test = c("lower", "upper", "both")){
-  fisherZ <- function(z) 0.5*log((1 + z)/(1 - z))
   if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
   if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
   if(length(p.adjust.method > 1)) p.adjust.method <- p.adjust.method[1]
   if(length(test) > 1) test <- test[3]
   
-  H_fisherR <- healthy.data %>% fisherZ() %>% colMeans()
-  S_fisherR <- sick.data %>% fisherZ() %>% colMeans()
+  healthy_means <- apply(healthy.data, 2, mean)
+  healthy_vars <- apply(healthy.data, 2, var)
+  healthy_ns <- apply(healthy.data, 2, length)
+  sick_means <- apply(sick.data, 2, mean)
+  sick_vars <- apply(sick.data, 2, var)
+  sick_ns <- apply(sick.data, 2, length)
+  dfs <- (healthy_vars/healthy_ns + sick_vars/sick_ns)^2/
+    ((healthy_vars/healthy_ns)^2/(healthy_ns - 1) + (sick_vars/sick_ns)^2/(sick_ns - 1))
+  tvals <- (sick_means - healthy_means)/sqrt(healthy_vars/healthy_ns + sick_vars/sick_ns)
   
-  vars <- (1/nrow(healthy.data) + 1/nrow(sick.data))/(Tlength - 3)
-  
-  Zvals <- (S_fisherR - H_fisherR)/sqrt(vars)
-  if(test == "lower") Pvals <- pnorm(Zvals)
-  if(test == "upper") Pvals <- 1 - pnorm(Zvals)
-  if(test == "both") Pvals <- 2*pnorm(abs(Zvals), lower.tail = F)
+  if(test == "lower") Pvals <- pt(tvals, dfs)
+  if(test == "upper") Pvals <- 1 - pt(tvals, dfs)
+  if(test == "both") Pvals <- 2*pt(abs(tvals), dfs, lower.tail = F)
   p.adjust(Pvals, p.adjust.method)
 }
+
+
+# multipleComparison <- function(healthy.data, sick.data, Tlength,
+#                                p.adjust.method = p.adjust.methods, test = c("lower", "upper", "both")){
+#   fisherZ <- function(z) 0.5*log((1 + z)/(1 - z))
+#   if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
+#   if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
+#   if(length(p.adjust.method > 1)) p.adjust.method <- p.adjust.method[1]
+#   if(length(test) > 1) test <- test[3]
+#   
+#   H_fisherR <- healthy.data %>% fisherZ() %>% colMeans()
+#   S_fisherR <- sick.data %>% fisherZ() %>% colMeans()
+#   
+#   vars <- (1/nrow(healthy.data) + 1/nrow(sick.data))/(Tlength - 3)
+#   
+#   Zvals <- (S_fisherR - H_fisherR)/sqrt(vars)
+#   if(test == "lower") Pvals <- pnorm(Zvals)
+#   if(test == "upper") Pvals <- 1 - pnorm(Zvals)
+#   if(test == "both") Pvals <- 2*pnorm(abs(Zvals), lower.tail = F)
+#   p.adjust(Pvals, p.adjust.method)
+# }
 

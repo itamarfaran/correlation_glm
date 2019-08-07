@@ -6,7 +6,7 @@ ipak <- function(pkg){
 }
 packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
               "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
-              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally")
+              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
 ipak(packages)
 
 promptForCores <- function(){

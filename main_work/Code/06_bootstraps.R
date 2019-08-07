@@ -3,7 +3,7 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-linkFun <- linkFunctions$additive_identity
+linkFun <- linkFunctions$multiplicative_identity
 
 Tlength <- 115
 B <- 120

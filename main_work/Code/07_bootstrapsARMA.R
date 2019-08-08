@@ -198,37 +198,6 @@ EstNRatio <-
   labs(title = "Estimate of Degrees of Freedom", x = "AR Coefficient", y = "#Obs/DF - 1") + 
   scale_y_continuous(labels = scales::percent) + xlim(-0.75, 0.75)
 
-# Comparison to z_tests
-
-BH_ztests <- 
-  do.call(rbind, mclapply(1:B, function(i) {
-    multipleComparison(healthy.data = sampleDataB$samples[[i]]$healthy,
-                       sick.data = sampleDataB$samples[[i]]$sick,
-                       Tlength = Tlength, p.adjust.method = "BH", test = "lower")
-  }, mc.cores = 1))
-
-which_voxel_diff <- triangle2vector(sampleDataB$alpha %>% create_alpha_mat() != 1)
-which_alpha_diff <- sampleDataB$alpha != 1
-
-alphas <- do.call(rbind, transpose(simuldat)$alpha)
-i = 1
-alphas_sd <- do.call(rbind, mclapply(1:B, function(b){
-  VarAlphaByHess <- ComputeFisher(simuldat[[b]], sampleDataB$samples[[b]]$sick, "Hess") %>% solve
-  VarAlphaByGrad <- ComputeFisher(simuldat[[b]], sampleDataB$samples[[b]]$sick, "Grad", ncores = 1) %>% solve
-  VarAlphaCombined <- VarAlphaByHess %*% solve(VarAlphaByGrad) %*% VarAlphaByHess
-  return(sqrt(diag(VarAlphaCombined)))
-}, mc.cores = ncores))
-alpha_ztests <- 2*pnorm(abs((alphas - 1)/alphas_sd), lower.tail = F) %>% apply(1, p.adjust, method = "holm") %>% t() 
-
-# power:
-mean(alpha_ztests[,which_alpha_diff] < 0.05)
-mean(BH_ztests[,which_voxel_diff] < 0.05)
-
-# FWER:
-mean(alpha_ztests[,!which_alpha_diff] < 0.05)
-mean(BH_ztests[,!which_voxel_diff] < 0.05)
-
-
 link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "fullRunYesARMA ", Sys.time(), ".RData") )
 
 save.image(file = link2)

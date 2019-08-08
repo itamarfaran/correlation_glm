@@ -19,8 +19,8 @@ compare_fdr_and_pwr <- function(B = 40, nH = 19, nS = 12, p = 10, percent_alpha 
                                                    MAsick = 0, MAhealth = 0),
                                 ncores = 1){
   sampleDataB_ARMA <-
-    createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tlength,
-                  percent_alpha = 0.4, range_alpha = c(0.6, 0.8),
+    createSamples(B = B, nH = nH, nS = nS, p = p, Tlength = Tlength,
+                  percent_alpha = percent_alpha, range_alpha = range_alpha,
                   ARsick = ARMAdetails$ARsick , ARhealth = ARMAdetails$ARhealth,
                   MAsick = ARMAdetails$MAsick, MAhealth = ARMAdetails$MAhealth,
                   ncores = ncores)
@@ -28,7 +28,7 @@ compare_fdr_and_pwr <- function(B = 40, nH = 19, nS = 12, p = 10, percent_alpha 
   estimation_results <- mclapply(1:B, function(b){
     estimateAlpha(healthy.data = sampleDataB_ARMA$samples[[b]]$healthy,
                   sick.data = sampleDataB_ARMA$samples[[b]]$sick,
-                  T_thresh = 10^4, updateU = 1, progress = F)}, mc.cores = ncores)
+                  linkFun = linkFun, T_thresh = 10^4, updateU = 1, progress = F)}, mc.cores = ncores)
   estimated_variances <- simplify2array(mclapply(1:B, function(b){
     FisherByHess <- ComputeFisher(estimation_results[[b]], sampleDataB_ARMA$samples[[b]]$sick, "Hess", linkFun = linkFun)
     FisherByGrad <- ComputeFisher(estimation_results[[b]], sampleDataB_ARMA$samples[[b]]$sick, "Grad", linkFun = linkFun, ncores = 1)
@@ -50,24 +50,28 @@ compare_fdr_and_pwr <- function(B = 40, nH = 19, nS = 12, p = 10, percent_alpha 
     tt_pvals = ttest_res_matrices[,,b]
     
     tt_pvals[,!tt_alpha] <- 1
-    tt_pvals[,tt_alpha] <- apply(tt_pvals[,tt_alpha], 2, p.adjust, method = "BH")
+    if(sum(tt_alpha) > 0) tt_pvals[,tt_alpha] <- apply(tt_pvals[,tt_alpha], 2, p.adjust, method = "BH")
     triangle2vector(tt_pvals)
   }))
   classic_hyptest <- t(apply(ttest_res, 1, p.adjust, method = "BH"))
   
   real_correlation_changes <- triangle2vector(linkFun$FUN(rep(1, p*(p-1)/2), sampleDataB_ARMA$alpha, 1))
+  null_alphas <- real_correlation_changes == 1
   
-  two_step_FDR <- mean(rowMeans(twostep_hyptest[, real_correlation_changes == 1] < 0.05))
-  classic_FDR <- mean(rowMeans(classic_hyptest[, real_correlation_changes == 1] < 0.05))
+  two_step_FDR <- mean(rowMeans(twostep_hyptest[, which(null_alphas)] < 0.05))
+  classic_FDR <- mean(rowMeans(classic_hyptest[, which(null_alphas)] < 0.05))
   
-  two_step_power <- mean(rowMeans(twostep_hyptest[, real_correlation_changes != 1] < 0.05))
-  classic_power <- mean(rowMeans(classic_hyptest[, real_correlation_changes != 1] < 0.05))
+  two_step_power <- mean(rowMeans(twostep_hyptest[, which(!null_alphas)] < 0.05))
+  classic_power <- mean(rowMeans(classic_hyptest[, null_alphas] < 0.05))
   
   output <- c(two_step_FDR, classic_FDR, two_step_power, classic_power)
   names(output) <- c("two_step_FDR", "classic_FDR", "two_step_power", "classic_power")
+  
+  # link <- gsub(":", "-", paste0("main_work/Data/enviroments/", "pwr_comp_", Sys.time(), ".RData"))
+  # save.image(file = link)
   return(output)
 }
-  
+
 
 experiment_1 <- # Fixed p, increasing effect size
   sapply(list(c(0.8, 0.85), c(0.85, 0.9), c(0.9, 0.95)),
@@ -79,14 +83,19 @@ experiment_1 <- # Fixed p, increasing effect size
 
 experiment_2 <- # Fixed alpha, increasing dimension
   sapply(5*(2:8), function(p) compare_fdr_and_pwr(
-    B = B, nH = 40, nS = 40, p = p, percent_alpha = 0.3,
+    B = B, nH = 60, nS = 60, p = p, percent_alpha = 0.3,
     range_alpha = c(0.8, 0.8), Tlength = 115,
     linkFun = linkFunctions$multiplicative_identity,
     ARMAdetails = ARMAdetails, ncores = ncores))
 
 experiment_3 <- # Fixed alpha, increasing dimension
-  sapply(5*(2:8), function(p) compare_fdr_and_pwr(
-    B = B, nH = 40, nS = 40, p = p, percent_alpha = 0.3,
+  sapply(5*(3:8), function(p) compare_fdr_and_pwr(
+    B = B, nH = 60, nS = 60, p = p, percent_alpha = 0.3,
     range_alpha = c(0.9, 0.9), Tlength = 115,
     linkFun = linkFunctions$multiplicative_identity,
     ARMAdetails = ARMAdetails, ncores = ncores))
+
+
+link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "power_comp ", Sys.time(), ".RData") )
+
+save.image(file = link2)

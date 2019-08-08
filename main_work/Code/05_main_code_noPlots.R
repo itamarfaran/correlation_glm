@@ -11,7 +11,7 @@ Tlength <- 115
 ARMAdetails <- list(ARsick = 0.3, MAsick = NULL,
                     ARhealth = 0.3, MAhealth = NULL)
 sapply(ARMAdetails, checkInv)
-sampleData <- createSamples(nH = 87, nS = 63, p = 12, Tlength = Tlength, dim_alpha = 1,
+sampleData <- createSamples(nH = 87, nS = 63, p = 25, Tlength = Tlength, dim_alpha = 1,
                             percent_alpha = 0.3, range_alpha = c(0.65, 0.95),
                             ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
                             ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
@@ -53,8 +53,7 @@ HypTestResComb$Results[order(HypTestResComb$Results$Real),]
 
 wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick, linkFun = linkFun, dim_alpha = 1)
 
-multiRes <- multipleComparison(healthy.data = sampleData$healthy, sick.data = sampleData$sick,
-                               Tlength = Pelet_Cov$Est_N, p.adjust.method = "BH") %>%
+multiRes <- multipleComparison(healthy.data = sampleData$healthy, sick.data = sampleData$sick, p.adjust.method = "BH") %>%
   round(3) %>% vector2triangle()
 
 tt.all <- Sys.time() - tt.all

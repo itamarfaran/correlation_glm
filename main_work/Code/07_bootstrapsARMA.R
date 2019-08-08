@@ -20,7 +20,7 @@ sampleDataB_ARMA <- createSamples(B = B, nH = 107, nS = 92, p = p, Tlength = Tle
 
 bootstrapFunction <- function(b) estimateAlpha(healthy.data = sampleDataB_ARMA$samples[[b]]$healthy,
                                                sick.data = sampleDataB_ARMA$samples[[b]]$sick,
-                                               T_thresh = 10^4, updateU = 1, progress = F)
+                                               linkFun = linkFun, T_thresh = 10^4, updateU = 1, progress = F)
 
 
 tt1 <- Sys.time()
@@ -35,8 +35,8 @@ for(b in 1:B){
   estN_all[b] <- simuldat[[b]]$Est_N
 }
 
-VarAlphaByHess <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Hess") %>% solve
-VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Grad", ncores = ncores) %>% solve
+VarAlphaByHess <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Hess", linkFun = linkFun) %>% solve
+VarAlphaByGrad <- ComputeFisher(simuldat[[1]], sampleDataB_ARMA$samples[[1]]$sick, "Grad", linkFun = linkFun, ncores = ncores) %>% solve
 VarAlphaCombined <- VarAlphaByHess %*% solve(VarAlphaByGrad) %*% VarAlphaByHess
 
 Emp_vs_Theo <- data.frame(TheoreticHess = sqrt(diag(VarAlphaByHess)),
@@ -77,7 +77,7 @@ for(t in 1:lngth_ARlist){
 
 bootstrapFunction <- function(b, k) estimateAlpha(healthy.data = sampleDataBT_ARMA[[k]]$samples[[b]]$healthy,
                                                sick.data = sampleDataBT_ARMA[[k]]$samples[[b]]$sick,
-                                               T_thresh = 10^4, updateU = 1, progress = F)
+                                               linkFun = linkFun, T_thresh = 10^4, updateU = 1, progress = F)
 
 simuldatT <- list()
 
@@ -111,8 +111,8 @@ for(t in 1:lngth_ARlist){
     estNT_all[b,t] <- simuldatT[[t]][[b]]$Est_N
   }
   pb$tick()
-  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Grad", silent = TRUE, ncores = ncores) %>% solve
-  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Hess", silent = TRUE) %>% solve
+  tmpG <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Grad", linkFun = linkFun, silent = TRUE, ncores = ncores) %>% solve
+  tmpH <- ComputeFisher(simuldatT[[t]][[1]], sampleDataBT_ARMA[[t]]$samples[[1]]$sick, "Hess", linkFun = linkFun, silent = TRUE) %>% solve
   tmpC <- tmpH %*% solve(tmpG) %*% tmpH
   
   alpha_sdGrad[t,] <- sqrt(diag(tmpG))

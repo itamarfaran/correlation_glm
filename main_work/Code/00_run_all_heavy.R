@@ -1,20 +1,20 @@
-source("main_work/code/05_main_code_noPlots.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/05_main_code_noPlots.R"), error = function(e) print(e))
+remove(list = ls()); gc()
 
-source("main_work/code/06_bootstraps.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/06_bootstraps.R"), error = function(e) print(e))
+remove(list = ls()); gc()
 
-source("main_work/code/07_bootstrapsARMA.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/07_bootstrapsARMA.R"), error = function(e) print(e))
+remove(list = ls()); gc()
 
-source("main_work/code/08_power_comparisions.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/08_power_comparisions.R"), error = function(e) print(e))
+remove(list = ls()); gc()
 
-# source("main_work/code/09_ndma.R")
-# remove(list = ls())
+#tryCatch(source("main_work/Code/09_ndma.R"), error = function(e) print(e))
+# remove(list = ls()); gc()
 
-source("main_work/code/10_adni.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/10_adni.R"), error = function(e) print(e))
+remove(list = ls()); gc()
 
-source("main_work/code/11_tga.R")
-remove(list = ls())
+tryCatch(source("main_work/Code/11_tga.R"), error = function(e) print(e))
+remove(list = ls()); gc()

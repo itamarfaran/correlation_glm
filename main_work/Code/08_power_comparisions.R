@@ -67,8 +67,8 @@ compare_fdr_and_pwr <- function(B = 40, nH = 19, nS = 12, p = 10, percent_alpha 
   output <- c(two_step_FDR, classic_FDR, two_step_power, classic_power)
   names(output) <- c("two_step_FDR", "classic_FDR", "two_step_power", "classic_power")
   
-  # link <- gsub(":", "-", paste0("main_work/Data/enviroments/", "pwr_comp_", Sys.time(), ".RData"))
-  # save.image(file = link)
+  link <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "pwr_comp_innerenv_", Sys.time(), ".RData"))
+  save.image(file = link)
   return(output)
 }
 
@@ -81,12 +81,19 @@ experiment_1 <- # Fixed p, increasing effect size
            linkFun = linkFunctions$multiplicative_identity,
            ARMAdetails = ARMAdetails, ncores = ncores))
 
+link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "power_comp ", Sys.time(), ".RData") )
+save.image(file = link2)
+
 experiment_2 <- # Fixed alpha, increasing dimension
   sapply(5*(2:8), function(p) compare_fdr_and_pwr(
     B = B, nH = 60, nS = 60, p = p, percent_alpha = 0.3,
     range_alpha = c(0.8, 0.8), Tlength = 115,
     linkFun = linkFunctions$multiplicative_identity,
     ARMAdetails = ARMAdetails, ncores = ncores))
+
+file.remove(link2)
+link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "power_comp ", Sys.time(), ".RData") )
+save.image(file = link2)
 
 experiment_3 <- # Fixed alpha, increasing dimension
   sapply(5*(3:8), function(p) compare_fdr_and_pwr(
@@ -95,7 +102,6 @@ experiment_3 <- # Fixed alpha, increasing dimension
     linkFun = linkFunctions$multiplicative_identity,
     ARMAdetails = ARMAdetails, ncores = ncores))
 
-
+file.remove(link2)
 link2 <- gsub(":", "-", paste0("main_work/Data/Enviroments/", "power_comp ", Sys.time(), ".RData") )
-
 save.image(file = link2)

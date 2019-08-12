@@ -3,7 +3,7 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-B = 50
+B = 60
 
 linkFun <- linkFunctions$multiplicative_identity
 
@@ -46,7 +46,7 @@ build_data_for_comparison <- function(B = 40, nH = 19, nS = 12, p = 10, percent_
 
 
 get_estimates_and_pvals <- function(data_list, ncores = 1){
-  B <- length(data_list$sample)
+  B <- length(data_list$sample$samples)
   
   alphas <- data_list$estimates
   alphas_sd <- t(sapply(1:B, function(b) sqrt(diag(data_list$variances[,,b]))))
@@ -71,8 +71,8 @@ compare_power_and_fdr <- function(data_list, sig.level = 0.05, ncores = 1){
     tt_alpha = which_alphas_rejected[b,]
     tt_pvals = ttest_res_matrices[,,b]
     
-    if(sum(tt_alpha) > 1) tt_pvals[,tt_alpha] <- apply(tt_pvals[,tt_alpha], 2, p.adjust, method = "BH") * sum(tt_alpha)
-    if(sum(tt_alpha) == 1) tt_pvals[,tt_alpha] <- p.adjust(tt_pvals[,tt_alpha], "BH") * sum(tt_alpha)
+    if(sum(tt_alpha) > 1) tt_pvals[,tt_alpha] <- apply(tt_pvals[,tt_alpha], 2, p.adjust, method = "BH") #* sum(tt_alpha)
+    if(sum(tt_alpha) == 1) tt_pvals[,tt_alpha] <- p.adjust(tt_pvals[,tt_alpha], "BH") #* sum(tt_alpha)
     tt_pvals[,!tt_alpha] <- 1
     tt_pvals[tt_pvals > 1] <- 1
     return(triangle2vector(tt_pvals))

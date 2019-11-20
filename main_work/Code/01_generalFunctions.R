@@ -4,10 +4,7 @@ ipak <- function(pkg){
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 }
-packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
-              "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
-              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
-ipak(packages)
+
 
 promptForCores <- function(){
   newPrompt <- TRUE
@@ -43,62 +40,25 @@ promptForCores <- function(){
   ncores <<- ncores
   message(paste0("R will use ", ncores, " cores. 'ncores' saved to global environemnt."))
 }
+
+
+packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
+              "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
+              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
+ipak(packages)
+
 ncores <- ifelse(tolower(.Platform$OS.type) == "windows", 1, detectCores() - 2)
 promptForCores()
 
-buildCL <- function(ncores = .GlobalEnv$ncores, packageList, dataList){
-  J <- length(packageList)
-  cl <<- makeCluster(ncores)
-  
-  for(j in 1:J){
-    tmp <- packageList[j]
-    clusterExport(cl = cl, "tmp", envir = environment())
-    clusterEvalQ(cl=cl, library(tmp, character.only = T))
-  }
-  clusterExport(cl = cl, dataList, envir = environment())
-  setDefaultCluster(cl = cl)
-  message("Cluster opened, saved as 'cl' on global environment. Do not forget to stopCluster. \n")
-  return(cl)
-}
-
-terminateCL <- function(silent = FALSE){
-  if("cl" %in% objects(envir = .GlobalEnv)){
-    stopCluster(cl)
-    setDefaultCluster()
-    rm(cl, envir =  .GlobalEnv)
-    if(!silent) message("Cluster terminated.")
-  } else {
-    warning("Cluster not found and was not closed. If cluster is not saved as 'cl' you must close the cluster manually!")
-  }
-}
 
 powerMatrix <- function(MATR, pow){
   eigenMat <- eigen(MATR)
   return(eigenMat$vectors %*% diag(eigenMat$values ^ pow) %*% t(eigenMat$vectors))
 }
 
-forceSolve <- function(MATR, method = "nearPD"){
-  invmat <- tryCatch(solve(MATR), error = function(e) FALSE)
-  if(is.logical(invmat[1])){
-    MATRnearPD <- nearPD(MATR)
-    message(paste0("frobenius norm difference: ", MATRnearPD$normF))
-    invmat <- solve(as.matrix(MATRnearPD$mat))
-  }
-  return(invmat)
-}
 
-forceEigen <- function(MATR, symmetric, only.values = FALSE, EISPACK = FALSE, method = "nearPD"){
-  if(missing(symmetric)) symmetric <- isSymmetric.matrix(MATR)
-  eig <- tryCatch(eigen(MATR, symmetric = symmetric, only.values = only.values, EISPACK = FALSE), error = function(e) FALSE)
-  if(is.logical(invmat[1])){
-    MATRnearPD <- nearPD(MATR)
-    message(paste0("frobenius norm difference: ", MATRnearPD$normF))
-    eig <- eigen(as.matrix(nearPD(MATR)), symmetric = symmetric, only.values = only.values)
-  }
-  return(eig)
-}
-
-regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"), const = 1, OnlyIfSing = TRUE){
+regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"),
+                             const = 1, OnlyIfSing = TRUE){
   method <- method[1]
   if(!is.square.matrix(MATR)) stop("Matrix is not square.")
   if(OnlyIfSing & !is.singular.matrix(MATR)) {
@@ -131,8 +91,10 @@ regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "i
   return(pelet)
 }
 
+
 #Calculate mean Correlation
 calculate_mean_matrix <- function(matrix_array, do.mean = TRUE) summatrix(matrix_array, weights = do.mean)
+
 
 #Check stationarity/invertability of AR/MA process
 checkInv <- function(coefs, perc = 0.001){
@@ -141,10 +103,11 @@ checkInv <- function(coefs, perc = 0.001){
   return(all(x == 1) | all(x == -1))
 }
 
+
 #Generate weighted sum of matrices from array
-summatrix <- function(ARRAY, index, constants, weights = FALSE){
-  if(missing(index)) index <- 1:(dim(ARRAY)[3])
-  if(missing(constants)) constants <- rep(1, length(index))
+summatrix <- function(ARRAY, index = 1:(dim(ARRAY)[3]), constants = rep(1, length(index)), weights = FALSE){
+  # if(missing(index)) index <- 1:(dim(ARRAY)[3])
+  # if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
   for(i in 1:length(index)){
@@ -153,10 +116,11 @@ summatrix <- function(ARRAY, index, constants, weights = FALSE){
   return(pelet)
 }
 
+
 #Generate weighted sum of vectors from matrices
-sumvector <- function(MATR, index, constants, weights = FALSE){
-  if(missing(index)) index <- 1:(nrow(MATR))
-  if(missing(constants)) constants <- rep(1, length(index))
+sumvector <- function(MATR, index = 1:(nrow(MATR)), constants = rep(1, length(index)), weights = FALSE){
+  # if(missing(index)) index <- 1:(nrow(MATR))
+  # if(missing(constants)) constants <- rep(1, length(index))
   if(weights) constants <- constants/sum(constants)
   pelet <- numeric(ncol(MATR))
   for(i in 1:length(index)){
@@ -165,39 +129,41 @@ sumvector <- function(MATR, index, constants, weights = FALSE){
   return(pelet)
 }
 
+
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
-central.moment <- function(x, norm=TRUE) {
-  n<-length(x)
-  b<-vector()
+central.moment <- function(x, norm = TRUE) {
+  b <- numeric(4)
+  names(b) <- c("Mean", "Variance", "Skewness",
+                ifelse(norm, "Kurtosis", "Ex.Kurtosis"))
+
+  n <- length(x)
+  b[1] <- mean <- mean(x)
+  b[2] <- var(x)
+  sd <- sqrt(b[2] * ((n - 1)/n))
+  norm_x <- (x - mean)/sd
   
-  mean<-mean(x)
-  sd<-sqrt(var(x)*((n-1)/n))
+  skew <- mean(norm_x^3)
+  kurt <- mean(norm_x^4)
   
-  b<-c(b,mean)
-  b<-c(b,var(x))
-  
-  skew<-mean((x-mean)^3)/(sd^3)
-  kurt<-(mean((x-mean)^4)/(sd^4))
-  
-  b<-c(b,(sqrt(n*(n-1))/(n-2))*skew)
-  b<-c(b,((n-1)/((n-2)*(n-3)))*((n+1)*kurt+6))
-  if (norm) b[4]<-b[4]-3
-  
-  names(b) <- c("Mean", "Variance", "Skewness", "Kurtosis")
-  if (norm) names(b)[4]<-"Ex.Kurtosis"
+  b[3] <- (sqrt(n*(n - 1)) / (n - 2)) * skew
+  b[4] <- ( (n - 1) / ((n - 2) * (n - 3)) ) * ((n + 1) * kurt + 6) + ifelse(norm, -3, 0)
+
   return(b)
 }
+
 
 #Take array of symmetric matrices and convert them to one data matrix
 cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle2vector))
 
-#Build the alpha matrix according to the model
+
+#Build the alpha matrix according to the multiplicative model
 create_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 1){
   alpha <- matrix(alpha, nc = dim_alpha)
   output <- alpha %*% t(alpha)
   diag(output) <- diag_val
   return(output)
 }
+
 
 create_additive_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 0){
   if(dim_alpha > 1) stop("currently support only dim_alpha = 1")
@@ -206,42 +172,10 @@ create_additive_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 0){
   return(output)
 }
 
-#Force Positive Definiteness
-force_positive_definiteness <- function(MATR, sensitivity = 0.01, homoscedasticity = FALSE){
-  if(!is.symmetric.matrix(MATR)) stop("MATR not symmetric")
-  alpha_seq <- unique(c(0, seq(0,1, by = sensitivity), 1))
-  pelet <- MATR
-  if(homoscedasticity){
-    if(mean(diag(MATR)) <= 0) stop("Diag mean not positive")
-    diag_MATR <- mean(diag(MATR)) * diag(nrow(MATR))
-  } else {
-    if(any(diag(MATR) <= 0)) stop("Diag not positive")
-    diag_MATR <- diag(diag(MATR))
-  }
-  
-  i <- 1
-  while(!is.positive.definite(pelet)){
-    pelet <- alpha_seq[i]*diag_MATR + (1 - alpha_seq[i])*MATR
-    i <- i+1
-  }
-  
-  if(i == 1) return(list(Matrix = pelet,
-                         Alpha = 0)) else return(list(Matrix = pelet,
-                                                      Alpha = alpha_seq[i-1]))
-}
 
 #Force symmetry on non-symmetrical matrix
 force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
 
-#Calculte sum of mahalonobis distances
-SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
-  if((reg.par < 0) | (reg.par > 1)) stop("reg.par not between [0,1]")
-  sigma <- (1 - reg.par)*sigma + reg.par*mean(diag(sigma))*diag(length(mu))
-  
-  if(solve_sig) sigma <- solve(sigma)
-  dist <- DATA - rep(1,nrow(DATA))%*%t(mu)
-  return(sum(diag(dist%*%sigma%*%t(dist))))
-}
 
 #Retrieve lower/upper triangle of a matrix as a vector
 triangle2vector <- function(MATR , diag = FALSE){
@@ -249,13 +183,6 @@ triangle2vector <- function(MATR , diag = FALSE){
   return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
 }
 
-#Trim extreme values
-trim_num <- function(x, lower = -Inf, upper = Inf){
-  pelet <- x
-  pelet[x<lower] <- lower
-  pelet[x>upper] <- upper
-  return(pelet)
-}
 
 vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
   m <- length(VECT)
@@ -277,24 +204,23 @@ vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
   return(output)
 }
 
+
 #Calculate Maholonobis norm of a vector. Default is regular norm.
-vnorm <- function(x, MATR, sqroot = FALSE, solve_matr = FALSE){
+vnorm <- function(x, MATR, sqrt = FALSE, solve_matr = FALSE){
   if(solve_matr) MATR <- solve(MATR)
-  if(missing(MATR)) { pelet <- sum(x^2) } else{ pelet <- as.vector(t(x)%*%MATR%*%x) }
-  if(sqroot) pelet <- sqrt(pelet)
+  if(missing(MATR)) { pelet <- sum(x^2) } else { pelet <- as.vector(t(x) %*% MATR %*% x) }
+  if(sqrt) pelet <- sqrt(pelet)
   return(pelet)
 }
 
-#Create a symmetric matrix from a vector
-# vector2triangle_old <- function(VECT){
-#   m <- length(VECT)
-#   p <- 0.5*c(1+sqrt(1+8*m), 1-sqrt(1+8*m))
-#   p <- p[which( (p==round(p))&p==abs(p) )]
-#   if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
-#   pelet <- matrix(0, ncol = p, nrow = p)
-#   pelet[lower.tri(pelet)] <- VECT
-#   pelet <- pelet+t(pelet)
-#   diag(pelet) <- 1
-#   return(pelet)
-# }
-# 
+
+#Calculte sum of mahalonobis distances
+SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
+  if((reg.par < 0) | (reg.par > 1)) stop("reg.par not between [0,1]")
+  sigma <- (1 - reg.par)*sigma + reg.par*mean(diag(sigma))*diag(length(mu))
+  
+  if(solve_sig) sigma <- solve(sigma)
+  dist <- DATA - rep(1,nrow(DATA))%*%t(mu)
+  return(sum(diag(dist%*%sigma%*%t(dist))))
+}
+

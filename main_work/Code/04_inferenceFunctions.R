@@ -1,8 +1,8 @@
 computeFisherByGrad <- function(CovObj, sickDat, linkFun = linkFunctions$multiplicative_identity,
-                                dim_alpha = 1, U1 = TRUE, ncores = 1){
+                                dim_alpha = 1, nonpositive = "Stop", reg_lambda = 0, U1 = TRUE, ncores = 1){
   U1 = TRUE
-  # U1 == TRUE    =>   Compute U1 every differntiation
-  # U1 == FALSE   =>   Compute U1 once, before differntiation
+  # U1 == TRUE    =>   Compute U1 every diffrentiation
+  # U1 == FALSE   =>   Compute U1 once, before diffrentiation
   # U1 == matrix  =>   use given U1
   
   if(is.logical(U1)){
@@ -10,7 +10,7 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun = linkFunctions$multipl
       U1 = NULL
     } else {
       g11 <- as.matrix(triangle2vector(linkFun$FUN(t = CovObj$theta, a = CovObj$alpha, d = dim_alpha))) 
-      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11))/CovObj$Est_N
+      g21 <- vector_var_matrix_calc_COR_C(vector2triangle(g11, nonpositive = nonpositive))/CovObj$Est_N
       e21 <- eigen(g21, symmetric = TRUE)
       U1 <- e21$vectors
     }
@@ -61,28 +61,36 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun = linkFunctions$multipl
   kapkap <- mclapply(1:nrow(sickDat), function(i) kappares[i,] %o% kappares[i,], mc.cores = ncores) %>%
     simplify2array() %>% calculate_mean_matrix(do.mean = FALSE)
   
-  return(0.25*(nrow(sickDat) * gammares %o% gammares + kapgam + t(kapgam) + kapkap))
+  return(0.25*(nrow(sickDat) * gammares %o% gammares + kapgam + t(kapgam) + kapkap) + 2*reg_lambda*CovObj$alpha)
 }
 
-ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), linkFun, dim_alpha = 1, ncores = 1, silent = FALSE){
+ComputeFisher <- function(CovObj, sickDat, method = c("Hess", "Grad"), linkFun, dim_alpha = 1,
+                          nonpositive = "Stop", reg_lambda = 0, ncores = 1, silent = FALSE){
   if(class(sickDat) == "array") sickDat <- cor.matrix_to_norm.matrix(sickDat) 
 
   method <- method[1]
-  if(method == "Hess") output <- hessian(
-    x = CovObj$alpha,
-    func = function(A) minusloglik(theta = CovObj$theta,
-                                   alpha = A, linkFun = linkFun,
-                                   sick.data = sickDat,
-                                   effective.N = CovObj$Est_N,
-                                   dim_alpha = dim_alpha))
-  if(method == "Grad") output <- computeFisherByGrad(CovObj, sickDat, linkFun = linkFun, dim_alpha = dim_alpha, ncores = ncores)
+  if(method == "Hess") output <- # diag(rep(2*reg_lambda, length(CovObj$alpha))) +
+    hessian(
+      x = CovObj$alpha,
+      func = function(A) minusloglik(theta = CovObj$theta,
+                                     alpha = A, linkFun = linkFun,
+                                     sick.data = sickDat,
+                                     effective.N = CovObj$Est_N,
+                                     dim_alpha = dim_alpha,
+                                     nonpositive = nonpositive))
+  if(method == "Grad") output <- computeFisherByGrad(CovObj, sickDat, linkFun = linkFun,
+                                                     dim_alpha = dim_alpha, nonpositive = nonpositive,
+                                                     reg_lambda = reg_lambda,
+                                                     ncores = ncores)
   
   return(output)
 }
 
 ### todo: modify this according to hypothesis
+### todo: I stopped reviewing here
 build_hyp.test <- function(CovObj, FisherMatr, effectiveN, linkFun = linkFunctions$multiplicative_identity,
-                           test = c("lower", "upper", "two-sided"), sig.level = 0.05, p.adjust.method = p.adjust.methods, const = 1, Real){
+                           test = c("lower", "upper", "two-sided"),
+                           sig.level = 0.05, p.adjust.method = p.adjust.methods, const = 1, Real){
   
   if(length(p.adjust.method) > 1) p.adjust.method <- p.adjust.method[1]
   if(length(test) > 1) test <- test[3]

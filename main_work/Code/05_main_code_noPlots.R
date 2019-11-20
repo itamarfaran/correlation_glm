@@ -18,24 +18,27 @@ sampleData <- createSamples(nH = 87, nS = 63, p = 25, Tlength = Tlength, dim_alp
                             ncores = ncores)
 
 #Are all matrices positive definite?
-all(abind(sampleData$healthy, sampleData$sick, along = 3) %>%
+all(abind(sampleData$samples$healthy, sampleData$samples$sick, along = 3) %>%
       apply(3, is.positive.definite))
 
 tt.est <- Sys.time()
-Pelet_Cov <- estimateAlpha(healthy.data = sampleData$healthy, sick.data = sampleData$sick, dim_alpha = 1,
-                            T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun)
+# Pelet_Cov <- estimateAlpha(healthy.data = sampleData$samples$healthy, sick.data = sampleData$samples$sick, dim_alpha = 1,
+#                             T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun)
 tt.est <- Sys.time() - tt.est
 
+Pelet_Cov <- estimateAlpha(healthy.data = sampleData$samples$healthy, sick.data = sampleData$samples$sick,
+                           dim_alpha = 1, reg_lambda = 0, var_weights = c(1, 1, 0),
+                           T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun)
 
 tt.hess <- Sys.time()
-fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$sick, "Hess", linkFun = linkFun, dim_alpha = 1)  %>% regularizeMatrix()
+fisherMatrHess <- ComputeFisher(Pelet_Cov, sampleData$samples$sick, "Hess", linkFun = linkFun, dim_alpha = 1)  %>% regularizeMatrix()
 tt.hess <- Sys.time() - tt.hess
 
 tt.grad <- Sys.time()
-fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$sick, "Grad", linkFun = linkFun, ncores = ncores, dim_alpha = 1)  %>% regularizeMatrix()
+fisherMatrGrad <- ComputeFisher(Pelet_Cov, sampleData$samples$sick, "Grad", linkFun = linkFun, ncores = ncores, dim_alpha = 1)  %>% regularizeMatrix()
 tt.grad <- Sys.time() - tt.grad
 
-fisherMatrSandwich <- fisherMatrHess %*% forceSolve(fisherMatrGrad) %*% fisherMatrHess
+fisherMatrSandwich <- fisherMatrHess %*% solve(fisherMatrGrad) %*% fisherMatrHess
 
 HypTestResHess <- build_hyp.test(Pelet_Cov, fisherMatrHess, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
 HypTestResGrad <- build_hyp.test(Pelet_Cov, fisherMatrGrad, linkFun = linkFun, sampleData$alpha, Real = sampleData$alpha)
@@ -45,15 +48,15 @@ gc()
 Pelet_Cov$returns
 Pelet_Cov$convergence
 c("Est_DF" = Pelet_Cov$Est_N, "Real_DF" = Tlength)
-c("Test" = HypTestResHess$Test, "Sig Level" = HypTestResHess$Significance, "FWER Method" = HypTestResHess$MH_method)
+c("Test" = HypTestResHess$Test, "Sig Level" = HypTestResHess$Significance, "FWER Method" = HypTestResHess$p.adjust.method)
 
 HypTestResHess$Results[order(HypTestResHess$Results$Real),]
 HypTestResGrad$Results[order(HypTestResGrad$Results$Real),]
 HypTestResComb$Results[order(HypTestResComb$Results$Real),]
 
-wilksTest(Pelet_Cov, sampleData$healthy, sampleData$sick, linkFun = linkFun, dim_alpha = 1)
+wilksTest(Pelet_Cov, sampleData$samples$healthy, sampleData$samples$sick, linkFun = linkFun, dim_alpha = 1)
 
-multiRes <- multipleComparison(healthy.data = sampleData$healthy, sick.data = sampleData$sick, p.adjust.method = "BH") %>%
+multiRes <- multipleComparison(healthy.data = sampleData$samples$healthy, sick.data = sampleData$samples$sick, p.adjust.method = "BH") %>%
   round(3) %>% vector2triangle()
 
 tt.all <- Sys.time() - tt.all

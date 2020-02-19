@@ -3,30 +3,14 @@ source("main_work/Code/02_simulationFunctions.R")
 source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
-link <- "main_work/Data/ADNI_data_AD_CN.mat"
-Real.dta <- readMat(link)
-corr_mats <- simplify2array(simplify2array(Real.dta$all.corrmats))
-#Which coloumns are NA? (Usually, 87-88)
-which.drop <- which(is.na(corr_mats[1,,1]), arr.ind = TRUE)
-p <- dim(corr_mats)[1] - length(which.drop)
+sampleData <- prepare_corrmat_data(
+  link = "main_work/Data/ADNI_data_AD_CN.mat",
+  corr_matrix_name = 'all.corrmats',
+  healthy_index_name = 'CONTROLS',
+  sick_index_name = 'AD'
+  )
 
-All.data <- array(dim = c(p, p, dim(corr_mats)[3]))
-for(i in 1:dim(All.data)[3]) All.data[,,i] <- force_symmetry(corr_mats[,,i])
-
-#Some observations still have NAs. Remove those observations:
-healthy.Real_t <- All.data[,,Real.dta$CONTROLS]
-healthy.Real <- healthy.Real_t[,,-unique(which(is.na(healthy.Real_t), arr.ind = TRUE)[,3])]
-
-sick.Real_t <- All.data[,,Real.dta$AD]
-sick.Real <- sick.Real_t #sick.Real_t[,,-unique(which(is.na(sick.Real_t), arr.ind = TRUE)[,3])]
-
-sampleData <- list(healthy = healthy.Real, sick = sick.Real, p = p, which.drop = which.drop, link = link)
-
-rm(which.drop, p, All.data, healthy.Real_t, healthy.Real, sick.Real_t, sick.Real)
-
-#Now, are all matrices good to go?
-abind(sampleData$healthy, sampleData$sick) %>% apply(3, is.positive.definite) %>% all()
-sum(is.na(sampleData$healthy)) + sum(is.na(sampleData$sick))
+test_corr_mat(sampleData)
 
 linkFun <- linkFunctions$multiplicative_identity
 

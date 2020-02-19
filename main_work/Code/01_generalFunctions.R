@@ -224,3 +224,63 @@ SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
   return(sum(diag(dist%*%sigma%*%t(dist))))
 }
 
+
+prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sick_index_name, subset, na_action = 'omit'){
+  get_and_handle_na <- function(all_data, index, na_action){
+    dta <- all_data[,,index]
+    na_patients <- unique(which(is.na(dta), arr.ind = TRUE)[,3])
+    if(length(na_patients)){
+      if(na_action == 'omit'){
+        dta <- dta[,,-na_patients]
+      } else {
+        stop('na_action must be one of \'omit\'')
+      }
+    }
+    return(dta)
+  }
+  
+  
+  na_action <- na_action[1]
+  real_dta <- readMat(link)
+  corr_mats <- real_dta[[corr_matrix_name]]
+  
+  for(try in 1:10){
+    if(class(corr_mats) == 'array') break()
+    corr_mats <- simplify2array(corr_mats)
+    if(try == 10) stop('corr_mats could not be simplified to array')
+  }
+  which_cols_na <- which(is.na(corr_mats[1,,1]), arr.ind = TRUE)
+  p <- dim(corr_mats)[1] - length(which_cols_na)
+  all_data <- array(dim = c(p, p, dim(corr_mats)[3]))
+  if(length(which_cols_na)){
+    for(i in 1:dim(all_data)[3]) all_data[,,i] <- force_symmetry(corr_mats[-which_cols_na, -which_cols_na, i])
+  } else {
+    for(i in 1:dim(all_data)[3]) all_data[,,i] <- force_symmetry(corr_mats[,,i])
+  }
+  
+  healthy_dta <- get_and_handle_na(all_data, real_dta[[healthy_index_name]], na_action)
+  sick_dta <- get_and_handle_na(all_data, real_dta[[sick_index_name]], na_action)
+  
+  if(!missing(subset)){
+    healthy_dta <- healthy_dta[subset, subset, ]
+    sick_dta <- sick_dta[subset, subset, ]
+    p <- length(subset)
+  }
+  
+  sample_data <- list(samples = list(healthy = healthy_dta, sick = sick_dta),
+                      p = p, which_cols_na = which_cols_na, link = link)
+  return(sample_data)
+}
+
+
+test_corr_mat <- function(dta){
+  which_not_pos <- which(!apply(with(dta$samples, abind(healthy, sick)), 3, is.positive.definite))
+  which_na <- list(
+    healthy = which(is.na(dta$healthy), arr.ind = TRUE),
+    sick = which(is.na(dta$sick), arr.ind = TRUE)
+  )
+  return(list(
+    which_not_positive_definite = which_not_pos,
+    which_na = which_na
+  ))
+}

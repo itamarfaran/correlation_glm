@@ -2195,6 +2195,95 @@ Maybe it's in the
 \begin_layout Standard
 ###Find efficient algorithm for inverting positive-definite matrix - check
  cholesky decomposition###
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+As before, our model is as follows: 
+\begin_inset Formula $\rho_{n}=\Theta\times(\alpha\alpha^{t})^{\pi(n)}+V_{n}+\mathcal{E}_{n}$
+\end_inset
+
+, where: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $V_{n}\sim W_{p}\left(p,\sigma^{2}\cdot I_{p}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{E}_{n}=\left[\begin{array}{ccccc}
+0 & \epsilon_{n12} & \epsilon_{n13} & \ldots & \epsilon_{n1p}\\
+\epsilon_{n12} & 0 & \epsilon_{n23}\\
+\epsilon_{n13} & \epsilon_{n23} & 0 &  & \vdots\\
+\vdots &  &  & \ddots\\
+\epsilon_{n1p} &  & \ldots &  & 0
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+GEE Method
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+I_{0} & =\sum_{i}\left(\frac{\partial\mu_{i}}{\partial\alpha}\right)^{t}\Sigma_{i}^{-1}\frac{\partial\mu_{i}}{\partial\alpha}\\
+ & =n\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+I_{1} & =\sum_{i}\left(\frac{\partial\mu_{i}}{\partial\alpha}\right)^{t}\Sigma_{i}^{-1}Cov\left(x_{i}\right)\Sigma_{i}^{-1}\frac{\partial\mu_{i}}{\partial\alpha}\\
+ & =n\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}Cov\left(x_{i}\right)\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\alpha}\right) & =I_{0}^{-1}I_{1}I_{0}^{-1}\\
+ & =\left(n\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\right)^{-1}n\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}Cov\left(x_{i}\right)\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\left(n\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\right)^{-1}\\
+ & =n^{-1}\left(\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\right)^{-1}\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}Cov\left(x_{i}\right)\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\left(\left(\frac{\partial\mu}{\partial\alpha}\right)^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\right)^{-1}
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \end_body

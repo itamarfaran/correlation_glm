@@ -1,5 +1,0 @@
-sample.interval=20000
-"sub" ".rs.doStripSurrounding" ".rs.stripSurrounding" ".rs.getAnywhere" ".rs.resolveObjectFromFunctionCall" ".rs.getCompletionsArgument" ".rs.getCompletionsFunction" ".rs.appendCompletions" ".rs.getRCompletions" ".rs.appendCompletions" "<Anonymous>" 
-".rs.normalizePath" "withCallingHandlers" "suppressWarnings" "<Anonymous>" 
-"ls" "FUN" "lapply" ".rs.objectsOnSearchPath" ".rs.getCompletionsSearchPath" "Reduce" "<Anonymous>" 
-"tolower" "nchar" ".rs.startsWith" ".rs.fuzzyMatches" ".rs.getCompletionsSearchPath" "Reduce" "<Anonymous>" 

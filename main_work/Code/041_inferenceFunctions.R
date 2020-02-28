@@ -82,3 +82,43 @@ computeFisherByHess_old <- function(CovObj, sickDat, method = c("Hess", "Grad"),
   return(output)
 }
 
+
+compute_gee_variance_nosick <- function(CovObj, sick.data, linkFun = linkFunctions$multiplicative_identity,
+                                        dim_alpha = 1, reg_lambda = 0, reg_p = 2, est_mu = TRUE, ncores = 1){
+  
+  
+  
+  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data) 
+  
+  p <- 0.5 + sqrt(1 + 8*ncol(sick.data))/2
+  d <- length(CovObj$alpha)/p
+  
+  mu_alpha_jacobian <- compute_mu_alpha_jacobian(CovObj$theta, CovObj$alpha, d = d, linkFun) 
+  
+  g11 <- if(est_mu){
+    triangle2vector(
+      linkFun$FUN(
+        t = CovObj$theta,
+        a = CovObj$alpha,
+        d = length(CovObj$alpha)/p
+      )
+    )
+  } else {
+    colMeans(sick.data)
+  }
+  
+  residuals <- sick.data - rep(1, nrow(sick.data)) %o% g11
+  cov_mat <- t(residuals) %*% residuals / (nrow(sick.data) - 1)
+  
+  Sigma <- vector_var_matrix_calc_COR_C(vector2triangle(colMeans(sick.data)))
+  solve_Sigma <- solve(Sigma)
+  
+  I0 <- t(mu_alpha_jacobian) %*% solve_Sigma %*% mu_alpha_jacobian
+  solve_I0 <- solve(I0)
+  
+  I1 <- t(mu_alpha_jacobian) %*% solve_Sigma %*% cov_mat %*% solve_Sigma %*% mu_alpha_jacobian
+  
+  res <- solve_I0 %*% I1 %*% solve_I0 / nrow(sick.data)
+  
+  return(res)
+}

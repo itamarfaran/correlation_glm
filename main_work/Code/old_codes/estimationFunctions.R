@@ -307,3 +307,110 @@ build_correction_mat <- function(Estimate.Loop2_object, Sick.ARR){
   return(list(Correction = sumMat,
               Corrected = HessSolve %*% sumMat %*% HessSolve))
 }
+
+Estimate.Loop2_old <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
+                               linkFun = linkFunctions$multiplicative_identity,
+                               var_weights = c(1, 0, 0), sigma = 1, reg_lambda = 0, reg_p = 2,
+                               nonpositive = "Stop", max.loop = 50, epsIter = 2*10^(-3), min_reps = 3,
+                               method = "Nelder-Mead", epsOptim = 10^(-5), updateU = 1, progress = TRUE){
+  
+  if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
+  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
+  
+  p <- 0.5 + sqrt(1 + 8*ncol(sick.data))/2
+  m <- 0.5*p*(p-1)
+  dim_alpha <- length(alpha0)/p
+  if(dim_alpha %% 1 != 0) stop("alpha0 not multiplicative of p")
+  
+  if( !(is.positive.definite(vector2triangle(theta0)) &
+        is.positive.definite(linkFun$FUN(t = theta0, a = alpha0, d = dim_alpha))) ){
+    stop("Initial parameters dont result with positive-definite matrices")
+  }
+  
+  temp.theta <- theta0
+  temp.alpha <- alpha0
+  
+  healthy_N <- nrow(healthy.data)
+  sick_N <- nrow(sick.data)
+  
+  Steps <- list()
+  Steps[[1]] <- list(theta = temp.theta, alpha = temp.alpha)
+  log_optim <- list()
+  dist <- 1000*epsIter
+  
+  #Convergence is a matrix wich tells us if the convergence in each iteration is completed
+  convergence <- rep(-1, max.loop)
+  convergence[1] <- 0
+  tnai0 <- FALSE
+  
+  tt <- Sys.time()
+  if(progress) message(paste0("Time of intialization: ", tt, "; Progress: 'Loop, (Time, Convergence, Distance)'"))
+  for(i in 2:max.loop){
+    g11 <- linkFun$FUN(t = temp.theta, a = temp.alpha, d = dim_alpha)
+    
+    effective.N <- compute_estimated_N(
+      ((nrow(sick.data) - 1)/nrow(sick.data)) * cov(sick.data),
+      vector_var_matrix_calc_COR_C(g11, nonpositive = "Ignore"))
+    effective.N <- min(effective.N, T_thresh)
+    
+    temp.theta <- colMeans(rbind(
+      linkFun$CLEAN(dt = sick.data, a = temp.alpha, d = dim_alpha),
+      healthy.data
+    ))
+    
+    if(updateU == 0){
+      U1 <- NULL
+    } else if((i - 2) %% updateU == 0){
+      U1 <- eigen(vector_var_matrix_calc_COR_C(g11, nonpositive = nonpositive),
+                  symmetric = T, only.values = F)$vectors
+    }
+    
+    #Optimize Alpha
+    optim.alpha <- optim(
+      temp.alpha,
+      function(A) {
+        minusloglik(theta = temp.theta,
+                    alpha = A, U1 = U1,
+                    linkFun = linkFun,
+                    sick.data = sick.data,
+                    effective.N = effective.N,
+                    dim_alpha = dim_alpha,
+                    nonpositive = nonpositive,
+                    var_weights = var_weights,
+                    sigma = sigma) +
+          reg_lambda*sum((A - linkFun$NULL_VAL)^reg_p)
+      },
+      method = method,
+      control = list(maxit = min(max(500, i*100), 2000),
+                     reltol = epsOptim)
+    )
+    convergence[i] <- optim.alpha$convergence
+    temp.alpha <- optim.alpha$par
+    
+    Steps[[i]] <- list(theta = temp.theta, alpha = temp.alpha,
+                       convergence = optim.alpha$convergence,
+                       Est_N = effective.N)
+    log_optim[[i]] <- optim.alpha
+    
+    
+    if(progress) cat(paste0(i," (",round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
+                            convergence[i],", ",round(dist, 5) , "); "))
+    
+    # Stopping rule
+    dist <- sqrt(mean((Steps[[i]]$alpha - Steps[[i-1]]$alpha)^2))
+    tnai0 <- FALSE
+    if(i > min_reps) tnai0 <- (dist <= epsIter) & (sum(convergence[i - 0:(min_reps - 1)]) == 0)
+    if(tnai0) break()
+  }
+  if(progress){
+    tt <- Sys.time() - tt
+    units(tt) <- "secs"
+    tt <- as.numeric(tt)
+    message(paste0("\nTotal time: ", floor(tt/60), " minutes and ", round(tt %% 60, 1), " seconds."))
+  }
+  
+  return( list(theta = temp.theta, alpha = temp.alpha,
+               convergence = convergence[1:(min(which(convergence == -1)) - 1)],
+               returns = i, Est_N = effective.N,
+               Steps = Steps, Log_Optim = log_optim) )
+}

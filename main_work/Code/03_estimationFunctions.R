@@ -164,7 +164,7 @@ sum_of_squares <- function(alpha, theta, sick.data, inv_sigma,
   if(missing(inv_sigma)) inv_sigma <- solve(sigma)
   
   g11 <- as.matrix(triangle2vector(linkFun$FUN(t = theta, a = alpha, d = dim_alpha)))
-  SSE <- t(g11) %*% inv_sigma %*% ( nrow(sick.data)/2 * g11 - colSums(sick.data) )
+  SSE <- t(g11) %*% inv_sigma %*% ( 0.5 * nrow(sick.data) * g11 - colSums(sick.data) )
   if(reg_lambda > 0) SSE <- SSE + reg_lambda*sum((alpha - linkFun$NULL_VAL)^reg_p)
   return(SSE)
 }
@@ -330,8 +330,15 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     message(paste0("\nTotal time: ", floor(tt/60), " minutes and ", round(tt %% 60, 1), " seconds."))
   }
   
+  suppressWarnings({
+    max_convergence <- min(
+      (min(which(convergence == -1)) - 1),
+      max.loop
+    )
+  })
+  
   return( list(theta = temp.theta, alpha = temp.alpha, Est_N = effective.N, linkFun = linkFun,
-               convergence = convergence[1:(min(which(convergence == -1)) - 1)],
+               convergence = convergence[1:max_convergence],
                returns = i, Steps = Steps, Log_Optim = log_optim) )
 }
 

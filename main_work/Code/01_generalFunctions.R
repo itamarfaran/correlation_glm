@@ -57,7 +57,7 @@ powerMatrix <- function(MATR, pow){
 }
 
 
-regularizeMatrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"),
+regularize_matrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"),
                              const = 1, OnlyIfSing = TRUE){
   method <- method[1]
   if(!is.square.matrix(MATR)) stop("Matrix is not square.")
@@ -97,12 +97,12 @@ calculate_mean_matrix <- function(matrix_array, do.mean = TRUE) summatrix(matrix
 
 
 #Check stationarity/invertability of AR/MA process
-checkInv <- function(coefs, perc = 0.001){
+check_invertability_arma <- function(coefs, perc = 0.001){
   polfun <- function(x) 1 - sum(coefs*x^(1:length(coefs)))
   x <- sign(sapply(seq(-1, 1, by = perc), polfun))
   return(all(x == 1) | all(x == -1))
 }
-
+checkInv <- check_invertability_arma
 
 #Generate weighted sum of matrices from array
 summatrix <- function(ARRAY, index = 1:(dim(ARRAY)[3]), constants = rep(1, length(index)), weights = FALSE){
@@ -131,7 +131,7 @@ sumvector <- function(MATR, index = 1:(nrow(MATR)), constants = rep(1, length(in
 
 
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
-central.moment <- function(x, norm = TRUE) {
+central_moment <- function(x, norm = TRUE) {
   b <- numeric(4)
   names(b) <- c("Mean", "Variance", "Skewness",
                 ifelse(norm, "Kurtosis", "Ex.Kurtosis"))
@@ -153,24 +153,25 @@ central.moment <- function(x, norm = TRUE) {
 
 
 #Take array of symmetric matrices and convert them to one data matrix
-cor.matrix_to_norm.matrix <- function(ARRAY) t(apply(ARRAY, 3, triangle2vector))
+corr_mat_array2normal_data_mat <- function(array) t(apply(array, 3, triangle2vector))
 
 
-#Build the alpha matrix according to the multiplicative model
-create_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 1){
-  alpha <- matrix(alpha, nc = dim_alpha)
-  output <- alpha %*% t(alpha)
-  diag(output) <- diag_val
-  return(output)
+corr_mat_array2normal_data_mat_test <- function(obj, verbose = FALSE){
+  if(class(obj) == "array"){
+    message_ <- 'obj transformed from array to matrix'
+    out <- corr_mat_array2normal_data_mat(obj)
+  } else if (class(obj) %in% c("matrix", "data.frame")){
+    message_ <- 'obj already in normal data matrix form'
+    out <- obj
+  } else {
+    stop('obj not of class "array", "matrix" or "data.frame"')
+  }
+  if(verbose) message(message_)
+  return(out)
 }
+  
 
-
-create_additive_alpha_mat <- function(alpha, dim_alpha = 1, diag_val = 0){
-  if(dim_alpha > 1) stop("currently support only dim_alpha = 1")
-  output <- replicate(length(a), a) + t(replicate(length(a), a))
-  diag(output) <- 0
-  return(output)
-}
+cor.matrix_to_norm.matrix <- corr_mat_array2normal_data_mat
 
 
 #Force symmetry on non-symmetrical matrix
@@ -214,17 +215,7 @@ vnorm <- function(x, MATR, sqrt = FALSE, solve_matr = FALSE){
 }
 
 
-#Calculte sum of mahalonobis distances
-SSS_norm.matrix <- function(DATA, mu, sigma, solve_sig = TRUE, reg.par = 0){
-  if((reg.par < 0) | (reg.par > 1)) stop("reg.par not between [0,1]")
-  sigma <- (1 - reg.par)*sigma + reg.par*mean(diag(sigma))*diag(length(mu))
-  
-  if(solve_sig) sigma <- solve(sigma)
-  dist <- DATA - rep(1,nrow(DATA))%*%t(mu)
-  return(sum(diag(dist%*%sigma%*%t(dist))))
-}
-
-
+# Data preperation functions
 prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sick_index_name, subset, na_action = 'omit'){
   get_and_handle_na <- function(all_data, index, na_action){
     dta <- all_data[,,index]

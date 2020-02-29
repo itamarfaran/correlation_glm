@@ -5,7 +5,7 @@ source("main_work/Code/04_inferenceFunctions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
 p <- c(5, 10) # c(5, 10, 20, 30, 40, 50, 60)
-n <- c(50, 80) # c(50, 80, 100, 120)
+n <- c(50, 80) # c(50, 80, 100, 150, 200, 300)
 sick_obs_percentage <- c(0.5, 0.6) # c(0.2, 0.35, 0.5, 0.65, 0.8)
 reps <- 3
 T_thresh <- Tlength <- 115
@@ -91,10 +91,11 @@ combinations2boot[,`:=`(
   )
 )]
 combinations2boot[,actual_est_ratio := actual_sd/mean_est_sd]
+fwrite(combinations2boot, 'main_work/code/gee-bootstrap-app/gee_data.csv')
 
-ggplot(combinations2boot, aes(
-  x = p, y = actual_est_ratio,
-  col = factor(n))#, shape = factor(sick_obs_percentage))
+ggplot(combinations2boot, aes_string(
+  x = 'p', y = 'actual_est_ratio',
+  col = factor('n'))#, shape = factor(sick_obs_percentage))
   ) +
   geom_point() + 
   geom_hline(yintercept = 0, size = 1) + 
@@ -107,5 +108,4 @@ ggplot(combinations2boot, aes(
     shape = 'Sick Obs / Total Obs'
   )
 
-lubridate::round_date(Sys.time(), 'minute')
 save.image(paste0('main_work/data/enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))

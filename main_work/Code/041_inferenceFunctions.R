@@ -93,7 +93,7 @@ compute_gee_variance_nosick <- function(CovObj, sick.data, linkFun = linkFunctio
   p <- 0.5 + sqrt(1 + 8*ncol(sick.data))/2
   d <- length(CovObj$alpha)/p
   
-  mu_alpha_jacobian <- compute_mu_alpha_jacobian(CovObj$theta, CovObj$alpha, d = d, linkFun) 
+  mu_alpha_jacobian <- compute_mu_alpha_dummy_jacobian(CovObj$theta, CovObj$alpha, d = d, linkFun) 
   
   g11 <- if(est_mu){
     triangle2vector(

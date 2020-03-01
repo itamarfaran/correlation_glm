@@ -130,6 +130,10 @@ sumvector <- function(MATR, index = 1:(nrow(MATR)), constants = rep(1, length(in
 }
 
 
+mean_sqrt_diag <- function(x) mean(sqrt(diag(x)))
+sqrt_diag <- function(x) sqrt(diag(x))
+
+
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
 central_moment <- function(x, norm = TRUE) {
   b <- numeric(4)

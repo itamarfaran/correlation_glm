@@ -29,11 +29,11 @@ sidebar <- dashboardSidebar(
     'MLE Estimated SD'
   )]),
   selectInput('y_denumerator', 'Y Axis Denumerator', sidebar_options[c(
+    '1',
     'Actual SD',
     'GEE Estimated SD',
     'GEE(old) Estimated SD',
-    'MLE Estimated SD',
-    '1'
+    'MLE Estimated SD'
   )]),
   selectInput('color', 'Color', sidebar_options[c(
     'None',

@@ -56,10 +56,12 @@ function(input, output){
     out
     })
   output$boxplot <- renderPlot({
+    data_plt[,ratio := get(input$y_numerator)]
+    if(input$y_denumerator != '1') data_plt[,ratio := ratio/get(input$y_denumerator)]
     out <- ggplot(data_plt, aes_string(
       x = input$x,
       group = input$x,
-      y = input$y_numerator
+      y = 'ratio'
     )) +
       geom_boxplot(fill = 'lightblue') +
       geom_hline(yintercept = 0, size = 1) +

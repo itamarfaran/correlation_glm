@@ -80,4 +80,4 @@ combinations2boot[,`:=`(
 )]
 
 fwrite(combinations2boot, 'main_work/Code/gee-bootstrap-app/gee_data.csv')
-save.image(paste0('main_work/data/enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))
+save.image(paste0('main_work/Data/Enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))

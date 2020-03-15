@@ -14,20 +14,17 @@ compute_mu_alpha_dummy_jacobian <- function(theta, alpha, d = 1, linkFun){
 }
 
 
-theta_of_alpha <- function(alpha, healthy_dt, linkFun, d = 1) colMeans(linkFun$CLEAN(healthy_dt, alpha, d))
-
-
-compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, d = 1, linkFun){
+compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, linkFun){
   func <- if(type == 'sick'){
     function(A) triangle2vector(
       linkFun$FUN(
-        t = theta_of_alpha(A, healthy_dt, linkFun),
+        t = theta_of_alpha(A, healthy_dt, sick_dt, linkFun = linkFun, d = d),
         a = A,
         d = d
       )
     )
   } else if(type == 'healthy') {
-    function(A) theta_of_alpha(A, healthy_dt, linkFun) 
+    function(A) theta_of_alpha(A, healthy_dt, sick_dt, linkFun = linkFun, d = d)
   }
   return(
     jacobian(func = func, x = alpha)
@@ -36,7 +33,7 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, d = 1, linkFun){
 
 
 compute_gee_variance <- function(
-  CovObj, sampledata, dim_alpha = 1, reg_lambda = 0, reg_p = 2, est_mu = TRUE, ncores = 1){
+  CovObj, sampledata, dim_alpha = 1, reg_lambda = 0, reg_p = 2, est_mu = TRUE, correct = FALSE, ncores = 1){
   
   compute_gee_raw <- function(type, list_){
     if(type == 'I0'){
@@ -46,7 +43,8 @@ compute_gee_variance <- function(
       cov_mat <- t(residuals) %*% residuals / (nrow(list_$data) - 1)
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% cov_mat %*% list_$solve_Sigma %*%list_$ jacobian
     }
-    out <- out*nrow(list_$data) # todo:
+    out <- out*nrow(list_$data)
+    # out <- out*1
     return(out)
   }
   
@@ -60,14 +58,26 @@ compute_gee_variance <- function(
   
   healthy_list <- list(
     data = healthy_data,
-    jacobian = compute_mu_alpha_jacobian('healthy', CovObj$alpha, healthy_data, d = d, linkFun),
+    jacobian = compute_mu_alpha_jacobian(
+      type = 'healthy',
+      alpha = CovObj$alpha,
+      healthy_dt = healthy_data,
+      sick_dt = sick_data,
+      d = d,
+      linkFun = linkFun),
     expected_value = if(est_mu) CovObj$theta else colMeans(healthy_data),
     solve_Sigma = solve(vector_var_matrix_calc_COR_C(vector2triangle(colMeans(healthy_data))))
   )
   
   sick_list <- list(
     data = sick_data,
-    jacobian = compute_mu_alpha_jacobian('sick', CovObj$alpha, sick_data, d = d, linkFun),
+    jacobian = compute_mu_alpha_jacobian(
+      type = 'sick',
+      alpha = CovObj$alpha,
+      healthy_dt = healthy_data,
+      sick_dt = sick_data,
+      d = d,
+      linkFun = linkFun),
     expected_value = if(est_mu) {
       triangle2vector(
         linkFun$FUN(
@@ -84,7 +94,8 @@ compute_gee_variance <- function(
   solve_I0 <- solve(I0)
   I1 <- compute_gee_raw('I1', healthy_list) + compute_gee_raw('I1', sick_list)
   res <- solve_I0 %*% I1 %*% solve_I0
-  
+  # if(correct) res <- res*(1 + (nrow(sick_data) + nrow(healthy_data))/nrow(sick_data))
+  # res <- res / nrow(sick_data)
   return(res)
 }
 

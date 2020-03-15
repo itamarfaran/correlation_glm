@@ -85,6 +85,14 @@ vector_var_matrix_calc_COR_R <- function(MATR, nonpositive = c("Stop", "Force", 
 }
 
 
+theta_of_alpha <- function(alpha, healthy_dt, sick_dt, linkFun, d = 1){
+  colMeans(rbind(
+    linkFun$CLEAN(dt = sick_dt, a = alpha, d = d),
+    healthy_dt
+  ))
+}
+
+
 minusloglik <- function(theta, alpha, healthy.data, sick.data, effective.N,
                         linkFun = linkFunctions$multiplicative_identity,
                         var_weights = c(1, 0, 0), sigma = 1, dim_alpha = 1,
@@ -200,11 +208,14 @@ Estimate.Loop <- function(iniAlpha, healthy.data, sick.data,
   distanceA <- 100
   distanceT <- 100
   for(i in 1:MaxLoop){
-    temp.theta <- colMeans(rbind(
-      linkFun$CLEAN(dt = sick.data, a = temp.alpha, d = dim_alpha),
-      healthy.data
-      ))
 
+    temp.theta <- theta_of_alpha(
+      alpha = temp.alpha,
+      healthy_dt = healthy.data,
+      sick_dt = sick.data,
+      linkFun = linkFun,
+      d = dim_alpha) 
+    
     temp.alpha <- optim(par = temp.alpha, fn = sum_of_squares, 
                         theta = temp.theta, sick.data = sick.data, inv_sigma = diag(m),
                         linkFun = linkFun, dim_alpha = dim_alpha,
@@ -289,10 +300,12 @@ Estimate.Loop2 <- function(theta0, alpha0, healthy.data, sick.data, T_thresh,
     #   theo_sigma)
     # effective.N <- min(effective.N, T_thresh)
     
-    temp.theta <- colMeans(rbind(
-      linkFun$CLEAN(dt = sick.data, a = temp.alpha, d = dim_alpha),
-      healthy.data
-    ))
+    temp.theta <- theta_of_alpha(
+      alpha = temp.alpha,
+      healthy_dt = healthy.data,
+      sick_dt = sick.data,
+      linkFun = linkFun,
+      d = dim_alpha) 
     
     optim.alpha <- optim(
       par = temp.alpha,

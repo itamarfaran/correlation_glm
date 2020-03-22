@@ -49,22 +49,36 @@ sidebar <- dashboardSidebar(
     'None' = 'none', 'Mean' = 'mean', 'Median' = 'median', 'Smooth' = 'smooth', 'LM' = 'lm'
     )),
   radioButtons('vline', 'Vertical Line', list('None' = 0, '0.05' = 0.05, '1' = 1)),
-  checkboxInput('abline', ' 0-1 Line', FALSE),
-  checkboxInput('jitter', 'Jitter', FALSE)
+  checkboxGroupInput(
+    'plot_checkboxs', 'Plot Options',
+    choices = list('Render Boxplot' = 'boxplot',
+                   '0-1 Line' = 'abline',
+                   'Jitter' = 'jitter'))
   )
 
 
 ##### Body #####
 body <- dashboardBody(tabItems(
   tabItem(tabName = "dashboard", h2(
-    plotOutput('points'),
-    plotOutput('boxplot')
+    plotOutput('graph'),
+    box(
+      verbatimTextOutput('plot_lm_res'),
+      box(
+        checkboxInput('intercept', 'Intercept', FALSE),
+        numericInput('polynom', 'Polynom Degree', 1, 1, Inf, 1)
+      ),
+      collapsible = TRUE
+    ),
+    box(
+      textInput('lm_formula', 'Free Style LM Formula', 'gee_sd/actual_sd ~ p + n'),
+      verbatimTextOutput('freestyle_lm_res'),
+      collapsible = TRUE
+    )
   )),
   tabItem(tabName = "data", h2(
     dataTableOutput('data')
   ))
 ))
-
 
 ##### UI #####
 dashboardPage(

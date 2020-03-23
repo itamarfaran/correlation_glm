@@ -5,6 +5,7 @@ sidebar_options <- list(
   'N' = 'n',
   'NH' = 'nh',
   'ND' = 'nd',
+  'AR Coefficient' = 'ar',
   'P/N' = 'p_n_ratio',
   'Length of Times Serie' = 'Tlength',
   'Percentage' = 'sick_obs_percentage',

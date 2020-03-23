@@ -279,3 +279,16 @@ test_corr_mat <- function(dta){
     which_na = which_na
   ))
 }
+
+cov_known_mu <- function(x, y = NULL, mu = 0, na.rm = FALSE, use = "everything"){
+  if(!is.vector(x)) stop('var_known_mu supports univariate') # currently univariate
+  if(na.rm) x <- x[!is.na(x)]
+  
+  return(mean((x - mu)^2))
+}
+
+var_known_mu <- function(x, mu = 0, na.rm = FALSE, use = "everything")
+  cov_known_mu(x = x, y = NULL, mu = mu, na.rm = na.rm, use = use)
+
+sd_known_mu <- function(x, mu, na.rm = FALSE)
+  sqrt(var_known_mu(if (is.vector(x) || is.factor(x)) x else as.double(x), mu = mu, na.rm = na.rm))

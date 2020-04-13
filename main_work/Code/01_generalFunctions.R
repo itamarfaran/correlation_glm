@@ -1,8 +1,8 @@
-ipak <- function(pkg){
+ipak <- function(..., only_install = FALSE){
+  pkg <- unlist(list(...))
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg)) 
-    install.packages(new.pkg, dependencies = TRUE)
-  sapply(pkg, require, character.only = TRUE)
+  if(length(new.pkg)) install.packages(new.pkg, dependencies = TRUE)
+  if(!only_install) sapply(pkg, require, character.only = TRUE)
 }
 
 

@@ -4,17 +4,19 @@ source("main_work/Code/03_estimationFunctions.R")
 source("main_work/Code/04_inferenceFunctions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
-p <- 40
+p <- 25
+nH <- 30
+nS <- 30
 T_thresh <- Tlength <- 115
 
 ARMAdetails <- list(
-  ARsick = NULL, MAsick = NULL,
-  ARhealth = NULL, MAhealth = NULL
-  )
+  ARsick = c(0.5, 0.1), MAsick = c(0.5, 0.1),
+  ARhealth = c(0.4, 0.2), MAhealth = c(0.4, 0.2)
+)
 sapply(ARMAdetails, checkInv)
 
 sampleData <- createSamples(
-  nH = 30, nS = 30, p = p, Tlength = 115, dim_alpha = 1,
+  nH = nH, nS = nS, p = p, Tlength = Tlength, dim_alpha = 1,
   percent_alpha = 0.3, range_alpha = c(1, 1),
   ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
   ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
@@ -47,23 +49,18 @@ Pelet_Cov <- estimateAlpha(
 
 gee_var <- compute_gee_variance(
   CovObj = Pelet_Cov, sampledata = sampleData$samples,
-  est_mu = TRUE
-)
-
-mle_var <- compute_sandwhich_fisher_variance(
-  CovObj = Pelet_Cov, sick.data = sampleData$samples$sick,
-  linkFun = linkFun, dim_alpha = 1
+  est_mu = TRUE, correct = FALSE
 )
 
 gc()
 
-Pelet_Cov_jacknife <- estimateAlpha_jacknife(
-  healthy.data = sampleData$samples$healthy, sick.data = sampleData$samples$sick,
-  dim_alpha = 1, reg_lambda = 0, var_weights = c(1, 0, 0),
-  T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun, jack_healthy = TRUE)
-
-alpha_jk_estimate <- colMeans(Pelet_Cov_jacknife$alpha)
-alpha_jk_variance <- var(Pelet_Cov_jacknife$alpha)*nrow(Pelet_Cov_jacknife$alpha - 1)
+# Pelet_Cov_jacknife <- estimateAlpha_jacknife(
+#   healthy.data = sampleData$samples$healthy, sick.data = sampleData$samples$sick,
+#   dim_alpha = 1, reg_lambda = 0, var_weights = c(1, 0, 0),
+#   T_thresh = Tlength, updateU = 1, progress = T, linkFun = linkFun, jack_healthy = TRUE)
+# 
+# alpha_jk_estimate <- colMeans(Pelet_Cov_jacknife$alpha)
+# alpha_jk_variance <- var(Pelet_Cov_jacknife$alpha)*nrow(Pelet_Cov_jacknife$alpha - 1)
 
 # save.image('main_work/data/enviroments/full_run_jacknife_simulated_data_multiplicative_link.RData')
 

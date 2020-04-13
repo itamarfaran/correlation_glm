@@ -5,6 +5,11 @@ ipak <- function(..., only_install = FALSE){
   if(!only_install) sapply(pkg, require, character.only = TRUE)
 }
 
+packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
+              "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
+              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
+ipak(packages)
+
 
 promptForCores <- function(){
   newPrompt <- TRUE
@@ -42,91 +47,79 @@ promptForCores <- function(){
 }
 
 
-packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
-              "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
-              "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
-ipak(packages)
-
 ncores <- ifelse(tolower(.Platform$OS.type) == "windows", 1, detectCores() - 2)
 promptForCores()
 
 
-powerMatrix <- function(MATR, pow){
-  eigenMat <- eigen(MATR)
-  return(eigenMat$vectors %*% diag(eigenMat$values ^ pow) %*% t(eigenMat$vectors))
+matrix_pow <- function(x, pow){
+  out <- with(eigen(x), vectors %*% diag(values ^ pow) %*% t(vectors))
+  return(out)
 }
 
 
-regularize_matrix <- function(MATR, method = c("diag", "constant", "avg.diag", "increase.diag"),
-                             const = 1, OnlyIfSing = TRUE){
+regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase_diag"),
+                             const = 1, only_if_singular = TRUE){
   method <- method[1]
-  if(!is.square.matrix(MATR)) stop("Matrix is not square.")
-  if(OnlyIfSing & !is.singular.matrix(MATR)) {
+  if(!is.square.matrix(matr)) stop("Matrix is not square.")
+  if(only_if_singular & !is.singular.matrix(matr)) {
     message("Matrix is invertible and was not changed.")
-    return(MATR)
+    return(matr)
   }
   
-  p <- nrow(MATR)
-  if(method == "diag") {
-    pelet <- MATR + diag(p)
-  }
+  p <- nrow(matr)
   if(method == "constant"){
     if(const <= 0) stop("In method 'constant' const must be greater than 0.")
-    pelet <- MATR + const*diag(p)
+    out <- matr + const*diag(p)
   }
-  if(method == "avg.diag"){
-    if(const < 0 | const > 1) stop("In method 'avg.diag' const must be between 0-1")
-    pelet <- (1 - const)*MATR + const*mean(diag(MATR))*diag(p)
+  if(method == "avg_diag"){
+    if(const < 0 | const > 1) stop("In method 'avg_diag' const must be between 0-1")
+    out <- (1 - const)*matr + const*mean(diag(matr))*diag(p)
   } 
-  if(method == "increase.diag"){
-    if(const < 0 | const > 1) stop("In method 'avg.diag' const must be between 0-1")
-    pelet <- (1 - const)*MATR + const*diag(diag(MATR))
+  if(method == "increase_diag"){
+    if(const < 0 | const > 1) stop("In method 'increase_diag' const must be between 0-1")
+    out <- (1 - const)*matr + const*diag(diag(matr))
   }
   
-  if(is.singular.matrix(pelet)){
+  if(is.singular.matrix(out)){
     warning("Matrix still not invertible.")
   } else{
-    message("Matrix is singular and was regularized.")
+    if(only_if_singular) message("Matrix is singular and was regularized.")
   }
-  return(pelet)
+  return(out)
 }
 
-
-#Calculate mean Correlation
-calculate_mean_matrix <- function(matrix_array, do.mean = TRUE) summatrix(matrix_array, weights = do.mean)
 
 
 #Check stationarity/invertability of AR/MA process
-check_invertability_arma <- function(coefs, perc = 0.001){
+check_invertability_arma <- function(coefs, perc = 1e-03){
   polfun <- function(x) 1 - sum(coefs*x^(1:length(coefs)))
   x <- sign(sapply(seq(-1, 1, by = perc), polfun))
   return(all(x == 1) | all(x == -1))
 }
-checkInv <- check_invertability_arma
+
 
 #Generate weighted sum of matrices from array
-summatrix <- function(ARRAY, index = 1:(dim(ARRAY)[3]), constants = rep(1, length(index)), weights = FALSE){
-  # if(missing(index)) index <- 1:(dim(ARRAY)[3])
-  # if(missing(constants)) constants <- rep(1, length(index))
+matrix_sum <- function(array_, index = 1:(dim(array_)[3]), constants = rep(1, length(index)), weights = FALSE){
+  out <- matrix(0, nrow = dim(array_)[1], ncol = dim(array_)[2])
+  
   if(weights) constants <- constants/sum(constants)
-  pelet <- matrix(0, nrow = dim(ARRAY)[1], ncol = dim(ARRAY)[2])
-  for(i in 1:length(index)){
-    pelet <- pelet + ARRAY[,,index[i]]*constants[i]
-  }
-  return(pelet)
+  
+  for(i in 1:length(index)) out <- out + constants[i]*array_[,,index[i]]
+  
+  return(out)
 }
 
+#Calculate mean Correlation
+calculate_mean_matrix <- function(matrix_array) matrix_sum(matrix_array, weights = TRUE)
 
 #Generate weighted sum of vectors from matrices
-sumvector <- function(MATR, index = 1:(nrow(MATR)), constants = rep(1, length(index)), weights = FALSE){
-  # if(missing(index)) index <- 1:(nrow(MATR))
-  # if(missing(constants)) constants <- rep(1, length(index))
+vector_sum <- function(matr, index = 1:(nrow(matr)), constants = rep(1, length(index)), weights = FALSE, by_row = TRUE){
+  out <- numeric(ncol(matr))
+  
   if(weights) constants <- constants/sum(constants)
-  pelet <- numeric(ncol(MATR))
-  for(i in 1:length(index)){
-    pelet <- pelet + MATR[index[i],]*constants[i]
-  }
-  return(pelet)
+  
+  for(i in 1:length(index)) out <- out + constants[i]*matr[index[i],]*
+  return(out)
 }
 
 
@@ -136,34 +129,34 @@ sqrt_diag <- function(x) sqrt(diag(x))
 
 #Calculate non-biased estimates for Mean, Variance, Skewness and (Ex-)Kurtosis
 central_moment <- function(x, norm = TRUE) {
-  b <- numeric(4)
-  names(b) <- c("Mean", "Variance", "Skewness",
-                ifelse(norm, "Kurtosis", "Ex.Kurtosis"))
+  out <- numeric(4)
+  names(out) <- c("Mean", "Variance", "Skewness", ifelse(norm, "Kurtosis", "Ex_Kurtosis"))
 
   n <- length(x)
-  b[1] <- mean <- mean(x)
-  b[2] <- var(x)
-  sd <- sqrt(b[2] * ((n - 1)/n))
-  norm_x <- (x - mean)/sd
+  out[1] <- m <- mean(x)
+  out[2] <- v <- var(x)
+  
+  s <- sqrt(v * (1 - 1/n))
+  norm_x <- (x - m)/s
   
   skew <- mean(norm_x^3)
   kurt <- mean(norm_x^4)
   
-  b[3] <- (sqrt(n*(n - 1)) / (n - 2)) * skew
-  b[4] <- ( (n - 1) / ((n - 2) * (n - 3)) ) * ((n + 1) * kurt + 6) + ifelse(norm, -3, 0)
+  out[3] <- (sqrt(n*(n - 1)) / (n - 2)) * skew
+  out[4] <- ( (n - 1) / ((n - 2) * (n - 3)) ) * ((n + 1) * kurt + 6) - 3*norm
 
-  return(b)
+  return(out)
 }
 
 
 #Take array of symmetric matrices and convert them to one data matrix
-corr_mat_array2normal_data_mat <- function(array) t(apply(array, 3, triangle2vector))
+convert_corr_array_to_data_matrix <- function(array_) t(apply(array_, 3, triangle2vector))
 
 
-corr_mat_array2normal_data_mat_test <- function(obj, verbose = FALSE){
+convert_corr_array_to_data_matrix_test <- function(obj, verbose = FALSE){
   if(class(obj) == "array"){
     message_ <- 'obj transformed from array to matrix'
-    out <- corr_mat_array2normal_data_mat(obj)
+    out <- convert_corr_array_to_data_matrix(obj)
   } else if (class(obj) %in% c("matrix", "data.frame")){
     message_ <- 'obj already in normal data matrix form'
     out <- obj
@@ -175,47 +168,44 @@ corr_mat_array2normal_data_mat_test <- function(obj, verbose = FALSE){
 }
   
 
-cor.matrix_to_norm.matrix <- corr_mat_array2normal_data_mat
-
-
 #Force symmetry on non-symmetrical matrix
-force_symmetry <- function(MATR) return((MATR + t(MATR))/2)
+force_symmetry <- function(matr) return((matr + t(matr))/2)
 
 
 #Retrieve lower/upper triangle of a matrix as a vector
-triangle2vector <- function(MATR , diag = FALSE){
-  if(nrow(MATR) != ncol(MATR)) stop("Matrix not p x p")
-  return(as.vector(MATR[lower.tri(MATR, diag = diag)]))
+triangle2vector <- function(matr, diag = FALSE){
+  if(nrow(matr) != ncol(matr)) stop("Matrix not p x p")
+  return(as.vector(matr[lower.tri(matr, diag = diag)]))
 }
 
 
-vector2triangle <- function(VECT, diag = FALSE, truncdiag = 1){
-  m <- length(VECT)
+vector2triangle <- function(vect, diag = FALSE, diag_value = NA){
+  m <- length(vect)
   
   one <- ifelse(diag, -1, 1)
   p <- 0.5*c(one + sqrt(1 + 8*m), one - sqrt(1 + 8*m))
   p <- p[which( (p==round(p)) & p==abs(p) )]
   if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
   
-  output <- matrix(0, ncol = p, nrow = p)
-  output[lower.tri(output, diag = diag)] <- VECT
+  out <- matrix(0, ncol = p, nrow = p)
+  out[lower.tri(out, diag = diag)] <- vect
   
-  if(diag){
-    output <- output + t(output) - diag(diag(output))
-  } else {
-    output <- output + t(output)
-    if(!is.null(truncdiag)) diag(output) <- truncdiag
-  }
-  return(output)
+  out <- out + t(out) - diag(diag(out))
+  if(!diag) diag(out) <- diag_value
+  return(out)
 }
 
 
 #Calculate Maholonobis norm of a vector. Default is regular norm.
-vnorm <- function(x, MATR, sqrt = FALSE, solve_matr = FALSE){
-  if(solve_matr) MATR <- solve(MATR)
-  if(missing(MATR)) { pelet <- sum(x^2) } else { pelet <- as.vector(t(x) %*% MATR %*% x) }
-  if(sqrt) pelet <- sqrt(pelet)
-  return(pelet)
+vnorm <- function(x, matr, sqrt = FALSE, solve_matr = FALSE){
+  if(missing(matr)){
+    out <- sum(x^2)
+  } else {
+    if(solve_matr) matr <- solve(matr)
+    out <- as.vector(t(x) %*% matr %*% x)
+  }
+  if(sqrt) out <- sqrt(out)
+  return(out)
 }
 
 
@@ -234,9 +224,8 @@ prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sic
     return(dta)
   }
   
-  
   na_action <- na_action[1]
-  real_dta <- readMat(link)
+  real_dta <- R.matlab::readMat(link)
   corr_mats <- real_dta[[corr_matrix_name]]
   
   for(try in 1:10){
@@ -280,15 +269,28 @@ test_corr_mat <- function(dta){
   ))
 }
 
-cov_known_mu <- function(x, y = NULL, mu = 0, na.rm = FALSE, use = "everything"){
-  if(!is.vector(x)) stop('var_known_mu supports univariate') # currently univariate
-  if(na.rm) x <- x[!is.na(x)]
+cov_known_mu <- function(x, y = NULL, mu, mu_x, mu_y, na.rm = FALSE, use = "everything"){
+
+  if(is.vector(x)){
+    if(na.rm) x <- x[!is.na(x)]
+    if(is.null(y)) {
+      y <- x
+      if(missing(mu_x)) mu_x <- mu
+      mu_y <- mu_x
+    }
+    out <- mean((x - mu_x) * (y - mu_y))
+  }
+  else if (is.matrix(x) | is.data.frame(x)){
+    stop('var_known_mu supports univariate') # currently univariate
+  } else {
+    stop('x must be a vector, matrix a data.frame')
+  }
   
-  return(mean((x - mu)^2))
+  return(out)
 }
 
 var_known_mu <- function(x, mu = 0, na.rm = FALSE, use = "everything")
-  cov_known_mu(x = x, y = NULL, mu = mu, na.rm = na.rm, use = use)
+  cov_known_mu(x = x, y = NULL, mu_x = mu, na.rm = na.rm, use = use)
 
 sd_known_mu <- function(x, mu, na.rm = FALSE)
   sqrt(var_known_mu(if (is.vector(x) || is.factor(x)) x else as.double(x), mu = mu, na.rm = na.rm))

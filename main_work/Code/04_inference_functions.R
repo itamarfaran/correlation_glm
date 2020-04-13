@@ -1,19 +1,3 @@
-compute_mu_alpha_dummy_jacobian <- function(theta, alpha, d = 1, linkFun){
-  return(
-    jacobian(
-      func = function(A) triangle2vector(
-        linkFun$FUN(
-          t = theta,
-          a = A,
-          d = d
-        )
-      ),
-      x = alpha
-    )
-  )
-}
-
-
 compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, linkFun){
   func <- if(type == 'sick'){
     function(A) triangle2vector(
@@ -32,8 +16,8 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
 }
 
 
-compute_gee_variance <- function(
-  CovObj, sampledata, dim_alpha = 1, reg_lambda = 0, reg_p = 2, est_mu = TRUE, correct = FALSE, ncores = 1){
+compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
+                                 reg_lambda = 0, reg_p = 2, est_mu = TRUE){
   
   compute_gee_raw <- function(type, list_){
     if(type == 'I0'){
@@ -47,32 +31,32 @@ compute_gee_variance <- function(
     return(out)
   }
   
-  linkFun <- CovObj$linkFun
+  linkFun <- cov_obj$linkFun
   
-  healthy_data <- corr_mat_array2normal_data_mat_test(sampledata$healthy)
-  sick_data <- corr_mat_array2normal_data_mat_test(sampledata$sick)
+  healthy_data <- convert_corr_array_to_data_matrix_test(healthy_dt)
+  sick_data <- convert_corr_array_to_data_matrix_test(sick_dt)
   
   p <- 0.5 + sqrt(1 + 8*ncol(sick_data))/2
-  d <- length(CovObj$alpha)/p
+  d <- length(cov_obj$alpha)/p
   
   healthy_list <- list(
     data = healthy_data,
     jacobian = compute_mu_alpha_jacobian(
       type = 'healthy',
-      alpha = CovObj$alpha,
+      alpha = cov_obj$alpha,
       healthy_dt = healthy_data,
       sick_dt = sick_data,
       d = d,
       linkFun = linkFun),
-    expected_value = if(est_mu) CovObj$theta else colMeans(healthy_data),
-    solve_Sigma = solve(vector_var_matrix_calc_COR_C(vector2triangle(colMeans(healthy_data))))
+    expected_value = if(est_mu) cov_obj$theta else colMeans(healthy_data),
+    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(healthy_data), diag_value = 1)))
   )
   
   sick_list <- list(
     data = sick_data,
     jacobian = compute_mu_alpha_jacobian(
       type = 'sick',
-      alpha = CovObj$alpha,
+      alpha = cov_obj$alpha,
       healthy_dt = healthy_data,
       sick_dt = sick_data,
       d = d,
@@ -80,115 +64,122 @@ compute_gee_variance <- function(
     expected_value = if(est_mu) {
       triangle2vector(
         linkFun$FUN(
-          t = CovObj$theta,
-          a = CovObj$alpha,
-          d = length(CovObj$alpha)/p
+          t = cov_obj$theta,
+          a = cov_obj$alpha,
+          d = length(cov_obj$alpha)/p
         )
       )
     } else colMeans(sick_data),
-    solve_Sigma = solve(vector_var_matrix_calc_COR_C(vector2triangle(colMeans(sick_data))))
+    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(sick_data), diag_value = 1)))
   )
   
   I0 <- compute_gee_raw('I0', healthy_list) + compute_gee_raw('I0', sick_list)
   solve_I0 <- solve(I0)
   I1 <- compute_gee_raw('I1', healthy_list) + compute_gee_raw('I1', sick_list)
   res <- solve_I0 %*% I1 %*% solve_I0
-  # if(correct) res <- res*(1 + (nrow(sick_data) + nrow(healthy_data))/nrow(sick_data))
-  # res <- res / nrow(sick_data)
   return(res)
 }
 
 
-compute_fisher_by_grad <- function(CovObj, sick.data, linkFun = linkFunctions$multiplicative_identity,
-                                   dim_alpha = 1, reg_lambda = 0, reg_p = 2, ncores = 1){
+compute_fisher_by_grad <- function(cov_obj, sick_dt, linkFun = linkFunctions$multiplicative_identity,
+                                   dim_alpha = 1, reg_lambda = 0, reg_p = 2){
   
-  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
+  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
-  p <- 0.5 + sqrt(1 + 8*ncol(sick.data))/2
-  d <- length(CovObj$alpha)/p
+  p <- 0.5 + sqrt(1 + 8*ncol(sick_dt))/2
+  d <- length(cov_obj$alpha)/p
   
-  mu_alpha_jacobian <- compute_mu_alpha_dummy_jacobian(CovObj$theta, CovObj$alpha, d = d, linkFun) 
+  mu_alpha_jacobian <- 
+    jacobian(
+      func = function(A) triangle2vector(
+        linkFun$FUN(
+          t = cov_obj$theta,
+          a = A,
+          d = d
+          )
+        ),
+      x = cov_obj$alpha
+      )
+  
   
   g11 <- triangle2vector(
     linkFun$FUN(
-      t = CovObj$theta,
-      a = CovObj$alpha,
-      d = length(CovObj$alpha)/p
+      t = cov_obj$theta,
+      a = cov_obj$alpha,
+      d = length(cov_obj$alpha)/p
     )
   )
   
-  residuals <- sick.data - rep(1, nrow(sick.data)) %o% g11
+  residuals <- sick_dt - rep(1, nrow(sick_dt)) %o% g11
   
-  Sigma <- vector_var_matrix_calc_COR_C(vector2triangle(colMeans(sick.data)))/CovObj$Est_N
+  Sigma <- triangled_corrmat_covariance(vector2triangle(colMeans(sick_dt), diag_value = 1))/cov_obj$Est_N
   temp_equation <- t(mu_alpha_jacobian) %*% solve(Sigma) %*% t(residuals)
   res <- temp_equation %*% t(temp_equation)
   return(res)
 }
 
 
-compute_fisher_by_hess <- function(CovObj, sick.data, linkFun = linkFunctions$multiplicative_identity,
-                                   dim_alpha = 1, reg_lambda = 0, reg_p = 2, ncores = 1){
-  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
+compute_fisher_by_hess <- function(cov_obj, sick_dt, linkFun = linkFunctions$multiplicative_identity,
+                                   dim_alpha = 1, reg_lambda = 0, reg_p = 2){
+  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
-  Sigma <- vector_var_matrix_calc_COR_C(vector2triangle(colMeans(sick.data)))/CovObj$Est_N
+  Sigma <- triangled_corrmat_covariance(vector2triangle(colMeans(sick_dt), diag_value = 1))/cov_obj$Est_N
   inv_sigma <- solve(Sigma)
-  to_deriv <- function(alpha){
+  to_deriv <- function(A){
     sum_of_squares(
-      alpha = alpha,
-      theta = CovObj$theta,
-      sick.data = sick.data,
+      alpha = A,
+      theta = cov_obj$theta,
+      sick_dt = sick_dt,
       inv_sigma = inv_sigma,
       linkFun = linkFun)
   }
-  fisher_mat <- hessian(to_deriv, CovObj$alpha)
+  fisher_mat <- hessian(to_deriv, cov_obj$alpha)
   return(fisher_mat)
 }
 
 
-compute_sandwhich_fisher_variance <- function(CovObj, sick.data, linkFun = linkFunctions$multiplicative_identity,
-                                              dim_alpha = 1, reg_lambda = 0, reg_p = 2, ncores = 1){
+compute_sandwhich_fisher_variance <- function(cov_obj, sick_dt, linkFun = linkFunctions$multiplicative_identity,
+                                              dim_alpha = 1, reg_lambda = 0, reg_p = 2){
   grad_fisher <- compute_fisher_by_grad(
-    CovObj = CovObj,
-    sick.data = sick.data,
+    cov_obj = cov_obj,
+    sick_dt = sick_dt,
     linkFun = linkFun,
     dim_alpha = dim_alpha,
     reg_lambda = reg_lambda,
-    reg_p = reg_p,
-    ncores = ncores)
+    reg_p = reg_p)
   hess_fisher <- compute_fisher_by_hess(
-    CovObj = CovObj,
-    sick.data = sick.data,
+    cov_obj = cov_obj,
+    sick_dt = sick_dt,
     linkFun = linkFun,
     dim_alpha = dim_alpha,
     reg_lambda = reg_lambda,
-    reg_p = reg_p,
-    ncores = ncores)
+    reg_p = reg_p)
   hess_fisher_solve <- solve(hess_fisher)
   out <- hess_fisher_solve %*% grad_fisher %*% hess_fisher_solve
   return(out)
 }
 
 
-wilksTest <- function(covObj, healthy.dat, sick.dat, dim_alpha = 1, linkFun){
-  if(class(healthy.dat) == "array") healthy.dat <- cor.matrix_to_norm.matrix(healthy.dat)
-  if(class(sick.dat) == "array") sick.dat <- cor.matrix_to_norm.matrix(sick.dat)
-  
+wilks_test <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1, linkFun){
+  healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
+  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
+
   #Do a wilks test (chi-square)
-  chisq <- -2*( minusloglik(theta = covObj$theta,
-                            alpha = covObj$alpha,
+  chisq <- -2*( minusloglik(theta = cov_obj$theta,
+                            alpha = cov_obj$alpha,
                             linkFun = linkFun,
                             healthy.data = healthy.dat,
                             sick.data = sick.dat,
                             dim_alpha = dim_alpha) -
                   minusloglik(theta = colMeans(rbind(healthy.dat, sick.dat)),
-                              alpha = rep(linkFun$NULL_VAL, length(covObj$alpha)),
+                              alpha = rep(linkFun$NULL_VAL, length(cov_obj$alpha)),
                               linkFun = linkFun,
                               healthy.data = healthy.dat,
                               sick.data = sick.dat,
                               dim_alpha = dim_alpha) )
   
-  c("Chisq_val" = chisq, "DF" = length(covObj$alpha),
-    "Pval" = 1 - pchisq(chisq, length(covObj$alpha)))
+  c("Chisq_val" = chisq, "DF" = length(cov_obj$alpha),
+    "Pval" = 1 - pchisq(chisq, length(cov_obj$alpha)))
 }
 
 

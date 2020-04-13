@@ -97,11 +97,12 @@ estimate_loop <- function(
   healthy_dt, sick_dt, alpha0 = NULL, theta0 = NULL, dim_alpha = 1,
   linkFun = linkFunctions$multiplicative_identity,
   cov_method = c('identity', 'corrmat'),
-  model_reg_config = list(lambda = 0, lp = 2),
-  matrix_reg_config = list(do_reg = FALSE, method = 'constant', const = 1),
-  iter_config = list(max_loop = 50, reltol = 1e-08, min_reps = 5),
-  optim_config = list(method = "BFGS", reltol = 1e-08, log_optim = FALSE),
+  model_reg_config = list(), matrix_reg_config = list(),
+  iter_config = list(), optim_config = list(),
   verbose = TRUE){
+  
+  if('reltol' %in% names(iter_config) & 'abstol' %in% names(iter_config))
+    stop('can supply only one of reltol or abstol')
   
   model_reg_config <- modifyList(list(lambda = 0, lp = 2), model_reg_config)
   matrix_reg_config <- modifyList(list(do_reg = FALSE, method = 'constant', const = 1), matrix_reg_config)
@@ -204,11 +205,17 @@ estimate_loop <- function(
     log_optim_out[[i]] <- if(optim_config$log_optim) optim_alpha else NA
     
     # Stopping rule
-    # distance <- sqrt(mean((steps[[i]]$alpha - steps[[i-1]]$alpha)^2))
-    # distance_lower_than_reltol <- distance < iter_config$abstol
+    if('abstol' %in% names(iter_config)){
+      distance <- sqrt(mean((steps[[i]]$alpha - steps[[i-1]]$alpha)^2))
+      distance_lower_than_threshold <-
+        distance < iter_config$abstol
+    } else {
+      distance <- abs(steps[[i-1]]$value - steps[[i]]$value)
+      distance_lower_than_threshold <-
+        distance < (iter_config$reltol * (abs(steps[[i]]$value) + iter_config$reltol))
+      
+    }
     
-    distance <- abs(steps[[i-1]]$value - steps[[i]]$value)
-    distance_lower_than_reltol <- distance < (iter_config$reltol * (abs(steps[[i]]$value) + iter_config$reltol))
     
     if(verbose) cat(paste0(
       i," (",round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
@@ -217,7 +224,7 @@ estimate_loop <- function(
     
     condition0 <- FALSE
     if(i > iter_config$min_reps) condition0 <-
-      distance_lower_than_reltol & (sum(convergence[i - 0:(iter_config$min_reps - 1)]) == 0)
+      distance_lower_than_threshold & (sum(convergence[i - 0:(iter_config$min_reps - 1)]) == 0)
     if(condition0) break()
   }
   if(verbose){
@@ -251,6 +258,11 @@ estimate_alpha <- function(
   iid_config = list(iter_config = list(), optim_config = list()),
   cov_config = list(iter_config = list(), optim_config = list()),
   verbose = TRUE){
+  
+  for(name in c('iter_config', 'optim_config')){
+    if(!name %in% names(iid_config)) iid_config[[name]] <- list()
+    if(!name %in% names(cov_config)) cov_config[[name]] <- list()
+  }
   
   iid_model <- estimate_loop(
     healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,

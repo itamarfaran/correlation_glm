@@ -2,38 +2,37 @@ library(shiny)
 library(shinydashboard)
 
 ##### Header #####
-header <- dashboardHeader()
+header <- dashboardHeader(title = 'Simulations Results')
 
 
 ##### Sidebar #####
 sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+    # menuItem("Widgets", tabName = "widgets", icon = icon("th")),
     menuItem("Raw Data", tabName = "data", icon = icon("th"))
   ),
   selectInput('x', 'X Axis', sidebar_options[c(
     'P',
+    'M',
     'N',
+    'P/N',
+    'M/N',
+    'AR Coefficient',
+    'Length of Times Serie',
     'NH',
     'ND',
-    'P/N',
-    'Length of Times Serie',
-    'Percentage',
+    'Percentage of Sick Samples',
     'Actual SD'
     )]),
   selectInput('y_numerator', 'Y Axis Numerator', sidebar_options[c(
     'Actual SD',
-    'GEE Estimated SD',
-    'GEE(old) Estimated SD',
-    'MLE Estimated SD'
-  )]),
+    'GEE Estimated SD'
+    )]),
   selectInput('y_denumerator', 'Y Axis Denumerator', sidebar_options[c(
     '1',
     'Actual SD',
-    'GEE Estimated SD',
-    'GEE(old) Estimated SD',
-    'MLE Estimated SD'
+    'GEE Estimated SD'
   )]),
   selectInput('color', 'Color', sidebar_options[c(
     'None',
@@ -42,19 +41,29 @@ sidebar <- dashboardSidebar(
     'NH',
     'ND',
     'P/N',
+    'AR Coefficient',
     'Length of Times Serie',
-    'Percentage'
+    'Percentage of Sick Samples'
   )]),
-  selectInput('aggFun', 'Trend', list(
-    'None' = 'none', 'Mean' = 'mean', 'Median' = 'median', 'Smooth' = 'smooth', 'LM' = 'lm'
-    )),
-  radioButtons('vline', 'Vertical Line', list('None' = 0, '0.05' = 0.05, '1' = 1)),
   checkboxGroupInput(
     'plot_checkboxs', 'Plot Options',
-    choices = list('Render Boxplot' = 'boxplot',
-                   '0-1 Line' = 'abline',
-                   'Jitter' = 'jitter'))
-  )
+    choices = list(
+      'Color as Factor' = 'color_as_factor',
+      'Render Boxplot' = 'boxplot',
+      'Jitter' = 'jitter',
+      'Add AB Line' = 'ab_line')
+    ),
+  splitLayout(
+    cellWidths = c('50%', '50%'),
+    numericInput('ab_intercept', 'AB Intercept', value = 0),
+    numericInput('ab_slope', 'AB Slope', value = 0)
+    ),
+  selectInput('aggFun', 'Trend', list(
+    'None' = 'none', 'Mean' = 'mean', 'Median' = 'median', 'Smooth' = 'smooth', 'LM' = 'lm'
+  ))#,
+  # selectInput('x_scale', 'X Axis Scale', names(scales_x)),
+  # selectInput('y_scale', 'Y Axis Scale', names(scales_y))
+)
 
 
 ##### Body #####
@@ -62,11 +71,12 @@ body <- dashboardBody(tabItems(
   tabItem(tabName = "dashboard", h2(
     plotOutput('graph'),
     box(
-      verbatimTextOutput('plot_lm_res'),
-      box(
+      splitLayout(
         checkboxInput('intercept', 'Intercept', FALSE),
         numericInput('polynom', 'Polynom Degree', 1, 1, Inf, 1)
       ),
+      verbatimTextOutput('plot_lm_res'),
+      title = 'LM on Plot',
       collapsible = TRUE
     ),
     box(

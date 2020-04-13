@@ -4,11 +4,16 @@ library(plotly)
 
 data <- fread('gee_data.csv')
 data[,`:=`(
-  p_n_ratio = p/n,
-  nh = sick_obs_percentage*n,
-  nd = (1 - sick_obs_percentage)*n
+  none = factor(1),
+  m =  0.5*p*(p - 1),
+  p_n_ratio = round(p/n, 1),
+  m_n_ratio = round(0.5*p*(p - 1)/n, 1),
+  nh = 5*round(sick_obs_percentage*n / 5),
+  nd = 5*round((1 - sick_obs_percentage)*n / 5)
 )]
 data_plt <- copy(data)
+cols <- colnames(data_plt)
+data_plt[,(paste0(cols, '_')) := lapply(.SD, factor), .SDcols = cols]
 
 data[,`:=`(
   actual_sd = round(actual_sd, 3),
@@ -16,21 +21,13 @@ data[,`:=`(
   gee_old_sd = round(gee_old_sd, 3),
   mle_sd = round(mle_sd, 3)
 )]
-data_plt[,`:=`(
-  none_ = factor(1),
-  p_ = factor(p),
-  n_ = factor(n),
-  p_n_ratio_ = p_n_ratio,
-  nh_ = factor(ceiling(nh)),
-  nd_ = factor(ceiling(nd)),
-  sick_obs_percentage_ = factor(sick_obs_percentage),
-  Tlength_ = factor(Tlength)
-  )]
+
 
 function(input, output){
   output$graph <- renderPlot({
     data_plt[,ratio := get(input$y_numerator)]
     if(input$y_denumerator != '1') data_plt[,ratio := ratio/get(input$y_denumerator)]
+    if(input$y_numerator == '1') data_plt[,ratio := 1/ratio]
     if('boxplot' %in% input$plot_checkboxs){
       out <- ggplot(data_plt, aes_string(
         x = input$x,
@@ -48,26 +45,31 @@ function(input, output){
       out <- ggplot(data_plt, aes_string(
         x = input$x,
         y = 'ratio',
-        col = paste0(input$color, '_')
+        col = paste0(input$color, ifelse('color_as_factor' %in% input$plot_checkboxs, '_', ''))
       )) +
         geom_point(position = (if('jitter' %in% input$plot_checkboxs) 'jitter' else 'identity')) +
         geom_hline(yintercept = 0, size = 1) +
+        # scales_x[[input$x_scale]] + scales_y[[input$y_scale]] + 
         labs(
           x = sidebar_options_reverse[input$x],
           y = paste0(sidebar_options_reverse[input$y_numerator], ' / ' , sidebar_options_reverse[input$y_denumerator]),
           col = sidebar_options_reverse[input$color]
         )
       if(!(input$aggFun == 'none')){
+        x <- 'x'
+        # formula <- paste0('y ~ ', ifelse(input$intercept, '', '0 + '), 'poly(x, ', input$polynom, ')')
+        formula <- paste0('y ~ poly(x, ', input$polynom, ')')
+        formula <- as.formula(formula)
+        
         out <- out + switch(
           input$aggFun,
           'mean' = stat_summary(fun.y = mean, geom = "line", size = 1.2, linetype = 1),
           'median' = stat_summary(fun.y = median, geom = "line", size = 1.2, linetype = 1),
           'smooth' = geom_smooth(se = FALSE),
-          'lm' = geom_smooth(se = FALSE, method = 'lm'))
+          'lm' = geom_smooth(se = FALSE, method = 'lm', formula = formula))
       }
-      if(input$vline > 0) out <- out + geom_hline(yintercept = as.numeric(input$vline), size = 1, col = 'darkgrey', linetype = 2)
-      if('abline' %in% input$plot_checkboxs) out <- out + geom_abline(slope = 1, intercept = 0, size = 1, col = 'darkgrey', linetype = 2)
-      }
+    }
+    if('ab_line' %in% input$plot_checkboxs) out <- out + geom_abline(slope = input$ab_slope, intercept = input$ab_intercept, size = 1, col = 'darkgrey', linetype = 2)
     out
     })
   output$plot_lm_res <- renderPrint({

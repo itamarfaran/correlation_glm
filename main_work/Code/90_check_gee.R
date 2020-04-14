@@ -34,12 +34,19 @@ create_ar_matrix <- function(p, ar){
   out <- ar^abs(row(out) - col(out))
   return(out)
 }
-create_ar_vector <- function(n, ar = 0, sd = 1){
-  x <- numeric(n)
-  x[1] <- rnorm(1, 0, sd)
-  for(i in 2:n) x[i] <- ar*x[i - 1] + rnorm(1, 0, sd)
-  return(x)
+create_ar_vector <- function(n, ar = 0, sd = 1, steady_state_iterations = 20){
+  ssi <- steady_state_iterations
+  len_x <- ssi + n
+  
+  x <- numeric(len_x)
+  noise <- rnorm(len_x, 0, sd)
+  x[1] <- noise[1]
+  
+  for(i in 2:len_x) x[i] <- ar*x[i - 1] + noise[i]
+  out <- x[(ssi + 1):len_x]
+  return(out)
 }
+
 create_gee_data_simple <- function(
   n_sample, n_repeat, ar,
   percent_sick = 0.5, 

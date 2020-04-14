@@ -1,8 +1,7 @@
-source("main_work/Code/01_generalFunctions.R")
-source("main_work/Code/02_simulationFunctions.R")
-source("main_work/Code/03_estimationFunctions.R")
-source("main_work/Code/04_inferenceFunctions.R")
-source("main_work/Code/041_inferenceFunctions.R")
+source("main_work/code/01_general_functions.R")
+source("main_work/code/02_simulation_functions.R")
+source("main_work/code/03_estimation_functions.R")
+source("main_work/code/04_inference_functions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
 B <- 5000
@@ -43,8 +42,8 @@ samples <-
   pbmclapply(
     1:combinations2boot[,.N],
     function(i){
-      samp_ <- createSamples(
-        B = 1, #seed = seed,
+      samp_ <- create_samples(
+        n_sim = 1, #seed = seed,
         nH = combinations2boot[i, nh],
         nS = combinations2boot[i, ns],
         p = combinations2boot[i, p],
@@ -54,18 +53,21 @@ samples <-
         ARhealth = combinations2boot[i, ar], MAhealth = NULL,
         ncores = 1
       )
-      covobj <- estimateAlpha(
-        healthy.data = samp_$samples$healthy,
-        sick.data = samp_$samples$sick,
-        dim_alpha = 1, reg_lambda = 0, var_weights = c(1, 0, 0),
-        T_thresh = combinations2boot[i, Tlength], updateU = 1, progress = F, linkFun = linkFun)
-      covobj$gee_var_new <- compute_gee_variance(covobj, samp_$samples)
+      covobj <- estimate_alpha(
+        healthy_dt = samp_$samples$healthy,
+        sick_dt = samp_$samples$sick,
+        dim_alpha = 1, verbose = F, linkFun = linkFun)
+      covobj$gee_var_new <- compute_gee_variance(
+        covobj, 
+        healthy_dt = samp_$samples$healthy,
+        sick_dt = samp_$samples$sick
+        )
       covobj$gee_var_old <- NA # compute_gee_variance_nosick(covobj, samp_$samples$sick, linkFun = linkFun)
       covobj$mle_var <- NA # compute_sandwhich_fisher_variance(covobj, samp_$samples$sick, linkFun = linkFun)
-      covobj$real.theta <- samp_$real.theta
+      covobj$real.theta <- samp_$real_theta
       covobj$real.alpha <- samp_$alpha
-      covobj$healthy_data <- corr_mat_array2normal_data_mat(samp_$samples$healthy)
-      covobj$sick_data <- corr_mat_array2normal_data_mat(samp_$samples$sick)
+      covobj$healthy_data <- convert_corr_array_to_data_matrix_test(samp_$samples$healthy)
+      covobj$sick_data <- convert_corr_array_to_data_matrix_test(samp_$samples$sick)
       covobj$Steps <- covobj$Log_Optim <- NULL
       return(covobj)
     },
@@ -99,6 +101,9 @@ save.image(paste0('main_work/Data/Enviroments/p_n_bootstrap', format(Sys.time(),
 combinations2boot <- fread('main_work/Code/gee-bootstrap-app/gee_data.csv')
 
 with(combinations2boot, plot(actual_sd, gee_sd))
+with(combinations2boot, cor(actual_sd, gee_sd))
+with(combinations2boot, cor(actual_sd, gee_sd, method = 'spearman'))
+summary(with(combinations2boot, lm(gee_sd ~ 0 + actual_sd)))
 abline(a = 0, b = 1)
 hist(combinations2boot$type1error)
 summary(combinations2boot$type1error)

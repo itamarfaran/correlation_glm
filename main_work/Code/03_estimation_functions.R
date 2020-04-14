@@ -1,16 +1,14 @@
-compute_estimated_N <- function(est, theo, only_diag = FALSE){
+compute_estimated_n <- function(est, theo, only_diag = FALSE){
   if(only_diag){
     x <- diag(theo)
     y <- diag(est)
   } else {
-    x <- triangle2vector(theo)
-    y <- triangle2vector(est)
+    x <- triangle2vector(theo, diag = TRUE)
+    y <- triangle2vector(est, diag = TRUE)
   }
   
   return(lm(x ~ 0 + y)$coef)
 }
-
-
 
 
 triangled_corrmat_covariance <- function(matr, nonpositive = c("Stop", "Force", "Ignore"), use_cpp = FALSE){
@@ -106,8 +104,8 @@ estimate_loop <- function(
   
   model_reg_config <- modifyList(list(lambda = 0, lp = 2), model_reg_config)
   matrix_reg_config <- modifyList(list(do_reg = FALSE, method = 'constant', const = 1), matrix_reg_config)
-  iter_config <- modifyList(list(max_loop = 50, reltol = 1e-08, min_reps = 3), iter_config)
-  optim_config <- modifyList(list(method = "BFGS", reltol = 1e-08, log_optim = FALSE), optim_config)
+  iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_reps = 3), iter_config)
+  optim_config <- modifyList(list(method = "BFGS", reltol = 1e-06, log_optim = FALSE), optim_config)
   cov_method <- cov_method[1]
   
   healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
@@ -119,34 +117,25 @@ estimate_loop <- function(
   p <- 0.5 + sqrt(1 + 8*ncol(sick_dt))/2
   m <- 0.5*p*(p-1)
   
-
   if(is.null(theta0)) theta0 <- colMeans(healthy_dt)
   if(is.null(alpha0)) alpha0 <- matrix(1, nr = p, nc = dim_alpha)
-  
   dim_alpha <- length(alpha0)/p
   if(dim_alpha %% 1 != 0) stop("alpha0 not multiplicative of p")
   
   if(!(
     is.positive.definite(vector2triangle(theta0, diag_value = 1)) &
     is.positive.definite(linkFun$FUN(t = theta0, a = alpha0, d = dim_alpha))
-  ) ){
-    warning("Initial parameters dont result with positive-definite matrices")
-  }
-  
-  temp_theta <- theta0
-  temp_alpha <- alpha0
-  
+  )) warning("Initial parameters dont result with positive-definite matrices")
+    
   g12 <- switch(
     cov_method,
     'identity' = diag(m),
     'corrmat' = triangled_corrmat_covariance(
-      vector2triangle(
-        colMeans(sick_dt), diag = FALSE, diag_value = 1
-        ), use_cpp = FALSE
+      vector2triangle(colMeans(sick_dt), diag_value = 1)
       ),
     NA
     )
-
+  
   g12_reg <- if(matrix_reg_config$do_reg) {
     regularize_matrix(
       g12,
@@ -157,6 +146,8 @@ estimate_loop <- function(
   
   solve_g12_reg <- solve(g12_reg)
   
+  temp_theta <- theta0
+  temp_alpha <- alpha0
   steps <- list()
   steps[[1]] <- list(theta = temp_theta, alpha = temp_alpha, value = NA)
   log_optim_out <- list()
@@ -197,9 +188,10 @@ estimate_loop <- function(
     
     convergence[i] <- optim_alpha$convergence
     temp_alpha <- optim_alpha$par
-    
     steps[[i]] <- list(
-      theta = temp_theta, alpha = temp_alpha, value = optim_alpha$value,
+      theta = temp_theta,
+      alpha = temp_alpha,
+      value = optim_alpha$value,
       convergence = convergence[i]
       )
     log_optim_out[[i]] <- if(optim_config$log_optim) optim_alpha else NA
@@ -213,13 +205,11 @@ estimate_loop <- function(
       distance <- abs(steps[[i-1]]$value - steps[[i]]$value)
       distance_lower_than_threshold <-
         distance < (iter_config$reltol * (abs(steps[[i]]$value) + iter_config$reltol))
-      
     }
     
-    
     if(verbose) cat(paste0(
-      i," (",round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
-      convergence[i],", ",round(distance, 5) , "); "
+      i, " (", round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
+      convergence[i], ", ", round(distance, 5), "); "
       ))
     
     condition0 <- FALSE
@@ -227,6 +217,7 @@ estimate_loop <- function(
       distance_lower_than_threshold & (sum(convergence[i - 0:(iter_config$min_reps - 1)]) == 0)
     if(condition0) break()
   }
+  if(i == iter_config$max_loop) warning('optimization reached maximum iterations')
   if(verbose){
     tt <- Sys.time() - tt
     units(tt) <- "secs"
@@ -253,10 +244,8 @@ estimate_loop <- function(
 estimate_alpha <- function(
   healthy_dt, sick_dt, dim_alpha = 1,
   linkFun = linkFunctions$multiplicative_identity,
-  model_reg_config = list(lambda = 0, lp = 2),
-  matrix_reg_config = list(do_reg = FALSE, method = 'constant', const = 1),
-  iid_config = list(iter_config = list(), optim_config = list()),
-  cov_config = list(iter_config = list(), optim_config = list()),
+  model_reg_config = list(), matrix_reg_config = list(),
+  iid_config = list(), cov_config = list(),
   verbose = TRUE){
   
   for(name in c('iter_config', 'optim_config')){
@@ -290,6 +279,7 @@ estimate_alpha <- function(
   return(cov_model)
 }
 
+# todo: refactor
 estimateAlpha_jacknife <- function(
   healthy.data, sick.data, T_thresh = Inf,
   linkFun = linkFunctions$multiplicative_identity,
@@ -380,7 +370,3 @@ estimateAlpha_jacknife <- function(
     linkFun = COV_sick[[1]]$linkFun
   ))
 }
-
-
-# todo : check elemntal library, instalation via R
-# todo : Add larger dimensions to alpha

@@ -48,18 +48,30 @@ gee_var <- with(sampleData$samples, compute_gee_variance(
   healthy_dt = healthy, sick_dt = sick, cov_obj = Pelet_Cov
   ))
 
-steps <- transpose(Pelet_Cov$steps)
-steps$theta <- t(do.call(cbind, steps$theta))
-steps$alpha <- t(do.call(cbind, steps$alpha))
-steps$value <- do.call(c, steps$value)
+# steps <- transpose(Pelet_Cov$steps)
+# steps$theta <- t(do.call(cbind, steps$theta))
+# steps$alpha <- t(do.call(cbind, steps$alpha))
+# steps$value <- do.call(c, steps$value)
+# 
+# z <- (Pelet_Cov$alpha - 1)/sqrt_diag(gee_var)
+# p <- 2*pnorm(abs(z), lower.tail = F)
+# p.adjust(p, 'BH') < 0.2
+# p < 0.05
 
-z <- (Pelet_Cov$alpha - 1)/sqrt_diag(gee_var)
-p <- 2*pnorm(abs(z), lower.tail = F)
-p.adjust(p, 'BH') < 0.2
-p < 0.05
-
-mean_sqrt_diag(gee_var)
 sd(Pelet_Cov$alpha)
+
+mean_sqrt_diag(
+  with(sampleData$samples, compute_gee_variance(
+    healthy_dt = healthy, sick_dt = sick, cov_obj = Pelet_Cov, correct = T
+  ))
+)
+
+mean_sqrt_diag(
+  with(sampleData$samples, compute_gee_variance(
+    healthy_dt = healthy, sick_dt = sick, cov_obj = Pelet_Cov, correct = F
+  ))
+)
+
 
 # todo: estimated n?
 # 

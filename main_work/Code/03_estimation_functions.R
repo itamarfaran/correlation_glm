@@ -1,16 +1,3 @@
-compute_estimated_n <- function(est, theo, only_diag = FALSE){
-  if(only_diag){
-    x <- diag(theo)
-    y <- diag(est)
-  } else {
-    x <- triangle2vector(theo, diag = TRUE)
-    y <- triangle2vector(est, diag = TRUE)
-  }
-  
-  return(lm(x ~ 0 + y)$coef)
-}
-
-
 triangled_corrmat_covariance <- function(matr, nonpositive = c("Stop", "Force", "Ignore"), use_cpp = FALSE){
   
   nonpositive <- tolower(nonpositive[1])

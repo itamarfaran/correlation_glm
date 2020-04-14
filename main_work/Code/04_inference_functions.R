@@ -1,3 +1,22 @@
+compute_estimated_n_raw <- function(est, theo, only_diag = FALSE){
+  if(only_diag){
+    x <- diag(theo)
+    y <- diag(est)
+  } else {
+    x <- triangle2vector(theo, diag = TRUE)
+    y <- triangle2vector(est, diag = TRUE)
+  }
+  
+  return(lm(x ~ 0 + y)$coef)
+}
+
+compute_estimated_n <- function(dt, only_diag = TRUE){
+  est <- t(dt) %*% dt
+  theo <- solve(triangled_corrmat_covariance(vector2triangle(colMeans(dt), diag_value = 1)))
+  return(compute_estimated_n_raw(est = est, theo = theo, only_diag = only_diag))
+}
+
+
 compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, linkFun){
   func <- if(type == 'sick'){
     function(A) triangle2vector(
@@ -16,12 +35,13 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
 }
 
 
-compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
-                                 reg_lambda = 0, reg_p = 2, est_mu = TRUE){
+compute_gee_variance <- function(
+  cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
+  reg_lambda = 0, reg_p = 2, est_mu = TRUE, correct = FALSE){
   
   # compute n/d factor <- function(){}
   
-  compute_gee_raw <- function(type, list_){
+  compute_gee_raw <- function(type, list_, correct){
     if(type == 'I0'){
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% list_$jacobian
     } else if (type == 'I1'){
@@ -30,6 +50,7 @@ compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% cov_mat %*% list_$solve_Sigma %*% list_$jacobian
     }
     out <- out*nrow(list_$data)
+    if(correct) out <- out/compute_estimated_n(list_$data, T) 
     return(out)
   }
   
@@ -77,9 +98,9 @@ compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
     df = nrow(sick_data)
   )
   
-  I0 <- compute_gee_raw('I0', healthy_list) + compute_gee_raw('I0', sick_list)
+  I0 <- compute_gee_raw('I0', healthy_list, correct) + compute_gee_raw('I0', sick_list, correct)
   solve_I0 <- solve(I0)
-  I1 <- compute_gee_raw('I1', healthy_list) + compute_gee_raw('I1', sick_list)
+  I1 <- compute_gee_raw('I1', healthy_list, correct) + compute_gee_raw('I1', sick_list, correct)
   res <- solve_I0 %*% I1 %*% solve_I0
   return(res)
 }

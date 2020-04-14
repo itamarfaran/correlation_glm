@@ -19,12 +19,14 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
 compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
                                  reg_lambda = 0, reg_p = 2, est_mu = TRUE){
   
+  # compute n/d factor <- function(){}
+  
   compute_gee_raw <- function(type, list_){
     if(type == 'I0'){
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% list_$jacobian
     } else if (type == 'I1'){
       residuals <- list_$data - rep(1, nrow(list_$data)) %o% list_$expected_value
-      cov_mat <- t(residuals) %*% residuals / nrow(list_$data)
+      cov_mat <- t(residuals) %*% residuals / list_$df # todo: add compute_estimated_n here
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% cov_mat %*% list_$solve_Sigma %*% list_$jacobian
     }
     out <- out*nrow(list_$data)
@@ -49,7 +51,8 @@ compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
       d = d,
       linkFun = linkFun),
     expected_value = if(est_mu) cov_obj$theta else colMeans(healthy_data),
-    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(healthy_data), diag_value = 1)))
+    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(healthy_data), diag_value = 1))),
+    df = nrow(healthy_data)
   )
   
   sick_list <- list(
@@ -70,7 +73,8 @@ compute_gee_variance <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
         )
       )
     } else colMeans(sick_data),
-    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(sick_data), diag_value = 1)))
+    solve_Sigma = solve(triangled_corrmat_covariance(vector2triangle(colMeans(sick_data), diag_value = 1))),
+    df = nrow(sick_data)
   )
   
   I0 <- compute_gee_raw('I0', healthy_list) + compute_gee_raw('I0', sick_list)

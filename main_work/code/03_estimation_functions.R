@@ -1,6 +1,25 @@
-triangled_corrmat_covariance <- function(matr, nonpositive = c("Stop", "Force", "Ignore"), use_cpp = FALSE){
+compute_estimated_n_raw <- function(est, theo, only_diag = FALSE){
+  if(only_diag){
+    x <- diag(theo)
+    y <- diag(est)
+  } else {
+    x <- triangle2vector(theo, diag = TRUE)
+    y <- triangle2vector(est, diag = TRUE)
+  }
   
-  nonpositive <- tolower(nonpositive[1])
+  return(lm(x ~ 0 + y)$coef)
+}
+
+compute_estimated_n <- function(dt, only_diag = TRUE){
+  dt <- convert_corr_array_to_data_matrix_test(dt)
+  est <- t(dt) %*% dt / nrow(dt)
+  theo <- corrmat_covariance_from_dt(dt)
+  return(compute_estimated_n_raw(est = est, theo = theo, only_diag = only_diag))
+}
+
+corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"), use_cpp = FALSE){
+  
+  nonpositive <- match.arg(nonpositive, c("stop", "force", "ignore"))
   if(!is.positive.definite(matr)){
     if(nonpositive == "force") {
       matr <- as.matrix(Matrix::nearPD(matr, corr = TRUE, doSym = TRUE)$mat)
@@ -54,6 +73,15 @@ triangled_corrmat_covariance <- function(matr, nonpositive = c("Stop", "Force", 
   return(output)
 }
 
+corrmat_covariance_from_dt <- function(dt, est_n = FALSE, only_diag = TRUE){
+  sigma <- corrmat_covariance(vector2triangle(colMeans(dt), diag_value = 1))
+  if(est_n){
+    est <- t(dt) %*% dt / nrow(dt)
+    estimated_n <- compute_estimated_n_raw(est = est, theo = sigma, only_diag = only_diag)
+    sigma <- sigma/estimated_n
+  }
+  return(sigma)
+}
 
 theta_of_alpha <- function(alpha, healthy_dt, sick_dt, linkFun, d = 1){
   colMeans(rbind(
@@ -93,7 +121,7 @@ estimate_loop <- function(
   matrix_reg_config <- modifyList(list(do_reg = FALSE, method = 'constant', const = 1), matrix_reg_config)
   iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_reps = 3), iter_config)
   optim_config <- modifyList(list(method = "BFGS", reltol = 1e-06, log_optim = FALSE), optim_config)
-  cov_method <- cov_method[1]
+  cov_method <- match.arg(cov_method, c('identity', 'corrmat'))
   
   healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
   sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
@@ -117,13 +145,12 @@ estimate_loop <- function(
   g12 <- switch(
     cov_method,
     'identity' = diag(m),
-    'corrmat' = triangled_corrmat_covariance(
-      vector2triangle(colMeans(sick_dt), diag_value = 1)
-      ),
+    'corrmat' = corrmat_covariance_from_dt(sick_dt),
     NA
     )
   
   g12_reg <- if(matrix_reg_config$do_reg) {
+    if(cov_method == 'identity') stop('cannot set do_reg=TRUE with cov_method=\'identity\'')
     regularize_matrix(
       g12,
       method = matrix_reg_config$method,

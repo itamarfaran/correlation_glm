@@ -59,7 +59,7 @@ matrix_pow <- function(x, pow){
 
 regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase_diag"),
                              const = 1, only_if_singular = TRUE){
-  method <- method[1]
+  method <- match.arg(method, c("constant", "avg_diag", "increase_diag"))
   if(!is.square.matrix(matr)) stop("Matrix is not square.")
   if(only_if_singular & !is.singular.matrix(matr)) {
     message("Matrix is invertible and was not changed.")

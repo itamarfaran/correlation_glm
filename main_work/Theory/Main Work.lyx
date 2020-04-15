@@ -2286,5 +2286,142 @@ Var\left(\hat{\alpha}\right) & =I_{0}^{-1}I_{1}I_{0}^{-1}\\
 
 \end_layout
 
+\begin_layout Standard
+Denote 
+\begin_inset Formula 
+\begin{align*}
+K_{D} & =\left(\frac{\partial\mu_{D}}{\partial\alpha}\right)^{t}\Sigma_{D}^{-1}\frac{\partial\mu_{D}}{\partial\alpha}\\
+M_{D} & =\left(\frac{\partial\mu_{D}}{\partial\alpha}\right)^{t}\Sigma_{D}^{-1}\widehat{Cov}\left(x_{D,i}\right)\Sigma_{D}^{-1}\frac{\partial\mu_{D}}{\partial\alpha}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And similarly to 
+\begin_inset Formula $K_{H}$
+\end_inset
+
+ and 
+\begin_inset Formula $M_{H}$
+\end_inset
+
+.
+ Then one has:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+I_{0} & =n_{D}K_{D}+n_{H}K_{H}\\
+ & =n_{D}\left(K_{D}+\frac{n_{H}}{n_{D}}K_{H}\right)\\
+I_{1} & =n_{D}M_{D}+n_{H}M_{H}\\
+ & =n_{D}\left(M_{D}+\frac{n_{H}}{n_{D}}M_{H}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\alpha}\right) & =I_{0}^{-1}I_{1}I_{0}^{-1}\\
+ & =\left(n_{D}\left(K_{D}+\frac{n_{H}}{n_{D}}K_{H}\right)\right)^{-1}n_{D}\left(M_{D}+\frac{n_{H}}{n_{D}}M_{H}\right)\left(n_{D}\left(K_{D}+\frac{n_{H}}{n_{D}}K_{H}\right)\right)^{-1}\\
+ & =n_{D}^{-1}\left(K_{D}+\frac{n_{H}}{n_{D}}K_{H}\right)^{-1}\left(M_{D}+\frac{n_{H}}{n_{D}}M_{H}\right)\left(K_{D}+\frac{n_{H}}{n_{D}}K_{H}\right)^{-1}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+1+\frac{1}{\left(\frac{n_{D}}{n_{D}+n_{H}}\right)} & =1+\frac{n_{D}+n_{H}}{n_{D}}\\
+ & =2+\frac{n_{H}}{n_{D}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(2+\frac{n_{H}}{n_{D}}\right)v_{gee} & =v_{emp}\\
+v_{gee} & =\frac{n_{D}}{2n_{D}+n_{H}}v_{emp}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(1+\frac{n}{n_{D}}\right)v_{gee}=\left(\frac{n_{D}+n}{n_{D}}\right)v_{gee} & =v_{emp}=\frac{\sigma^{2}}{n_{D}}\\
+v_{gee} & =\frac{\sigma^{2}}{n_{D}}\left(\frac{n_{D}}{n_{D}+n}\right)\\
+ & =\frac{\sigma^{2}}{n_{D}+n}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mu^{t}\Sigma^{-1}\left(\frac{n_{D}\cdot\mu}{2}-\sum_{i}x_{i}\right)=n_{D}\left(\frac{\mu^{t}\Sigma^{-1}\mu}{2}-\mu^{t}\Sigma^{-1}\bar{x}^{D}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\alpha}n_{D}\left(\frac{\mu^{t}\Sigma^{-1}\mu}{2}-\mu^{t}\Sigma^{-1}\bar{x}^{D}\right) & =\frac{\partial\mu}{\partial\alpha}\frac{\partial}{\partial\mu}n_{D}\left(\frac{\mu^{t}\Sigma^{-1}\mu}{2}-\mu^{t}\Sigma^{-1}\bar{x}^{D}\right)\\
+ & =\frac{\partial\mu}{\partial\alpha}n_{D}\left(\frac{\partial}{\partial\mu}\frac{\mu^{t}\Sigma^{-1}\mu}{2}-\frac{\partial}{\partial\mu}\mu^{t}\Sigma^{-1}\bar{x}^{D}\right)\\
+ & =n_{D}\Sigma^{-1}\left(\mu-\bar{x}^{D}\right)\frac{\partial\mu}{\partial\alpha}\\
+ & =n_{D}\left(\underset{m\times p}{\frac{\partial\mu}{\partial\alpha}}\right)^{t}\underset{m\times m}{\Sigma^{-1}}\left(\underset{m\times1}{\mu}-\underset{m\times1}{\bar{x}^{D}}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sum\left(x_{i}-\mu\right)^{t}\Sigma^{-1}\left(x_{i}-\mu\right)=\sum\left(x_{i}^{t}\Sigma^{-1}x_{i}-2x_{i}^{t}\Sigma^{-1}\mu+\mu^{t}\Sigma^{-1}\mu\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\alpha}=2\sum\left(\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}-x_{i}^{t}\Sigma^{-1}\frac{\partial\mu}{\partial\alpha}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document

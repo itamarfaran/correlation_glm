@@ -9,6 +9,10 @@
 *.lyx~
 *.docx
 *.tex
+*.csv
+!main_work/code/gee-bootstrapp-app/gee_data.csv
+*.rar
+*.txt
 desktop.ini
 .Rproj.user
 credentials-2.csv

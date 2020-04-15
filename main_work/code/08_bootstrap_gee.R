@@ -92,13 +92,13 @@ combinations2boot[,`:=`(
   nh = NULL, ns = NULL
 )]
 
-fwrite(combinations2boot, 'main_work/Code/gee-bootstrap-app/gee_data.csv')
-save.image(paste0('main_work/Data/Enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))
+fwrite(combinations2boot, 'main_work/code/gee-bootstrap-app/gee_data.csv')
+save.image(paste0('main_work/data/enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))
 
 
 #####
 
-combinations2boot <- fread('main_work/Code/gee-bootstrap-app/gee_data.csv')
+combinations2boot <- fread('main_work/code/gee-bootstrap-app/gee_data.csv')
 
 with(combinations2boot, plot(actual_sd, gee_sd))
 with(combinations2boot, cor(actual_sd, gee_sd))

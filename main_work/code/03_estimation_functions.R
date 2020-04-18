@@ -119,12 +119,9 @@ estimate_loop <- function(
   
   model_reg_config <- modifyList(list(lambda = 0, lp = 2), model_reg_config)
   matrix_reg_config <- modifyList(list(do_reg = FALSE, method = 'constant', const = 1), matrix_reg_config)
-  iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_reps = 3), iter_config)
+  iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_loop = 3), iter_config)
   optim_config <- modifyList(list(method = "BFGS", reltol = 1e-06, log_optim = FALSE), optim_config)
   cov_method <- match.arg(cov_method, c('identity', 'corrmat'))
-  
-  healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
-  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
   healthy_n <- nrow(healthy_dt)
   sick_n <- nrow(sick_dt)
@@ -163,7 +160,20 @@ estimate_loop <- function(
   temp_theta <- theta0
   temp_alpha <- alpha0
   steps <- list()
-  steps[[1]] <- list(theta = temp_theta, alpha = temp_alpha, value = NA)
+  steps[[1]] <- list(
+    theta = temp_theta,
+    alpha = temp_alpha,
+    value = sum_of_squares(
+      theta = temp_theta,
+      alpha = temp_alpha,
+      sick_dt = sick_dt,
+      inv_sigma = solve_g12_reg,
+      linkFun = linkFun,
+      dim_alpha = dim_alpha,
+      reg_lambda = model_reg_config$lambda,
+      reg_p = model_reg_config$lp,
+    )
+  )
   log_optim_out <- list()
 
   #Convergence is a matrix wich tells us if the convergence in each iteration is completed
@@ -227,8 +237,11 @@ estimate_loop <- function(
       ))
     
     condition0 <- FALSE
-    if(i > iter_config$min_reps) condition0 <-
-      distance_lower_than_threshold & (sum(convergence[i - 0:(iter_config$min_reps - 1)]) == 0)
+    if(i > iter_config$min_loop){
+      look_back <- iter_config$min_loop - 1
+      index <- if(look_back > 0) i - 0:look_back else i
+      condition0 <- distance_lower_than_threshold & (sum(convergence[i]) == 0)
+    }
     if(condition0) break()
   }
   if(i == iter_config$max_loop) warning('optimization reached maximum iterations')
@@ -267,6 +280,11 @@ estimate_alpha <- function(
     if(!name %in% names(cov_config)) cov_config[[name]] <- list()
   }
   
+  if(length(verbose) == 1) verbose <- rep(verbose, 2)
+  
+  healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
+  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
+  
   iid_model <- estimate_loop(
     healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
     linkFun = linkFunctions$multiplicative_identity,
@@ -275,7 +293,7 @@ estimate_alpha <- function(
     matrix_reg_config = matrix_reg_config,
     iter_config = iid_config$iter_config,
     optim_config = iid_config$optim_config,
-    verbose = verbose
+    verbose = verbose[1]
     )
   
   cov_model <- estimate_loop(
@@ -287,100 +305,105 @@ estimate_alpha <- function(
     matrix_reg_config = matrix_reg_config,
     iter_config = cov_config$iter_config,
     optim_config = cov_config$optim_config,
-    verbose = verbose
+    verbose = verbose[2]
   )
   
   return(cov_model)
 }
 
 # todo: refactor
-estimateAlpha_jacknife <- function(
-  healthy.data, sick.data, T_thresh = Inf,
+estimate_alpha_jacknife <- function(
+  healthy_dt, sick_dt, dim_alpha = 1, 
+  alpha0 = NULL, theta0 = NULL,
   linkFun = linkFunctions$multiplicative_identity,
-  dim_alpha = 1, var_weights = c(1, 0, 0), sigma = 1, reg_lambda = 0, reg_p = 2,
-  updateU = 1, jack_healthy = TRUE, progress = TRUE, ncores = 1,
-  INIconfig = list(iniAlpha = 0.8, MaxLoop = 500, Persic = 0.001, method = "BFGS"),
-  FULconfig = list(
-    max.loop = 50, epsIter = 2*10^(-3),
-    min_reps = 3, nonpositive = "Ignore",
-    method = "BFGS", epsOptim = 10^(-5)
-    )
+  model_reg_config = list(), matrix_reg_config = list(),
+  iid_config = list(iter_config = list(min_loop = 0)), cov_config = list(),
+  jack_healthy = TRUE, verbose = TRUE, ncores = 1
   ){
   
-  INIconfig <- modifyList(list(iniAlpha = 0.8, MaxLoop = 500, Persic = 0.001, method = "BFGS"), INIconfig)
-  FULconfig <- modifyList(list(max.loop = 50, epsIter = 2*10^(-3), min_reps = 3, nonpositive = "Ignore",
-                               method = "Nelder-Mead", epsOptim = 10^(-5)), FULconfig)
+  mclapply_ <- if(verbose) pbmcapply::pbmclapply else parallel::mclapply
   
-  if(class(healthy.data) == "array") healthy.data <- cor.matrix_to_norm.matrix(healthy.data)
-  if(class(sick.data) == "array") sick.data <- cor.matrix_to_norm.matrix(sick.data)
-  
-  IID <- Estimate.Loop(
-    iniAlpha = linkFun$INV(INIconfig$iniAlpha),
-    healthy.data = healthy.data, sick.data = sick.data,
-    linkFun = linkFun, reg_lambda = reg_lambda, reg_p = reg_p, dim_alpha = dim_alpha,
-    MaxLoop = INIconfig$MaxLoop, Persic = INIconfig$Persic, method = INIconfig$method
+  apply_fun <- function(i, boot_dt){
+    if(boot_dt == 'sick'){
+      sick_dt_ = sick_dt[-i,]
+      healthy_dt_ = healthy_dt
+    } else if(boot_dt == 'healthy'){
+      sick_dt_ = sick_dt
+      healthy_dt_ = healthy_dt[-i,]
+    }
+    
+    out <- estimate_loop(
+      healthy_dt = healthy_dt_, sick_dt = sick_dt_,
+      alpha0 = alpha0, theta0 = theta0,
+      linkFun = linkFunctions$multiplicative_identity,
+      cov_method = 'corrmat',
+      model_reg_config = model_reg_config,
+      matrix_reg_config = matrix_reg_config,
+      iter_config = iid_config$iter_config,
+      optim_config = iid_config$optim_config,
+      verbose = FALSE
     )
-  cat('\nJack Knifing Sick Observations...\n')
-  COV_sick <- pbmclapply(
-    1:nrow(sick.data),
-    function(i){
-      Estimate.Loop2(
-        theta0 = IID$theta, alpha0 = IID$alpha,
-        healthy.data = healthy.data, sick.data = sick.data[-i,], T_thresh = T_thresh,
-        linkFun = linkFun, var_weights = var_weights,
-        sigma = sigma, reg_lambda = reg_lambda, reg_p = reg_p,
-        nonpositive = FULconfig$nonpositive, max.loop = FULconfig$max.loop,
-        epsIter = FULconfig$epsIter, min_reps = FULconfig$min_reps,
-        method = FULconfig$method, epsOptim = FULconfig$epsOptim,
-        updateU = updateU, progress = FALSE)
-    },
-    mc.cores = ncores
-  )
+    return(list(
+      theta = out$theta,
+      alpha = out$alpha,
+      convergence = tail(out$convergence, 1)
+    ))
+  }
   
-  COV_sick_transposed <- purrr::transpose(COV_sick)
+  for(name in c('iter_config', 'optim_config')){
+    if(!name %in% names(iid_config)) iid_config[[name]] <- list()
+    if(!name %in% names(cov_config)) cov_config[[name]] <- list()
+  }
   
-  theta <- do.call(rbind, COV_sick_transposed$theta)
-  alpha <- do.call(rbind, COV_sick_transposed$alpha)
-  est_n <- do.call(rbind, COV_sick_transposed$Est_N)
+  healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
+  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
+  
+  if(is.null(alpha0) | is.null(theta0)){
+    iid_model <- estimate_loop(
+      healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
+      alpha0 = alpha0, theta0 = theta0,
+      linkFun = linkFunctions$multiplicative_identity,
+      cov_method = 'identity',
+      model_reg_config = model_reg_config,
+      matrix_reg_config = matrix_reg_config,
+      iter_config = iid_config$iter_config,
+      optim_config = iid_config$optim_config,
+      verbose = FALSE
+    )
+    alpha0 <- iid_model$alpha
+    theta0 <- iid_model$theta
+  }
+  
+  if(verbose) cat('\nJack Knifing Sick Observations...\n')
+  cov_obj_sick <- mclapply_(1:nrow(sick_dt), apply_fun, boot_dt = 'sick', mc.cores = ncores)
+  cov_obj_sick_t <- purrr::transpose(cov_obj_sick)
+  
+  theta <- do.call(rbind, cov_obj_sick_t$theta)
+  alpha <- do.call(rbind, lapply(cov_obj_sick_t$alpha, as.vector))
+  convergence <- do.call(c, cov_obj_sick_t$convergence)
+  
+  sick_index = NA
   
   if(jack_healthy){
-    cat('\nJack Knifing Healthy Observations...\n')
-    COV_healthy <- pbmclapply(
-      1:nrow(healthy.data),
-      function(i){
-        Estimate.Loop2(
-          theta0 = IID$theta, alpha0 = IID$alpha,
-          healthy.data = healthy.data[-i,], sick.data = sick.data, T_thresh = T_thresh,
-          linkFun = linkFun, var_weights = var_weights,
-          sigma = sigma, reg_lambda = reg_lambda, reg_p = reg_p,
-          nonpositive = FULconfig$nonpositive, max.loop = FULconfig$max.loop,
-          epsIter = FULconfig$epsIter, min_reps = FULconfig$min_reps,
-          method = FULconfig$method, epsOptim = FULconfig$epsOptim,
-          updateU = updateU, progress = FALSE)
-      },
-      mc.cores = ncores
-    )
+    if(verbose) cat('\nJack Knifing Healthy Observations...\n')
+    cov_obj_healthy <- mclapply_(1:nrow(healthy_dt), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
+    cov_obj_healthy_t <- purrr::transpose(cov_obj_healthy)
     
-    COV_healthy_transposed <- purrr::transpose(COV_healthy)
+    theta_h <- do.call(rbind, cov_obj_healthy_t$theta)
+    alpha_h <- do.call(rbind, lapply(cov_obj_healthy_t$alpha, as.vector))
+    convergence_h <- do.call(c, cov_obj_healthy_t$convergence)
     
-    theta <- rbind(
-      theta,
-      do.call(rbind, COV_healthy_transposed$theta)
-    )
-    alpha <- rbind(
-      alpha,
-      do.call(rbind, COV_healthy_transposed$alpha)
-    )
-    est_n <- rbind(
-      est_n,
-      do.call(rbind, COV_healthy_transposed$Est_N)
-    )
+    theta <- rbind(theta_h, theta)
+    alpha <- rbind(alpha_h, alpha)
+    convergence <- rbind(convergence_h, convergence)
+    is_sick <- c(rep(0, nrow(healthy_dt)), rep(1, nrow(sick_dt)))
   }
   
   return(list(
     theta = theta,
     alpha = alpha,
-    est_n = est_n,
-    linkFun = COV_sick[[1]]$linkFun
+    convergence = convergence,
+    is_sick = is_sick,
+    linkFun = linkFun
   ))
 }

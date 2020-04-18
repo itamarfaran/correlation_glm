@@ -197,11 +197,11 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
   rawFun <- function(b){
     list(
       healthy = create_correlation_matrices(
-        real_corr = real_theta, sample_size = nH, df = Tlength,
+        real_corr = real_theta, sample_size = n_h, df = Tlength,
         AR = ARsick, MA = MAsick, ncores = 1
         ),
       sick = create_correlation_matrices(
-        real_corr = g11, sample_size = nS, df = Tlength,
+        real_corr = g11, sample_size = n_s, df = Tlength,
         AR = ARsick, MA = MAsick, ncores = 1
         )
     )

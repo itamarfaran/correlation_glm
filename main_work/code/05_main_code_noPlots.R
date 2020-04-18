@@ -4,9 +4,9 @@ source("main_work/code/03_estimation_functions.R")
 source("main_work/code/04_inference_functions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
-p <- 50
-nH <- 40
-nS <- 20
+p <- 22
+n_h <- 10
+n_s <- 10
 T_thresh <- Tlength <- 115
 
 ARMAdetails <- list(
@@ -16,7 +16,7 @@ ARMAdetails <- list(
 sapply(ARMAdetails, check_invertability_arma)
 
 sample_data <- create_samples(
-  nH = nH, nS = nS, p = p, Tlength = Tlength, dim_alpha = 1,
+  n_h = n_h, n_s = n_s, p = p, Tlength = Tlength, dim_alpha = 1,
   percent_alpha = 0.3, range_alpha = c(0.9, 0.9),
   ARsick = ARMAdetails$ARsick, MAsick = ARMAdetails$MAsick,
   ARhealth = ARMAdetails$ARhealth, MAhealth = ARMAdetails$MAhealth,
@@ -48,25 +48,19 @@ gee_var <- with(sample_data$samples, compute_gee_variance(
   healthy_dt = healthy, sick_dt = sick, cov_obj = results
   ))
 
-steps <- transpose(results$steps)
-steps$theta <- t(do.call(cbind, steps$theta))
-steps$alpha <- t(do.call(cbind, steps$alpha))
-steps$value <- do.call(c, steps$value)
-
-zval <- (results$alpha - 1)/sqrt_diag(gee_var)
-pval <- 2*pnorm(abs(z), lower.tail = F)
-p.adjust(p, 'BH') < 0.2
-pval < 0.05
-
-sd(results$alpha)
-mean_sqrt_diag(gee_var)
-
 results_jacknife <- estimate_alpha_jacknife(
   healthy_dt = sample_data$samples$healthy, sick_dt = sample_data$samples$sick,
-  linkFun = linkFun, jack_healthy = TRUE, ncores = ncores)
+  linkFun = linkFun, jack_healthy = TRUE, return_gee = TRUE, ncores = ncores)
 
 alpha_jk_estimate <- with(results_jacknife, colMeans(alpha))
-alpha_jk_variance <- with(results_jacknife, var(alpha)*(nrow(alpha) - 1)) 
+alpha_jk_variance <- with(results_jacknife, var(alpha)*(nrow(alpha) - 1)^2/nrow(alpha)) 
+alpha_jk_sd_estimate <- t(apply(
+  X = results_jacknife$gee_var, MARGIN = 1,
+  FUN = function(x) sqrt(diag(vector2triangle(x, diag = TRUE)))
+  ))
+
+# (n_h + n_s - 1)*sqrt_diag(gee_var) - colMeans(alpha_jk_sd_estimate)
+
 
 out <- data.table(
   alpha = as.vector(sample_data$alpha),

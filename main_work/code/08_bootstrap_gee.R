@@ -13,7 +13,6 @@ ARMAdetails <- list(
 B_uniq <- floor(B/20) # B
 combinations2boot <- data.table(
   p = 10*round((40*rbeta(B_uniq, 1, 1.8) + 20)/10),
-  # p = 5*round(runif(B_uniq, 20, 40)/5),
   n = 10*round(runif(B_uniq, 80, 120)/10),
   sick_obs_percentage = 10*round((0.6*rbeta(B_uniq, 1.5, 1.5) + 0.2)/10, 2),
   Tlength = 10*round((40*rbeta(B_uniq, 1.5, 1.5) + 80)/10),
@@ -40,12 +39,11 @@ seed <- c(3584, 5345, 3848)
 
 samples <- 
   pbmclapply(
-    1:combinations2boot[,.N],
-    function(i){
+    1:combinations2boot[,.N], function(i){
       samp_ <- create_samples(
         n_sim = 1, #seed = seed,
-        nH = combinations2boot[i, nh],
-        nS = combinations2boot[i, ns],
+        n_h = combinations2boot[i, nh],
+        n_s = combinations2boot[i, ns],
         p = combinations2boot[i, p],
         Tlength = combinations2boot[i, Tlength],
         dim_alpha = 1, percent_alpha = 0.3, range_alpha = c(1, 1),
@@ -64,14 +62,13 @@ samples <-
         )
       covobj$gee_var_old <- NA # compute_gee_variance_nosick(covobj, samp_$samples$sick, linkFun = linkFun)
       covobj$mle_var <- NA # compute_sandwhich_fisher_variance(covobj, samp_$samples$sick, linkFun = linkFun)
-      covobj$real.theta <- samp_$real_theta
-      covobj$real.alpha <- samp_$alpha
+      covobj$real_theta <- samp_$real_theta
+      covobj$real_alpha <- samp_$alpha
       covobj$healthy_data <- convert_corr_array_to_data_matrix_test(samp_$samples$healthy)
       covobj$sick_data <- convert_corr_array_to_data_matrix_test(samp_$samples$sick)
       covobj$Steps <- covobj$Log_Optim <- NULL
       return(covobj)
-    },
-    mc.cores = ncores
+    }, mc.cores = ncores
   )
 
 

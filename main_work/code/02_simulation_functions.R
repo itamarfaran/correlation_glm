@@ -178,7 +178,7 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = 1){
 }
 
 
-create_samples <- function(n_sim = 1, nH, nS, p, Tlength,
+create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
                            percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1),
                            linkFun = linkFunctions$multiplicative_identity,
                            ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL,

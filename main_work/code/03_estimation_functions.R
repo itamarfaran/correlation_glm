@@ -311,14 +311,14 @@ estimate_alpha <- function(
   return(cov_model)
 }
 
-# todo: refactor
+
 estimate_alpha_jacknife <- function(
   healthy_dt, sick_dt, dim_alpha = 1, 
   alpha0 = NULL, theta0 = NULL,
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   iid_config = list(iter_config = list(min_loop = 0)), cov_config = list(),
-  jack_healthy = TRUE, verbose = TRUE, ncores = 1
+  return_gee = FALSE, jack_healthy = TRUE, verbose = TRUE, ncores = 1
   ){
   
   mclapply_ <- if(verbose) pbmcapply::pbmclapply else parallel::mclapply
@@ -343,10 +343,23 @@ estimate_alpha_jacknife <- function(
       optim_config = iid_config$optim_config,
       verbose = FALSE
     )
+    gee_out <- if(return_gee){
+      triangle2vector(
+        compute_gee_variance(
+          cov_obj = out,
+          healthy_dt = healthy_dt_,
+          sick_dt = sick_dt_,
+          est_mu = TRUE
+        ),
+        diag = TRUE
+      )
+    } else NA
+    
     return(list(
       theta = out$theta,
       alpha = out$alpha,
-      convergence = tail(out$convergence, 1)
+      convergence = tail(out$convergence, 1), 
+      gee_var = gee_out
     ))
   }
   
@@ -374,34 +387,38 @@ estimate_alpha_jacknife <- function(
     theta0 <- iid_model$theta
   }
   
-  if(verbose) cat('\nJack Knifing Sick Observations...\n')
+  if(verbose) cat('\njacknifing Sick Observations...\n')
   cov_obj_sick <- mclapply_(1:nrow(sick_dt), apply_fun, boot_dt = 'sick', mc.cores = ncores)
   cov_obj_sick_t <- purrr::transpose(cov_obj_sick)
   
   theta <- do.call(rbind, cov_obj_sick_t$theta)
   alpha <- do.call(rbind, lapply(cov_obj_sick_t$alpha, as.vector))
   convergence <- do.call(c, cov_obj_sick_t$convergence)
+  gee_var <- do.call(rbind, cov_obj_sick_t$gee_var)
   
   sick_index = NA
   
   if(jack_healthy){
-    if(verbose) cat('\nJack Knifing Healthy Observations...\n')
+    if(verbose) cat('\njacknifing Healthy Observations...\n')
     cov_obj_healthy <- mclapply_(1:nrow(healthy_dt), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
     cov_obj_healthy_t <- purrr::transpose(cov_obj_healthy)
     
     theta_h <- do.call(rbind, cov_obj_healthy_t$theta)
     alpha_h <- do.call(rbind, lapply(cov_obj_healthy_t$alpha, as.vector))
     convergence_h <- do.call(c, cov_obj_healthy_t$convergence)
+    gee_var_h <- do.call(rbind, cov_obj_healthy_t$gee_var)
     
     theta <- rbind(theta_h, theta)
     alpha <- rbind(alpha_h, alpha)
-    convergence <- rbind(convergence_h, convergence)
+    convergence <- c(convergence_h, convergence)
+    gee_var <- rbind(gee_var, gee_var_h)
     is_sick <- c(rep(0, nrow(healthy_dt)), rep(1, nrow(sick_dt)))
   }
   
   return(list(
     theta = theta,
     alpha = alpha,
+    gee_var = gee_var,
     convergence = convergence,
     is_sick = is_sick,
     linkFun = linkFun

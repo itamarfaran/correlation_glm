@@ -17,8 +17,8 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
 
 
 compute_gee_variance <- function(
-  cov_obj, healthy_dt, sick_dt, dim_alpha = 1,
-  reg_lambda = 0, reg_p = 2, est_mu = TRUE){
+  cov_obj, healthy_dt, sick_dt, est_mu = TRUE,
+  reg_lambda = 0, reg_p = 2){
   
   # compute n/d factor <- function(){}
   
@@ -70,7 +70,7 @@ compute_gee_variance <- function(
         linkFun$FUN(
           t = cov_obj$theta,
           a = cov_obj$alpha,
-          d = length(cov_obj$alpha)/p
+          d = d
         )
       )
     } else colMeans(sick_data),

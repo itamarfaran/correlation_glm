@@ -2,7 +2,7 @@ library(data.table)
 library(DT)
 library(plotly)
 
-data <- fread('gee_data_boot.csv')
+data <- fread('gee_data.csv')
 data[,`:=`(
   none = factor(1),
   m =  0.5*p*(p - 1),
@@ -16,10 +16,10 @@ cols <- colnames(data_plt)
 data_plt[,(paste0(cols, '_')) := lapply(.SD, factor), .SDcols = cols]
 
 data[,`:=`(
-  alpha_est_mean = round(alpha_est_mean, 3),
-  alpha_est_emp_sd = round(alpha_est_emp_sd, 3),
-  gee_sd_mean = round(gee_sd_mean, 3),
-  gee_sd_emp_sd = round(gee_sd_emp_sd)
+  actual_sd = round(actual_sd, 3),
+  gee_sd = round(gee_sd, 3),
+  gee_old_sd = round(gee_old_sd, 3),
+  mle_sd = round(mle_sd, 3)
 )]
 
 

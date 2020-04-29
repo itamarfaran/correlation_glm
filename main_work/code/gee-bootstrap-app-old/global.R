@@ -2,7 +2,6 @@ library(ggplot2)
 
 sidebar_options <- list(
   'None' = 'none',
-  '#Bootstraps' = 'nboot',
   '1' = '1',
   'P' = 'p',
   'M' = 'm',
@@ -14,17 +13,13 @@ sidebar_options <- list(
   'M/N' = 'm_n_ratio',
   'Length of Times Serie' = 'Tlength',
   'Percentage of Sick Samples' = 'sick_obs_percentage',
-  'None Null Alphas' = 'percent_alpha',
-  'Minimum Range of Alpha' = 'min_alpha',
-  'Real Alpha' = 'alpha',
-  'Alpha Estimate' = 'alpha_est_mean',
-  'Alpha Estimate SD' = 'alpha_est_emp_sd',
-  'Alpha Estimate Lower' = 'alpha_est_lower',
-  'Alpha Estimate Upper' = 'alpha_est_upper',
-  'GEE Estimated SD' = 'gee_sd_mean',
-  'SD of GEE Estimated SD' = 'gee_sd_emp_sd',
-  'GEE Estimated SD Lower' = 'gee_sd_lower',
-  'GEE Estimated SD Upper' = 'gee_sd_upper')
+  'Actual SD' = 'actual_sd',
+  'GEE Estimated SD' = 'gee_sd',
+  'GEE(old) Estimated SD' = 'gee_old_sd',
+  'MLE Estimated SD' = 'mle_sd',
+  'Ratio' = 'actual_est_ratio',
+  'Type I Error' = 'type1error'
+)
 
 sidebar_options_reverse <- list()
 for(i in 1:length(sidebar_options)){

@@ -13,52 +13,38 @@ sidebar <- dashboardSidebar(
     menuItem("Raw Data", tabName = "data", icon = icon("th"))
   ),
   selectInput('x', 'X Axis', sidebar_options[c(
-    '#Bootstraps',
     'P',
     'M',
     'N',
-    'NH',
-    'ND',
-    'AR Coefficient',
     'P/N',
     'M/N',
+    'AR Coefficient',
     'Length of Times Serie',
+    'NH',
+    'ND',
     'Percentage of Sick Samples',
-    'None Null Alphas',
-    'Minimum Range of Alpha',
-    'Real Alpha',
-    'Alpha Estimate',
-    'Alpha Estimate SD'
+    'Actual SD'
     )]),
   selectInput('y_numerator', 'Y Axis Numerator', sidebar_options[c(
-    'Alpha Estimate',
-    'Alpha Estimate SD',
-    'GEE Estimated SD',
-    'SD of GEE Estimated SD'
+    'Actual SD',
+    'GEE Estimated SD'
     )]),
   selectInput('y_denumerator', 'Y Axis Denumerator', sidebar_options[c(
     '1',
-    'Alpha Estimate',
-    'Alpha Estimate SD',
+    'Actual SD',
     'GEE Estimated SD'
   )]),
   selectInput('color', 'Color', sidebar_options[c(
     'None',
-    '#Bootstraps',
     'P',
-    'M',
     'N',
     'NH',
     'ND',
-    'AR Coefficient',
     'P/N',
-    'M/N',
+    'AR Coefficient',
     'Length of Times Serie',
-    'Percentage of Sick Samples',
-    'None Null Alphas',
-    'Minimum Range of Alpha',
-    'Real Alpha'
-    )]),
+    'Percentage of Sick Samples'
+  )]),
   checkboxGroupInput(
     'plot_checkboxs', 'Plot Options',
     choices = list(
@@ -94,7 +80,7 @@ body <- dashboardBody(tabItems(
       collapsible = TRUE
     ),
     box(
-      textInput('lm_formula', 'Free Style LM Formula', 'gee_sd_mean/alpha_est_emp_sd ~ p + n'),
+      textInput('lm_formula', 'Free Style LM Formula', 'gee_sd/actual_sd ~ p + n'),
       verbatimTextOutput('freestyle_lm_res'),
       collapsible = TRUE
     )

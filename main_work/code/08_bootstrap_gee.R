@@ -89,7 +89,7 @@ combinations2boot[,`:=`(
   nh = NULL, ns = NULL
 )]
 
-fwrite(combinations2boot, 'main_work/code/gee-bootstrap-app/gee_data.csv')
+fwrite(combinations2boot, 'main_work/code/gee-bootstrap-app-old/gee_data.csv')
 save.image(paste0('main_work/data/enviroments/p_n_bootstrap', format(Sys.time(), '%Y%m%d_%H%M'), '.RData'))
 
 

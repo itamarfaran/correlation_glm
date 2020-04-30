@@ -54,9 +54,9 @@ bootstrap_gee <- function(p, n, percent_alpha = 0.3, range_alpha = c(1, 1),
     ar = ar,
     confidence = 1 - sig_level,
     alpha = alpha_real,
-    alpha_est_mean = rowMeans(alpha_mat),
-    # alpha_est_emp_sd = apply(alpha_mat, 2, sd_known_mu, mu = alpha_real), 
-    alpha_est_emp_sd = apply(alpha_mat, 2, sd), 
+    alpha_est_mean = colMeans(alpha_mat),
+    alpha_est_emp_sd = apply(alpha_mat, 2, sd_known_mu, mu = alpha_real),
+    # alpha_est_emp_sd = apply(alpha_mat, 2, sd), 
     # alpha_est_lower = apply(alpha_mat, 2, quantile, probs = sig_level/2),
     # alpha_est_upper = apply(alpha_mat, 2, quantile, probs = 1 - sig_level/2),
     gee_sd_mean = rowMeans(alpha_sd_mat),
@@ -91,6 +91,7 @@ results <- do.call(rbind, pbmclapply(1:B, function(b){
                 percent_alpha = combinations2boot[b, percent_alpha],
                 range_alpha = c(combinations2boot[b, min_alpha], 1),
                 ar = combinations2boot[b, ar],
+                # nboot = 2,
                 ncores = 1)
 }, mc.cores = ncores))
 

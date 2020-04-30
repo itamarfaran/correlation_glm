@@ -10,45 +10,41 @@ bootstrap_gee <- function(p, n, percent_alpha = 0.3, range_alpha = c(1, 1),
                           ar = 0, nboot = 100, sig_level = 0.05,
                           sim_num = NULL, ncores = 1, verbose = FALSE){
   lapply_ <- if(verbose) pbmcapply::pbmclapply else parallel::mclapply
+  
+  samp_ <- create_samples(
+    n_sim = nboot,
+    n_h = round(n*(1 - sick_obs_percentage)),
+    n_s = round(n*sick_obs_percentage),
+    p = p,
+    Tlength = t_length,
+    dim_alpha = 1,
+    percent_alpha = percent_alpha, range_alpha = range_alpha,
+    ARsick = ar, MAsick = NULL,
+    ARhealth = ar, MAhealth = NULL,
+    ncores = ncores
+  )
+  
   simulations <- lapply_(1:nboot, function(i){
-    samp_ <- create_samples(
-      n_sim = 1,
-      n_h = round(n*(1 - sick_obs_percentage)),
-      n_s = round(n*sick_obs_percentage),
-      p = p,
-      Tlength = t_length,
-      dim_alpha = 1,
-      percent_alpha = percent_alpha, range_alpha = range_alpha,
-      ARsick = ar, MAsick = NULL,
-      ARhealth = ar, MAhealth = NULL,
-      ncores = 1
-    )
+    s_ <- samp_$samples[[i]]
     covobj <- estimate_alpha(
-      healthy_dt = samp_$samples$healthy,
-      sick_dt = samp_$samples$sick,
+      healthy_dt = s_$healthy,
+      sick_dt = s_$sick,
       dim_alpha = 1, verbose = F, linkFun = linkFun)
     covobj$gee_var_new <- compute_gee_variance(
       covobj, 
-      healthy_dt = samp_$samples$healthy,
-      sick_dt = samp_$samples$sick
+      healthy_dt = s_$healthy,
+      sick_dt = s_$sick
     )
-    covobj$real_theta <- samp_$real_theta
-    covobj$real_alpha <- samp_$alpha
-    covobj$healthy_data <- convert_corr_array_to_data_matrix_test(samp_$samples$healthy)
-    covobj$sick_data <- convert_corr_array_to_data_matrix_test(samp_$samples$sick)
     covobj$steps <- covobj$Log_Optim <- NULL
     return(covobj)
   }, mc.cores = ncores)
   
   alpha_mat <- do.call(rbind, lapply(transpose(simulations)$alpha, as.vector))
   alpha_sd_mat <- do.call(rbind, lapply(transpose(simulations)$gee_var_new, sqrt_diag))
-  alpha_real <- as.vector(simulations[[1]]$real_alpha)
-  # theta_mat <- do.call(rbind, lapply(transpose(simulations)$theta, as.vector))
-  # as.vector(triangle2vector(simulations[[1]]$real_theta))
-  
+  alpha_real <- as.vector(samp_$alpha)
+
   out <- data.table(
     sim_num = sim_num,
-    nboot = nboot,
     p = p,
     n = n,
     percent_alpha = percent_alpha,
@@ -59,18 +55,19 @@ bootstrap_gee <- function(p, n, percent_alpha = 0.3, range_alpha = c(1, 1),
     confidence = 1 - sig_level,
     alpha = alpha_real,
     alpha_est_mean = rowMeans(alpha_mat),
-    alpha_est_emp_sd = apply(alpha_mat, 2, sd),
-    alpha_est_lower = apply(alpha_mat, 2, quantile, probs = sig_level/2),
-    alpha_est_upper = apply(alpha_mat, 2, quantile, probs = 1 - sig_level/2),
+    # alpha_est_emp_sd = apply(alpha_mat, 2, sd_known_mu, mu = alpha_real), 
+    alpha_est_emp_sd = apply(alpha_mat, 2, sd), 
+    # alpha_est_lower = apply(alpha_mat, 2, quantile, probs = sig_level/2),
+    # alpha_est_upper = apply(alpha_mat, 2, quantile, probs = 1 - sig_level/2),
     gee_sd_mean = rowMeans(alpha_sd_mat),
-    gee_sd_emp_sd = apply(alpha_sd_mat, 2, sd),
-    gee_sd_lower = apply(alpha_sd_mat, 2, quantile, probs = sig_level/2),
-    gee_sd_upper = apply(alpha_sd_mat, 2, quantile, probs = 1 - sig_level/2)
+    gee_sd_emp_sd = apply(alpha_sd_mat, 2, sd)
+    # gee_sd_lower = apply(alpha_sd_mat, 2, quantile, probs = sig_level/2),
+    # gee_sd_upper = apply(alpha_sd_mat, 2, quantile, probs = 1 - sig_level/2)
   )
   return(out)
 }
 
-B <- 1000
+B <- 200
 combinations2boot <- data.table(
   p = 10*round((40*rbeta(B, 1, 1.8) + 20)/10),
   n = 10*round(runif(B, 80, 120)/10),
@@ -94,7 +91,6 @@ results <- do.call(rbind, pbmclapply(1:B, function(b){
                 percent_alpha = combinations2boot[b, percent_alpha],
                 range_alpha = c(combinations2boot[b, min_alpha], 1),
                 ar = combinations2boot[b, ar],
-                nboot = 100,
                 ncores = 1)
 }, mc.cores = ncores))
 

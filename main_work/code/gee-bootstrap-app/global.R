@@ -2,7 +2,6 @@ library(ggplot2)
 
 sidebar_options <- list(
   'None' = 'none',
-  '#Bootstraps' = 'nboot',
   '1' = '1',
   'P' = 'p',
   'M' = 'm',

@@ -13,7 +13,6 @@ sidebar <- dashboardSidebar(
     menuItem("Raw Data", tabName = "data", icon = icon("th"))
   ),
   selectInput('x', 'X Axis', sidebar_options[c(
-    '#Bootstraps',
     'P',
     'M',
     'N',
@@ -39,12 +38,12 @@ sidebar <- dashboardSidebar(
   selectInput('y_denumerator', 'Y Axis Denumerator', sidebar_options[c(
     '1',
     'Alpha Estimate',
+    'Real Alpha',
     'Alpha Estimate SD',
     'GEE Estimated SD'
   )]),
   selectInput('color', 'Color', sidebar_options[c(
     'None',
-    '#Bootstraps',
     'P',
     'M',
     'N',
@@ -57,7 +56,8 @@ sidebar <- dashboardSidebar(
     'Percentage of Sick Samples',
     'None Null Alphas',
     'Minimum Range of Alpha',
-    'Real Alpha'
+    'Real Alpha',
+    'Alpha Estimate'
     )]),
   checkboxGroupInput(
     'plot_checkboxs', 'Plot Options',
@@ -65,7 +65,8 @@ sidebar <- dashboardSidebar(
       'Color as Factor' = 'color_as_factor',
       'Render Boxplot' = 'boxplot',
       'Jitter' = 'jitter',
-      'Add AB Line' = 'ab_line')
+      'Add AB Line' = 'ab_line',
+      'Drop Line at 0' = 'no_zero_line')
     ),
   splitLayout(
     cellWidths = c('50%', '50%'),

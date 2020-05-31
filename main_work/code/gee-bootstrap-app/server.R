@@ -2,7 +2,9 @@ library(data.table)
 library(DT)
 library(plotly)
 
-data <- fread('gee_data_boot.csv')
+data <- fread('gee_data_boot_.csv')
+# data <- fread('gee_data_boot.csv')
+# data <- fread('gee_data_boot_null.csv')
 data[,`:=`(
   none = factor(1),
   m =  0.5*p*(p - 1),
@@ -35,7 +37,6 @@ function(input, output){
         y = 'ratio'
       )) +
         geom_boxplot(fill = 'lightblue') +
-        geom_hline(yintercept = 0, size = 1) +
         labs(
           x = sidebar_options_reverse[input$x],
           y = paste0(sidebar_options_reverse[input$y_numerator], ' / ' , sidebar_options_reverse[input$y_denumerator])
@@ -48,7 +49,6 @@ function(input, output){
         col = paste0(input$color, ifelse('color_as_factor' %in% input$plot_checkboxs, '_', ''))
       )) +
         geom_point(position = (if('jitter' %in% input$plot_checkboxs) 'jitter' else 'identity')) +
-        geom_hline(yintercept = 0, size = 1) +
         # scales_x[[input$x_scale]] + scales_y[[input$y_scale]] + 
         labs(
           x = sidebar_options_reverse[input$x],
@@ -70,6 +70,7 @@ function(input, output){
       }
     }
     if('ab_line' %in% input$plot_checkboxs) out <- out + geom_abline(slope = input$ab_slope, intercept = input$ab_intercept, size = 1, col = 'darkgrey', linetype = 2)
+    if(!'no_zero_line' %in% input$plot_checkboxs) out <- out + geom_hline(yintercept = 0, size = 1)
     out
     })
   output$plot_lm_res <- renderPrint({

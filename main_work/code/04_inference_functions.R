@@ -15,6 +15,30 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
   )
 }
 
+efrons_rms <- function(m, p = NULL){
+  if(class(m) != 'matrix')
+    m <- vector2triangle(m, diag_value = 1)
+  if(!is.square.matrix(m))
+    stop('m is not square')
+  if(!is.positive.semi.definite(m))
+    stop('m is not semi positive definite')
+  if(!all(diag(m) == 1))
+    stop('diag of m is not 1')
+  
+  m_vect <- triangle2vector(m, diag = FALSE)
+  sum_sqrd_corrs <- sum(m_vect^2)
+  rms <- sqrt(sum_sqrd_corrs/choose(ncol(m), 2))
+  
+  if(!is.null(p))
+    rms <- sqrt(p/(p - 1) * (rms^2 - 1/(p - 1)))
+  
+  return(rms)
+}
+
+efrons_effective_sample_size <- function(n, rms){
+  out <- n/(1 + (n - 1) * rms^2)
+  return(out)
+}
 
 compute_gee_variance <- function(
   cov_obj, healthy_dt, sick_dt, est_mu = TRUE,
@@ -53,8 +77,13 @@ compute_gee_variance <- function(
       linkFun = linkFun),
     expected_value = if(est_mu) cov_obj$theta else colMeans(healthy_data),
     solve_Sigma = solve(corrmat_covariance_from_dt(healthy_data, est_n = T)),
-    df = nrow(healthy_data)
-  )
+    df = efrons_effective_sample_size(
+      n = nrow(healthy_data),
+      efrons_rms(
+        vector2triangle(colMeans(healthy_data), diag_value = 1)
+        )
+      )
+    )
 
   sick_list <- list(
     data = sick_data,
@@ -75,8 +104,13 @@ compute_gee_variance <- function(
       )
     } else colMeans(sick_data),
     solve_Sigma = solve(corrmat_covariance_from_dt(sick_data, est_n = T)),
-    df = nrow(sick_data)
-  )
+    df = efrons_effective_sample_size(
+      n = nrow(sick_data),
+      efrons_rms(
+        vector2triangle(colMeans(sick_data), diag_value = 1)
+        )
+      )
+    )
   
   I0 <- compute_gee_raw('I0', healthy_list) + compute_gee_raw('I0', sick_list)
   solve_I0 <- solve(I0)

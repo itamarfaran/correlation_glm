@@ -184,8 +184,8 @@ vector2triangle <- function(vect, diag = FALSE, diag_value = NA){
   
   one <- ifelse(diag, -1, 1)
   p <- 0.5*c(one + sqrt(1 + 8*m), one - sqrt(1 + 8*m))
-  p <- p[which( (p==round(p)) & p==abs(p) )]
-  if(length(p)==0) stop("Vect length does not fit size of triangular matrix")
+  p <- p[which( (p == round(p)) & p == abs(p) )]
+  if(length(p) == 0) stop("Vect length does not fit size of triangular matrix")
   
   out <- matrix(0, ncol = p, nrow = p)
   out[lower.tri(out, diag = diag)] <- vect

@@ -2,8 +2,8 @@ library(data.table)
 library(DT)
 library(plotly)
 
-data <- fread('gee_data_boot_.csv')
-# data <- fread('gee_data_boot.csv')
+# data <- fread('gee_data_boot_.csv')
+data <- fread('gee_data_boot.csv')
 # data <- fread('gee_data_boot_null.csv')
 data[,`:=`(
   none = factor(1),
@@ -63,8 +63,8 @@ function(input, output){
         
         out <- out + switch(
           input$aggFun,
-          'mean' = stat_summary(fun.y = mean, geom = "line", size = 1.2, linetype = 1),
-          'median' = stat_summary(fun.y = median, geom = "line", size = 1.2, linetype = 1),
+          'mean' = stat_summary(fun = mean, geom = "line", size = 1.2, linetype = 1),
+          'median' = stat_summary(fun = median, geom = "line", size = 1.2, linetype = 1),
           'smooth' = geom_smooth(se = FALSE),
           'lm' = geom_smooth(se = FALSE, method = 'lm', formula = formula))
       }

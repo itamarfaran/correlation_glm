@@ -13,6 +13,7 @@
 !main_work/code/gee-bootstrapp-app/gee_data.csv
 *.rar
 *.txt
+*.png
 desktop.ini
 .Rproj.user
 credentials-2.csv

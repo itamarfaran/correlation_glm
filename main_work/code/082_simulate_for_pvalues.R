@@ -4,7 +4,7 @@ source("main_work/code/03_estimation_functions.R")
 source("main_work/code/04_inference_functions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
-B <- 200
+B <- 500
 
 bootstrap_gee <- function(p, n, percent_alpha = 0.3, range_alpha = c(1, 1),
                           sick_obs_percentage = 0.5, t_length = 115,
@@ -80,9 +80,9 @@ results <- do.call(rbind, pbmclapply(1:B, function(b){
     percent_alpha = percent_alpha,
     range_alpha = c(min_alpha, 1),
     ar = ar,
-    ncores = 2
+    ncores = ncores
   ))
-}, mc.cores = ncores/2))
+}, mc.cores = 1))
 
 results[, zval := (alpha_est - linkFun$NULL_VAL)/gee_sd]
 results[, pval := 2*pnorm(abs(zval), lower.tail = F)]

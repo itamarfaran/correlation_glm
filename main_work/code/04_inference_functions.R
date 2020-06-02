@@ -44,8 +44,47 @@ compute_gee_variance <- function(
   cov_obj, healthy_dt, sick_dt, est_mu = TRUE,
   reg_lambda = 0, reg_p = 2){
   
-  # compute n/d factor <- function(){}
-  
+  create_list_for_raw_gee <- function(type, cov_obj, healthy_dt, sick_dt, est_mu){
+    type <- match.arg(type, c('healthy', 'sick'))
+    healthy_data <- convert_corr_array_to_data_matrix_test(healthy_dt)
+    sick_data <- convert_corr_array_to_data_matrix_test(sick_dt)
+    data <- if(type == 'healthy') healthy_data else sick_data
+    
+    p <- 0.5 + sqrt(1 + 8*ncol(data))/2
+    d <- length(cov_obj$alpha)/p
+    
+    jacobian <- compute_mu_alpha_jacobian(
+        type = type,
+        alpha = cov_obj$alpha,
+        healthy_dt = healthy_data,
+        sick_dt = sick_data,
+        d = d,
+        linkFun = cov_obj$linkFun)
+    expected_value <- if(est_mu){
+      if(type == 'healthy') cov_obj$theta else triangle2vector(
+        cov_obj$linkFun$FUN(
+          t = cov_obj$theta,
+          a = cov_obj$alpha,
+          d = d
+        )
+      )
+      } else colMeans(data)
+    solve_Sigma <- solve(corrmat_covariance_from_dt(data, est_n = T))
+    df <- efrons_effective_sample_size(
+      n = nrow(data),
+      efrons_rms(vector2triangle(colMeans(data), diag_value = 1))
+      )
+    
+    out <- list(
+      data = data,
+      jacobian = jacobian,
+      expected_value = expected_value,
+      solve_Sigma = solve_Sigma,
+      df = df
+    )
+    return(out)
+    }
+
   compute_gee_raw <- function(type, list_){
     if(type == 'I0'){
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% list_$jacobian
@@ -58,60 +97,9 @@ compute_gee_variance <- function(
     return(out)
   }
   
-  linkFun <- cov_obj$linkFun
-  
-  healthy_data <- convert_corr_array_to_data_matrix_test(healthy_dt)
-  sick_data <- convert_corr_array_to_data_matrix_test(sick_dt)
-  
-  p <- 0.5 + sqrt(1 + 8*ncol(sick_data))/2
-  d <- length(cov_obj$alpha)/p
-  
-  healthy_list <- list(
-    data = healthy_data,
-    jacobian = compute_mu_alpha_jacobian(
-      type = 'healthy',
-      alpha = cov_obj$alpha,
-      healthy_dt = healthy_data,
-      sick_dt = sick_data,
-      d = d,
-      linkFun = linkFun),
-    expected_value = if(est_mu) cov_obj$theta else colMeans(healthy_data),
-    solve_Sigma = solve(corrmat_covariance_from_dt(healthy_data, est_n = T)),
-    df = efrons_effective_sample_size(
-      n = nrow(healthy_data),
-      efrons_rms(
-        vector2triangle(colMeans(healthy_data), diag_value = 1)
-        )
-      )
-    )
+  healthy_list <- create_list_for_raw_gee('healthy', cov_obj, healthy_dt, sick_dt, est_mu)
+  sick_list <- create_list_for_raw_gee('sick', cov_obj, healthy_dt, sick_dt, est_mu)
 
-  sick_list <- list(
-    data = sick_data,
-    jacobian = compute_mu_alpha_jacobian(
-      type = 'sick',
-      alpha = cov_obj$alpha,
-      healthy_dt = healthy_data,
-      sick_dt = sick_data,
-      d = d,
-      linkFun = linkFun),
-    expected_value = if(est_mu) {
-      triangle2vector(
-        linkFun$FUN(
-          t = cov_obj$theta,
-          a = cov_obj$alpha,
-          d = d
-        )
-      )
-    } else colMeans(sick_data),
-    solve_Sigma = solve(corrmat_covariance_from_dt(sick_data, est_n = T)),
-    df = efrons_effective_sample_size(
-      n = nrow(sick_data),
-      efrons_rms(
-        vector2triangle(colMeans(sick_data), diag_value = 1)
-        )
-      )
-    )
-  
   I0 <- compute_gee_raw('I0', healthy_list) + compute_gee_raw('I0', sick_list)
   solve_I0 <- solve(I0)
   I1 <- compute_gee_raw('I1', healthy_list) + compute_gee_raw('I1', sick_list)

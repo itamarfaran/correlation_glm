@@ -1,0 +1,935 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Preliminaries
+\end_layout
+
+\begin_layout Standard
+Notes: 
+\end_layout
+
+\begin_layout Itemize
+Define all transformation functions in the begining;
+\end_layout
+
+\begin_layout Itemize
+Refactor with Lemmas: If 
+\begin_inset Formula $\Delta=I_{n}$
+\end_inset
+
+ then Wishart with Cov | Delta method ton 
+\begin_inset Formula $R$
+\end_inset
+
+ | 
+\begin_inset Formula $R$
+\end_inset
+
+ Case case when 
+\begin_inset Formula $\Delta\neq I_{T}$
+\end_inset
+
+ with effctive d.o.f based on Efron
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $X\sim\mathcal{MN}_{T\times p}\left(\boldsymbol{0},\Delta,\Sigma\right)$
+\end_inset
+
+, a Matrix-Normal RV with Expected Value 0, Row-wise Covariance matrix 
+\begin_inset Formula $\underset{T\times T}{\Delta}$
+\end_inset
+
+ and column-wise covariance matrix 
+\begin_inset Formula $\underset{p\times p}{\Sigma}$
+\end_inset
+
+.
+ In the case where 
+\begin_inset Formula $\Delta=I_{T}$
+\end_inset
+
+, 
+\begin_inset Formula $X$
+\end_inset
+
+ matches the common case of 'tidy data' whereas each row is an independent
+ observation consisting of 
+\begin_inset Formula $p$
+\end_inset
+
+ attributes, with a covariance structure of 
+\begin_inset Formula $\Sigma$
+\end_inset
+
+ between columns.
+ In this case, 
+\begin_inset Formula $W=T^{-1}X^{t}X$
+\end_inset
+
+ is the MLE estimate of 
+\begin_inset Formula $\Sigma$
+\end_inset
+
+ with 
+\begin_inset Formula $E\left[W\right]=\Sigma$
+\end_inset
+
+, and 
+\begin_inset Formula $T\cdot W$
+\end_inset
+
+ follows the Wishart distribution: 
+\begin_inset Formula $T\cdot W\sim W_{p}\left(\Sigma,T\right)$
+\end_inset
+
+ with the two first moments detailed in formulas () & ().
+
+\series bold
+ 
+\series default
+When row-wise correlation is present and 
+\begin_inset Formula $\Delta\neq I_{T}$
+\end_inset
+
+, 
+\begin_inset Formula $T\cdot W$
+\end_inset
+
+ doesn't follow the Wishart distribution anymore - While 
+\begin_inset Formula $W$
+\end_inset
+
+ remains unbiased, it's variance inflates since the effective degrees of
+ freedom decreases.
+ B.
+ Efron addressed this issue using the RMS factor 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and showed that 
+\begin_inset Formula $T_{eff}=\frac{T}{\left(T-1\right)\alpha^{2}+1}$
+\end_inset
+
+; other than replacing 
+\begin_inset Formula $T$
+\end_inset
+
+ with 
+\begin_inset Formula $T_{eff}$
+\end_inset
+
+, the expression for 
+\begin_inset Formula $Cov\left(W\right)$
+\end_inset
+
+ is the same as described in formula ().
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+E\left[W_{ij}\right] & =\Sigma_{ij}\\
+T\cdot Cov\left(W_{ij},W_{kl}\right) & =\Sigma_{ij,kl}^{\left(2\right)}=\Sigma_{ik}\Sigma_{jl}+\Sigma_{il}\Sigma_{jk}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Correlation matrix, 
+\begin_inset Formula $R$
+\end_inset
+
+, is a function of 
+\begin_inset Formula $W$
+\end_inset
+
+: 
+\begin_inset Formula $R=diag\left(W\right)^{-\nicefrac{1}{2}}\cdot W\cdot diag\left(W\right)^{-\nicefrac{1}{2}}$
+\end_inset
+
+, or 
+\begin_inset Formula $R_{ij}=\frac{W_{ij}}{\sqrt{W_{ii}W_{jj}}}$
+\end_inset
+
+.
+ By using the fact that the Wishart distribution is closed under convolution
+ (if 
+\begin_inset Formula $U\sim W_{p}\left(\Sigma,n\right),V\sim W_{p}\left(\Sigma,m\right)$
+\end_inset
+
+, then 
+\begin_inset Formula $U+V\sim W_{p}\left(\Sigma,m+n\right)$
+\end_inset
+
+) one can imply that 
+\begin_inset Formula $W\underset{n\rightarrow\infty}{\overset{d}{\longrightarrow}}\mathcal{MN}_{p\times p}\left(\Sigma,\Sigma^{\left(2\right)}\right)$
+\end_inset
+
+ and the Delta method can be used to approximate 
+\begin_inset Formula $R$
+\end_inset
+
+'s second moment.
+ If we denote by 
+\begin_inset Formula $\rho_{ij}=\frac{\Sigma_{ij}}{\sqrt{\Sigma_{ii}\Sigma_{jj}}}$
+\end_inset
+
+, then from the Delta method we find that:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{n\rightarrow\infty}{\lim}E\left[R\right]=\boldsymbol{\rho}\coloneqq diag\left(\Sigma\right)^{-\nicefrac{1}{2}}\cdot\Sigma\cdot diag\left(\Sigma\right)^{-\nicefrac{1}{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{n\rightarrow\infty}{\lim}n\cdot Cov\left(R_{ij},R_{kl}\right)\propto C_{ij,kl}\left(\boldsymbol{\rho}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+C_{ij,kl}\left(\boldsymbol{\rho}\right)\coloneqq\frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)-\boldsymbol{\rho_{kl}}\left(\rho_{ik}\cdot\rho_{jk}+\rho_{il}\cdot\rho_{jl}\right)+\left(\rho_{ik}\rho_{jl}+\rho_{il}\rho_{jk}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And more specifically 
+\begin_inset Formula $n_{eff}^{-1}\cdot Cov\left(R_{ij},R_{kl}\right)\underset{n\rightarrow\infty}{\longrightarrow}C_{ij,kl}\left(\boldsymbol{\rho}\right)$
+\end_inset
+
+.
+ In order to treat the Correlation matrix as a vector, we define 
+\begin_inset Formula $h:\mathbb{M}_{p}\left(\mathbb{R}\right)\mapsto\mathbb{R}^{m}$
+\end_inset
+
+ where 
+\begin_inset Formula $m=\frac{p\left(p-1\right)}{2}$
+\end_inset
+
+ is the number of elements over the main diagonal.
+ Since 
+\begin_inset Formula $R$
+\end_inset
+
+ is a correlation matrix, it is symmetrical with all elements on the diagonal
+ equal to 1 and can be fully characterized using only one of the triangles
+ excluding the main diagonal:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+h\left(\left[\begin{array}{cccc}
+R_{11} & R_{12} & \cdots & R_{1p}\\
+ & R_{22} & \cdots & R_{2p}\\
+ &  & \ddots & \vdots\\
+ &  &  & R_{pp}
+\end{array}\right]\right)=\left(R_{12},R_{13,}\cdots,R_{1p},R_{23},\cdots R_{p-1,p}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the ease of notation, we will denote 
+\begin_inset Formula $\vec{u}\coloneqq h\left(u\right)$
+\end_inset
+
+ for the rest of this paper.
+ If we define 
+\begin_inset Formula $\Sigma_{\boldsymbol{\rho}}^{\star}$
+\end_inset
+
+ in the way that 
+\begin_inset Formula $\left[\Sigma_{\boldsymbol{\rho}}^{\star}\right]_{ij}=n_{eff}\cdot Cov\left(\left[\vec{R}\right]_{i},\left[\vec{R}\right]_{j}\right)$
+\end_inset
+
+ then we could imply 
+\begin_inset Formula $\vec{R}\rightsquigarrow N_{m}\left(\vec{\boldsymbol{\rho}},n_{eff}^{-1}\cdot\Sigma_{\boldsymbol{\rho}}^{\star}\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Non-Linear Modeling of Correlation Matrices
+\end_layout
+
+\begin_layout Subsection
+Model Definition
+\end_layout
+
+\begin_layout Standard
+# Todo: 
+\begin_inset Formula $E\left[R_{i}\right]$
+\end_inset
+
+ in line
+\end_layout
+
+\begin_layout Standard
+# Todo: explain on 
+\begin_inset Formula $g$
+\end_inset
+
+ before definitions and explain it's role
+\end_layout
+
+\begin_layout Standard
+# Todo: Explain why we use the model and explain inference on alpha, why
+ and how
+\end_layout
+
+\begin_layout Standard
+# Todo: give another example
+\end_layout
+
+\begin_layout Standard
+Suppose that the collected data consists of two sets of independent samples,
+ denoted by 
+\begin_inset Formula $\mathcal{D}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathcal{H}$
+\end_inset
+
+: diagnosed and control subjects, respectively, each holding 
+\begin_inset Formula $n_{d}$
+\end_inset
+
+ and 
+\begin_inset Formula $n_{h}$
+\end_inset
+
+ subjects.
+ The observational unit of each subject 
+\begin_inset Formula $i$
+\end_inset
+
+ is a Correlation matrix 
+\begin_inset Formula $R_{i}$
+\end_inset
+
+ of dimension 
+\begin_inset Formula $p\times p$
+\end_inset
+
+ obtained from 
+\begin_inset Formula $T$
+\end_inset
+
+ measurements.
+ We will assume that 
+\begin_inset Formula $E\left[R_{i}\right]=\begin{cases}
+\Lambda_{h} & i\in\mathcal{H}\\
+\Lambda_{d} & i\in\mathcal{D}
+\end{cases}$
+\end_inset
+
+ and we seek to model these two matrices with less than 
+\begin_inset Formula $2m$
+\end_inset
+
+ parameters; We can achieve that by modeling 
+\begin_inset Formula $\Lambda_{d}$
+\end_inset
+
+ as a function of 
+\begin_inset Formula $\Lambda_{h}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Lambda_{h} & =\Theta,\\
+\Lambda_{d} & =g\left(\Theta,\alpha\right),\\
+\alpha & \in\mathbb{R}^{p\times q};\,q<p
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $g:\mathbb{M}_{p}\left(\left[-1,1\right]\right)\mapsto\mathbb{M}_{p}\left(\left[-1,1\right]\right)$
+\end_inset
+
+ will be referred as the link function.
+ In this paper we will use the working example of 
+\begin_inset Formula $g\left(\Theta,\alpha\right)=\Theta\circ\alpha\alpha^{t}$
+\end_inset
+
+ (
+\begin_inset Formula $\circ$
+\end_inset
+
+ denoting the Hadamard product) with 
+\begin_inset Formula $q=1$
+\end_inset
+
+.
+ #Todo 
+\end_layout
+
+\begin_layout Subsection
+Model Estimation
+\end_layout
+
+\begin_layout Standard
+# Todo: explain how we use the theorem, explain the assumptions (normal),
+ 'we assume normality with 
+\begin_inset Formula $sigma$
+\end_inset
+
+ as defined upward'...
+ 'therefore the full likelihood is', define 
+\begin_inset Formula $\phi_{m}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+# Todo: ignore 
+\begin_inset Formula $T$
+\end_inset
+
+ in problems with likelihood; say about the problem with 
+\begin_inset Formula $\alpha$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+# Where 
+\begin_inset Formula $\Sigma_{\Theta}^{\star}$
+\end_inset
+
+ is as discribed in chapter ...
+\end_layout
+
+\begin_layout Standard
+# Explain that 
+\begin_inset Formula $\alpha,\Theta$
+\end_inset
+
+ are argmins of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ and then explain why we do iteratively
+\end_layout
+
+\begin_layout Standard
+We define 
+\begin_inset Formula $Y_{i}=h\left(R_{i}\right)$
+\end_inset
+
+ and by using the theorem detailed in the previous chapter, we would be
+ able to build a full likelihood function to maximize:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ell_{full}=\sum_{i\in\mathcal{H}}\ln\phi_{m}\left(X_{i},\vec{\Theta},\nicefrac{\Sigma_{\Theta}^{\star}}{T}\right)+\sum_{i\in\mathcal{D}}\ln\phi_{m}\left(X_{i},\vec{g}\left(\Theta,\alpha\right),\nicefrac{\Sigma_{g}^{\star}}{T}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+However, this optimization raises two challenges.
+ The first is the fact that 
+\begin_inset Formula $T$
+\end_inset
+
+ must be known or estimated in order to conduct inference; In our case,
+ 
+\begin_inset Formula $T$
+\end_inset
+
+ is not known, and it's estimation is a challenge by itself.
+ Secondly, in order to minimize the weighted least squares, a possible solution
+ is to take 
+\begin_inset Formula $\alpha\rightarrow\infty$
+\end_inset
+
+ (since it's inverted in the weight matrix 
+\begin_inset Formula $\Sigma_{g}^{\star}$
+\end_inset
+
+ and in the determinant as well).
+ In cases where the link function doesn't fit well to the data, this optimizatio
+n method will lead to limiting results (
+\begin_inset Formula $\alpha\rightarrow\infty$
+\end_inset
+
+ or 
+\begin_inset Formula $\alpha\rightarrow0$
+\end_inset
+
+).
+ Therefore, we choose to estimate the model's parameters using Generalized
+ Estimation Equations methodology: Given a set of estimates 
+\begin_inset Formula $\hat{\Theta}$
+\end_inset
+
+, we wish to minimize the following least squares equation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{\alpha}=\underset{\alpha}{\arg\min}\sum_{i\in\mathcal{D}}\left(X_{i}-\vec{g}\left(\Theta,\alpha\right)\right)^{t}\overline{\Sigma^{\star}}^{-1}\left(X_{i}-\vec{g}\left(\Theta,\alpha\right)\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\overline{\Sigma^{\star}}^{-1}$
+\end_inset
+
+ is estimated independently of 
+\begin_inset Formula $\left(\Theta,\alpha\right)$
+\end_inset
+
+.
+ An ordinary least squares solution and inference will yield misspecified
+ variance estimates since the columns of 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ aren't independent; Instead, in the GEE we minimize a weighted least squares
+ equation where distances are inversely weighted by their covariance.
+ The covariance structure of 
+\begin_inset Formula $X_{i}$
+\end_inset
+
+ is computed using the theorem from the previous chapter, and in order to
+ avoid using 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ in the weight matrix, we use the average correlation matrix to construct
+ the estimate of 
+\begin_inset Formula $\Sigma^{\star}$
+\end_inset
+
+: We define 
+\begin_inset Formula $\bar{R}_{d}=n_{d}^{-1}\sum_{i\in\mathcal{D}}R_{d}$
+\end_inset
+
+ and use 
+\begin_inset Formula $\Sigma_{\bar{R}_{d}}^{\star}$
+\end_inset
+
+ as the weighting matrix for the loss function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{\alpha}=\underset{\alpha}{\arg\min}\ell=\underset{\alpha}{\arg\min}\sum_{i\in\mathcal{D}}\left(X_{i}-\vec{g}\left(\hat{\Theta},\alpha\right)\right)^{t}\Sigma_{\bar{R}_{d}}^{\star-1}\left(X_{i}-\vec{g}\left(\hat{\Theta},\alpha\right)\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The avoidance of a weighting matrix parameterized by 
+\begin_inset Formula $\left(\Theta,\alpha\right)$
+\end_inset
+
+ also increases the optimization speed and feasibility, among solving the
+ challenges raised by the full likelihood model.
+ Note also that the value of 
+\begin_inset Formula $n_{eff}$
+\end_inset
+
+ isn't needed during the optimization.
+ 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ is estimated using a simple Moment estimator: It is clear that 
+\begin_inset Formula $\bar{R}_{h}=n_{h}^{-1}\sum_{i\in\mathcal{H}}R_{i}$
+\end_inset
+
+ is an unbiased estimator of 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ (IS IT?), however it isn't efficient since it ignores the information that
+ can be gained from the diagnosed subjects - An efficient estimator of 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ will use the information gained by both sets; Given a set of estimators
+ 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+, we can estimate 
+\begin_inset Formula $\Theta$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{\Theta}=\left(n_{h}+n_{d}\right)^{-1}\left(\sum_{i\in\mathcal{H}}R_{i}+\sum_{i\in\mathcal{D}}g^{-1}\left(R_{i},\hat{\alpha}\right)\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $g^{-1}$
+\end_inset
+
+ is the 'reverse' function of 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ In our working example, if 
+\begin_inset Formula $g_{ij}\left(\Theta,\alpha\right)=\Theta_{ij}\cdot\alpha_{i}\alpha_{j}$
+\end_inset
+
+, then 
+\begin_inset Formula $g_{ij}^{-1}\left(R,\alpha\right)=R\cdot\frac{1}{\alpha_{i}\alpha_{j}}$
+\end_inset
+
+.
+ Since this isn't a linear estimator of 
+\begin_inset Formula $\Theta$
+\end_inset
+
+, the bias is larger than a simple average of the control subjects; but
+ by integrating the 
+\begin_inset Formula $n_{d}$
+\end_inset
+
+ diagnosed subjects, it is more efficient.
+ Given these two methods, we can define an iterative optimization algorithm
+ as described in Algorithm 1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Solution of GEE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\[
+\ell_{k}=\sum_{i\in\mathcal{D}}\left(X_{i}-\vec{g}\left(\hat{\Theta}_{k},\hat{\alpha}_{k}\right)\right)^{t}\Sigma_{\bar{R}_{d}}^{\star-1}\left(X_{i}-\vec{g}\left(\hat{\Theta}_{k},\hat{\alpha}_{k}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\hat{\Theta}_{0}=n_{h}^{-1}\sum_{i\in\mathcal{H}}R_{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+While 
+\begin_inset Formula $||\ell_{k}-\ell_{k-1}||>\epsilon$
+\end_inset
+
+ do:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\hat{\alpha}_{k}=\underset{\alpha}{\arg\min}\sum_{i\in\mathcal{D}}\left(X_{i}-\vec{g}\left(\hat{\Theta}_{k-1},\alpha\right)\right)^{t}\Sigma_{\bar{R}_{d}}^{\star-1}\left(X_{i}-\vec{g}\left(\hat{\Theta}_{k-1},\alpha\right)\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\hat{\Theta}_{k}=\left(n_{h}+n_{d}\right)^{-1}\left(\sum_{i\in\mathcal{H}}R_{i}+\sum_{i\in\mathcal{D}}g^{-1}\left(R_{i},\hat{\alpha}_{k}\right)\right)$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+PRESENT SIMULATION AND CONSISTENCY
+\end_layout
+
+\begin_layout Subsection
+Model Inference
+\end_layout
+
+\begin_layout Standard
+# Todo: finally say that 
+\begin_inset Formula $\alpha\sim N$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+# Todo: Rename RMS not to alpha
+\end_layout
+
+\begin_layout Standard
+# Talk about P-value Correction
+\end_layout
+
+\begin_layout Standard
+In order to infer the estimates, we turn back to GEE Theory.
+ The GEE variance estimator is a sandwich estimator that uses the empirical
+ residual matrix to increase robustness.
+ The variance of 
+\begin_inset Formula $\hat{\alpha}$
+\end_inset
+
+ is calculated as 
+\begin_inset Formula $\widehat{Var}\left(\hat{\alpha}\right)=I^{\left(0\right)-1}I^{\left(1\right)}I^{\left(0\right)-1}$
+\end_inset
+
+ where 
+\begin_inset Formula $I^{\left(k\right)}=I_{h}^{\left(k\right)}+I_{d}^{\left(k\right)}$
+\end_inset
+
+ and:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+I_{d}^{\left(0\right)} & =n_{d}\cdot\frac{\partial\vec{g}\left(\Theta,\alpha\right)}{\partial\alpha}^{t}\cdot\Sigma_{\bar{R}_{d}}^{\star-1}\cdot\frac{\partial\vec{g}\left(\Theta,\alpha\right)}{\partial\alpha}|_{\alpha=\hat{\alpha}}\\
+I_{d}^{\left(1\right)} & =n_{d}\cdot\frac{\partial\vec{g}\left(\Theta,\alpha\right)}{\partial\alpha}^{t}\cdot\Sigma_{\bar{R}_{d}}^{\star-1}\cdot\underset{i\in\mathcal{D}}{\widehat{Cov}}\left(X_{i}\right)\cdot\Sigma_{\bar{R}_{h}}^{\star-1}\cdot\frac{\partial\vec{g}\left(\Theta,\alpha\right)}{\partial\alpha}|_{\alpha=\hat{\alpha}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With 
+\begin_inset Formula $I_{h}^{\left(0\right)},I_{h}^{\left(1\right)}$
+\end_inset
+
+ defined similarly with 
+\begin_inset Formula $\vec{\Theta}$
+\end_inset
+
+, 
+\begin_inset Formula $\Sigma_{\bar{R}_{h}}^{\star-1}$
+\end_inset
+
+ replacing 
+\begin_inset Formula $\vec{g}\left(\Theta,\alpha\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\Sigma_{\bar{R}_{d}}^{\star-1}$
+\end_inset
+
+.
+ Also, 
+\begin_inset Formula $\underset{i\in\mathcal{D}}{\widehat{Cov}}\left(X_{i}\right)=n_{eff}^{-1}\sum_{i\in\mathcal{D}}\left(X_{i}-\vec{g}\left(\Theta,\alpha\right)\right)\left(X_{i}-\vec{g}\left(\Theta,\alpha\right)\right)^{t}$
+\end_inset
+
+.
+ In theory, 
+\begin_inset Formula $\nicefrac{\Sigma_{\bar{R}_{d}}^{\star-1}}{T_{eff}}$
+\end_inset
+
+ should appear in the equation and not 
+\begin_inset Formula $\Sigma_{\bar{R}_{d}}^{\star-1}$
+\end_inset
+
+; However, since it cancels out in the final multiplaction, it is not needed
+ in practice.
+ On the other hand, 
+\begin_inset Formula $n_{eff}$
+\end_inset
+
+ must be estimated - we turn to Efron's estimate of the RMS coefficient:
+ 
+\begin_inset Formula $\bar{\alpha}_{d}=\sqrt{\sum_{i<j}\bar{R}_{d,ij}^{2}/{p \choose 2}}$
+\end_inset
+
+ and we estimate the effective degrees of freedom 
+\begin_inset Formula $n_{eff}=\frac{n_{d}}{\left(n_{d}-1\right)\bar{\alpha}_{d}^{2}+1}$
+\end_inset
+
+ .
+ 
+\end_layout
+
+\begin_layout Standard
+# Todo: Under theoretical assumptions both 
+\begin_inset Formula $\nicefrac{\Sigma_{\bar{R}_{d}}^{\star}}{T_{eff}},\underset{i\in\mathcal{D}}{\widehat{Cov}}\left(X_{i}\right)\overset{p}{\longrightarrow}\nicefrac{\Sigma^{\star}}{T_{eff}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Sigma_{\bar{R}_{d}}^{\star-1}\cdot\underset{i\in\mathcal{D}}{\widehat{Cov}}\left(X_{i}\right)\cdot\Sigma_{\bar{R}_{h}}^{\star-1}\overset{p}{\longrightarrow}T_{eff}\cdot\Sigma^{\star-1}$
+\end_inset
+
+, but BLA BLA BLA ADVANTAGES OF GEE
+\end_layout
+
+\begin_layout Standard
+# Todo: 
+\begin_inset Formula $\bar{\alpha}_{d}$
+\end_inset
+
+ is over-estimating the effect of row-wise correlation
+\end_layout
+
+\end_body
+\end_document

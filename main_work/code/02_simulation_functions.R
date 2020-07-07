@@ -105,7 +105,7 @@ create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0
         stop("seed_control not available for rWishart2")
       }
     }
-    out <- rWishart2(sample_size, df, real_var, ncores = ncores)
+    out <- rWishart2(sample_size, df, real_var)
   } else {
     if(!missing(seed_control)) stop("seed_control not available for rWishart_ARMA")
     out <- rWishart_ARMA(sample_size, df, real_var, AR = AR, MA = MA, ncores = ncores)

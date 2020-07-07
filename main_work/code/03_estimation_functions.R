@@ -287,7 +287,7 @@ estimate_alpha <- function(
   
   iid_model <- estimate_loop(
     healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
-    linkFun = linkFunctions$multiplicative_identity,
+    linkFun = linkFun,
     cov_method = 'identity',
     model_reg_config = model_reg_config,
     matrix_reg_config = matrix_reg_config,
@@ -299,7 +299,7 @@ estimate_alpha <- function(
   cov_model <- estimate_loop(
     healthy_dt = healthy_dt, sick_dt = sick_dt,
     alpha0 = iid_model$alpha, theta0 = iid_model$theta,
-    linkFun = linkFunctions$multiplicative_identity,
+    linkFun = linkFun,
     cov_method = 'corrmat',
     model_reg_config = model_reg_config,
     matrix_reg_config = matrix_reg_config,

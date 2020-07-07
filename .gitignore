@@ -15,6 +15,8 @@
 *.txt
 *.png
 desktop.ini
-.Rproj.user
+*.Rproj
 credentials-2.csv
 connect_to_ssh.txt
+*Icon
+.Rproj.user

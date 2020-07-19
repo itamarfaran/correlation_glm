@@ -63,3 +63,39 @@ create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alp
   return(out)
 }
 
+
+create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, sim = NULL){
+  case = if(percent_alpha == 0) 'No Effect' else "Effect"
+  autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
+  if (ARMA == 0) ARMA <- NULL
+  n_s <- ceiling(p_s*n)
+  n_h <- n - n_s
+  
+  samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
+                            percent_alpha = percent_alpha, range_alpha = range_alpha,
+                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
+  results <- lapply(
+    1:n_sim, function(i) estimate_alpha(
+      healthy_dt = samples$samples[[i]]$healthy,
+      sick_dt = samples$samples[[i]]$sick,
+      verbose = FALSE)
+  )
+  
+  gee_vars <- lapply(1:n_sim, function(i) compute_gee_variance(
+    cov_obj = results[[i]],
+    healthy_dt = samples$samples[[i]]$healthy,
+    sick_dt = samples$samples[[i]]$sick
+  ))
+  
+  out <- data.table(
+    sim_num = rep(1:n_sim, each = p),
+    voxel = rep(1:p, times = n_sim),
+    estimated_alpha = do.call(c, transpose(results)$alpha),
+    real_alpha = rep(samples$alpha, times = n_sim),
+    sd = do.call(c, lapply(gee_vars, sqrt_diag))
+  )
+  out[,`:=`(autocorrelated = autocorrelated, p_s = p_s, case = case)]
+  if(!is.null(sim)) out[,sim := sim]
+  return(out)
+}
+

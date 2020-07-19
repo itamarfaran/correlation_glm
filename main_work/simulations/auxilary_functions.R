@@ -33,7 +33,7 @@ create_estimates <- function(n_sim, n, p, percent_alpha, range_alpha, ARMA = 0, 
   return(out)
 }
 
-create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0){
+create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, ncores = 1){
   case = if(percent_alpha == 0) 'No Effect' else "Effect"
   autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if (ARMA == 0) ARMA <- NULL
@@ -42,21 +42,21 @@ create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alp
   
   samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
-                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
-  results <- lapply(
+                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA, ncores = ncores)
+  results <- pbmclapply(
     1:n_sim, function(i) estimate_alpha(
       healthy_dt = samples$samples[[i]]$healthy,
       sick_dt = samples$samples[[i]]$sick,
-      verbose = FALSE)
+      verbose = FALSE), mc.cores = ncores
   )
   
   emp_cov <- var(t(do.call(cbind, transpose(results)$alpha)))
   
-  gee_vars <- calculate_mean_matrix(sapply(1:n_sim, function(i) compute_gee_variance(
+  gee_vars <- calculate_mean_matrix(simplify2array(pbmclapply(1:n_sim, function(i) compute_gee_variance(
     cov_obj = results[[i]],
     healthy_dt = samples$samples[[i]]$healthy,
     sick_dt = samples$samples[[i]]$sick
-  ), simplify = 'array'))
+  ), mc.cores = ncores)))
   
   out <- data.table(n = n, p = p, alpha = as.vector(samples$alpha), emp = sqrt_diag(emp_cov), est = sqrt_diag(gee_vars))
   out[,`:=`(autocorrelated = autocorrelated, p_s = p_s, case = case)]

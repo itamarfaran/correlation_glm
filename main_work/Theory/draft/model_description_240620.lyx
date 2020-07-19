@@ -93,6 +93,31 @@ Itamar Faran, Yuval Benjamini
 \end_layout
 
 \begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Enumerate
+scholarly review.
+ emphasize that we work on inference
+\end_layout
+
+\begin_layout Enumerate
+introduce our problem - show that we have more power (?)
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+cartoon
+\begin_inset Quotes erd
+\end_inset
+
+ of parameters, for example corrplot of theta, corrplot of alpha, visualize
+ g
+\end_layout
+
+\begin_layout Section
 Preliminaries
 \end_layout
 
@@ -1490,7 +1515,7 @@ Parameters:
 
 \begin_layout Enumerate
 Generate 
-\begin_inset Formula $X\sim\mathcal{MN}_{n\times d}\left(0,V\right)$
+\begin_inset Formula $X\sim\mathcal{MN}_{n\times d}\left(0,I_{n},V\right)$
 \end_inset
 
 
@@ -1692,6 +1717,32 @@ Bias of
 
 \end_layout
 
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+Not Bias - Estimate vs real
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+Instead of boxplot - have less null alphas
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_inset
 
 
@@ -1701,7 +1752,7 @@ Bias of
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1733,9 +1784,90 @@ Bias of
 
 \end_layout
 
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+Narrower Boxplots - without dots
+\end_layout
+
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+More sample size
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+Show only alpha
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+Show RMSE also
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Flex TODO Note (Margin)
+status open
+
+\begin_layout Plain Layout
+For p - do group by (with fill) instead of facet grid
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+two rows - the first is bias, the second is RMSE.
+ No Theta, P with aes(fill=p) instaed of facet_grid
+\end_layout
+
+\begin_layout Plain Layout
+Write that ARMA doesn't matter - maybe plot but don't show
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Algorithm
+
+\end_layout
+
+\begin_layout Algorithm
 \begin_inset Float figure
 wide false
 sideways false
@@ -1891,6 +2023,16 @@ The first simulations show the bias of the estimates
  to vary - the sample size varies from 20 to 100 while the simension varies
  from 10 to 40.
  
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+talk about other parameters
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1971,33 +2113,7 @@ We further show
 status open
 
 \begin_layout Plain Layout
-robustness
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
 calculation times
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-robustness
 \end_layout
 
 \end_inset
@@ -2023,7 +2139,27 @@ FWER & FDR
 status open
 
 \begin_layout Plain Layout
-Power
+Power: effect size 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, number of non-null, n VS power
+\end_layout
+
+\end_inset
+
+for every sample, mean(p<.05) by is_null -> alot of samples (to show power
+ + FWER/FDR).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Power: Comparison - for T statisics - atleast one element in column is significa
+nt
 \end_layout
 
 \end_inset
@@ -2032,79 +2168,90 @@ Power
 \end_layout
 
 \begin_layout Standard
-Write the text for these simulations
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+robustness - with simulation link function
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+robustness - without simulation link : 2 different matrices and difference
+ one or 2 columns
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+robustness - Difference between 
+\begin_inset Formula $\bar{R}_{d}$
+\end_inset
+
+ and 
+\begin_inset Formula $g\left(\hat{\Theta},\hat{\alpha}\right)$
+\end_inset
+
+, diagnostics?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Write the text for these simulations:
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\hat{\alpha},\hat{\Theta}$
-\end_inset
-
- vs.
- 
-\begin_inset Formula $\alpha,\Theta$
-\end_inset
-
- - Bias in small dimension
+Randomize from Random Effects - does n_eff (and rms alpha) change?
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\hat{\alpha}-\alpha,\hat{\Theta}-\Theta$
-\end_inset
-
- vs.
- 
-\begin_inset Formula $n$
-\end_inset
-
- - Bias as a function of sample size
+Does n_eff vary when ARMA is different??
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $V\left(\hat{\alpha}\right)$
-\end_inset
-
- vs bootsrtap variance 
-\begin_inset Formula $\hat{\alpha}$
-\end_inset
-
- - small and large sample size
+Does n_eff ecreases when dim(alpha) increases?
 \end_layout
 
-\begin_layout Enumerate
-Effect of 
-\begin_inset Formula $\frac{n_{d}}{n_{d}+n_{h}}$
+\begin_layout Section
+Estimate on Real Data
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g_{ij}=\frac{\Theta_{ij}}{\left(1+\alpha_{i}+\alpha_{j}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+try constraints on 
+\begin_inset Formula $\alpha$
 \end_inset
 
 ?
-\end_layout
-
-\begin_layout Enumerate
-Type I Errors - Under strong & week null - large sample size
-\end_layout
-
-\begin_layout Enumerate
-Robustness - Simulate data from one link function, estimate using another
-\end_layout
-
-\begin_layout Enumerate
-Calculation time as function of 
-\begin_inset Formula $p$
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Enumerate
-Randomize from Random Effects - and show n_eff still works
-\end_layout
-
-\begin_layout Enumerate
-show that n_eff ecreases when dim(alpha) increases?
-\end_layout
-
-\begin_layout Enumerate
-Power simulations - Yuval, what to do here? How can we compare to the ordinary
- Z tests?
 \end_layout
 
 \end_body

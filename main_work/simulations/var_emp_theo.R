@@ -39,6 +39,7 @@ p2 <- ggplot(toplot[case == 'Effect' & autocorrelated == 'Autocorrelated'],
     x = 'Empirical Variance', y = 'GEE Estimated Variance',
     shape = '\u03B1 Value:'
   )
+save(toplot, file = 'main_work/simulations/var_emp_theo.RData')
 
 custom_ggsave('variance_emp_theo_null.png', p1, width=2, height=1)
 custom_ggsave('variance_emp_theo_nonnull.png', p2, width=2, height=1)

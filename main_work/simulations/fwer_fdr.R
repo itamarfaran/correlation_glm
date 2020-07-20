@@ -16,17 +16,17 @@ samples <- rbind(
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.9, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
     ncores = ncores
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
     ncores = ncores
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.9, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
     ncores = ncores
   ))
 )

@@ -3,7 +3,7 @@ source('main_work/code/02_simulation_functions.R')
 source('main_work/code/03_estimation_functions.R')
 source('main_work/code/04_inference_functions.R')
 
-n_sim <- 100
+n_sim <- 200
 n = 50
 p = 25
 percent_alpha = 0

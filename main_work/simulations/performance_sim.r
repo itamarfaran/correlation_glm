@@ -63,3 +63,5 @@ p <- results %>%
 
 custom_ggsave('performance_sim.png', p)
 
+f <- function(q) sum((predict(lm(I(mean)^(1/q) ~ 0 + p:Type, results))^q - results[,mean])^2)
+optimise(f, c(0, 10))

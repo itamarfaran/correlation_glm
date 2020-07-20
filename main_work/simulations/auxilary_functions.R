@@ -64,7 +64,7 @@ create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alp
 }
 
 
-create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, sim = NULL){
+create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, ncores = 1, sim = NULL){
   case = if(percent_alpha == 0) 'No Effect' else "Effect"
   autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if (ARMA == 0) ARMA <- NULL
@@ -73,19 +73,20 @@ create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha
   
   samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
-                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
-  results <- lapply(
+                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
+                            ncores = ncores)
+  results <- pbmclapply(
     1:n_sim, function(i) estimate_alpha(
       healthy_dt = samples$samples[[i]]$healthy,
       sick_dt = samples$samples[[i]]$sick,
-      verbose = FALSE)
+      verbose = FALSE), mc.cores = ncores
   )
   
-  gee_vars <- lapply(1:n_sim, function(i) compute_gee_variance(
+  gee_vars <- pbmclapply(1:n_sim, function(i) compute_gee_variance(
     cov_obj = results[[i]],
     healthy_dt = samples$samples[[i]]$healthy,
     sick_dt = samples$samples[[i]]$sick
-  ))
+  ), mc.cores = ncores)
   
   out <- data.table(
     sim_num = rep(1:n_sim, each = p),

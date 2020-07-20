@@ -26,7 +26,7 @@ timeit <- function(p, r){
   return(out)
 }
 
-p <- 5*(2:5)
+p <- 5*(2:12)
 r <- 10
 out <- data.table(p = numeric(), est = numeric(), gee = numeric())
 

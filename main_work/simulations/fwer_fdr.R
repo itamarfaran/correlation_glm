@@ -1,33 +1,33 @@
 source('main_work/simulations/auxilary_functions.R')
 
-n_sim = 100
+n_sim = 60
 n = 100
-p = 25
+p = 32
 range_alpha = c(0.7, 0.9)
 ARMA = 0.6
 reps = 20
 sig_level = .05
 
 samples <- rbind(
-  rbindlist(pbmclapply(
+  rbindlist(lapply(
     1:reps, create_sample_estimates,
     n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
-    mc.cores = ncores
+    ncores = ncores
   )),
-  rbindlist(pbmclapply(
+  rbindlist(lapply(
     1:reps, create_sample_estimates,
     n_sim = n_sim, n = n, p = p, p_s = 0.9, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
-    mc.cores = ncores
+    ncores = ncores
   )),
-  rbindlist(pbmclapply(
+  rbindlist(lapply(
     1:reps, create_sample_estimates,
     n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
-    mc.cores = ncores
+    ncores = ncores
   )),
-  rbindlist(pbmclapply(
+  rbindlist(lapply(
     1:reps, create_sample_estimates,
     n_sim = n_sim, n = n, p = p, p_s = 0.9, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
-    mc.cores = ncores
+    ncores = ncores
   ))
 )
 

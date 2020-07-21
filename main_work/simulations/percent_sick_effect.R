@@ -11,7 +11,8 @@ percent_alpha = 0
 examples <- expand.grid(p_s = c(0.2, 0.35, 0.5, 0.65, 0.8), ARMA = c(0, 0.5))
 
 toplot <- do.call(rbind, pbmclapply(1:nrow(examples), function(i) create_variance_estimates(
-  n_sim = 7, n = 50, p = 25, percent_alpha = 0, range_alpha = 0, p_s = examples[i, 1], ARMA = examples[i, 2]), mc.cores = ncores))
+  n_sim = n_sim, n = n, p = p, percent_alpha = percent_alpha,
+  range_alpha = c(1, 1), p_s = examples[i, 1], ARMA = examples[i, 2]), mc.cores = ncores))
 
 toplot[,`:=`(ratio = est/emp)]
 p <- ggplot(toplot, aes(x = p_s, y = ratio, group = p_s)) + 
@@ -25,4 +26,5 @@ p <- ggplot(toplot, aes(x = p_s, y = ratio, group = p_s)) +
     x = TeX('$n_{d}/\\left(n_{d}+n_{h}\\right)$'), y = 'Ratio Between Estimated & Empirical\nStandard Deviations'
   )
 
+save(toplot, 'main_work/simulations/percent_sick_effect.RData')
 custom_ggsave('percent_sick_effect.png', p, width=2)

@@ -68,17 +68,22 @@ create_power_comparison <- function(
 
 examples <- expand.grid(n = c(60, 90, 120), percent_alpha = c(0.1, 0.2, 0.3), min_alpha = c(0.85, 0.9, 0.95))
 
-out <- lapply(1:nrow(examples), function(i)
-  lapply(
-    1:sim, create_power_comparison,
-    n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2], range_alpha = c(examples[i, 3], 1),
-    ncores = ncores
+file_loc <- 'main_work/simulations/power_t.RData'
+if(file.exists(file_loc)){
+  load(file_loc)
+} else {
+  out <- lapply(1:nrow(examples), function(i)
+    lapply(
+      1:sim, create_power_comparison,
+      n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2], range_alpha = c(examples[i, 3], 1),
+      ncores = ncores
     )
   )
-
-out <- do.call(rbind, lapply(out, do.call, what=rbind))
-
-save(out, file = 'main_work/simulations/power_t.RData')
+  
+  out <- do.call(rbind, lapply(out, do.call, what=rbind))
+  
+  save(out, file = file_loc)
+}
 
 
 id.vars <- names(out)[!startsWith(names(out), 'rejected')]
@@ -87,7 +92,7 @@ out2[,Method := ifelse(Method == 'rejected_gee', 'GEE', 'T Test')]
 
 add_same_stuff <- function(plt){
   plt <- plt + 
-    scale_y_log10() + 
+    scale_y_log10(limits = c(.001, 1)) + 
     # geom_hline(yintercept = 0) + 
     scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
     theme_user() + theme(
@@ -98,25 +103,36 @@ add_same_stuff <- function(plt){
   return(plt)
 }
 
-p1 <- out2[real_alpha != 1, mean(value), by = .(sim, percent_alpha, Method)] %>% 
-  ggplot(aes(x = percent_alpha, y = V1, fill = Method, group = interaction(percent_alpha, Method))) + 
-  geom_boxplot(position = position_dodge(width = .03), alpha = .6) + 
+toplot1 <- out2[real_alpha != 1, mean(value), by = .(sim, percent_alpha, Method)]
+labels1 <- toplot1[,median(V1), by = .(percent_alpha, Method)]
+p1 <- ggplot(toplot1, aes(x = percent_alpha, y = V1, fill = Method, group = interaction(percent_alpha, Method))) + 
+  geom_boxplot(position = position_dodge(width = .03), alpha = .6) +
+  geom_label(aes(x = percent_alpha, y = V1, label = Method), data = labels1,
+             position = position_dodge(width = .03), fill = 'white') + 
   labs(title = '% Non-Null Parameters') + scale_x_continuous(labels = scales::percent)
 p1 <- add_same_stuff(p1); p1
-  
-p2 <- out2[real_alpha != 1, mean(value), by = .(sim, min_alpha, Method)] %>% 
-  ggplot(aes(x = min_alpha, y = V1, fill = Method, group = interaction(min_alpha, Method))) + 
+
+toplot2 <- out2[real_alpha != 1, mean(value), by = .(sim, min_alpha, Method)]
+labels2 <- toplot2[,median(V1), by = .(min_alpha, Method)]
+
+p2 <- ggplot(toplot2, aes(x = min_alpha, y = V1, fill = Method, group = interaction(min_alpha, Method))) + 
   geom_boxplot(position = position_dodge(width = .02), alpha = .6) + 
+  geom_label(aes(x = min_alpha, y = V1, label = Method), data = labels2,
+             position = position_dodge(width = .02), fill = 'white') + 
   labs(title = 'Minimal Value of Alpha')
 p2 <- add_same_stuff(p2); p2
 
-p3 <- out2[real_alpha != 1, mean(value), by = .(sim, n, Method)] %>% 
-  ggplot(aes(x = n, y = V1, fill = Method, group = interaction(n, Method))) + 
+toplot3 <- out2[real_alpha != 1, mean(value), by = .(sim, n, Method)]
+labels3 <- toplot3[,median(V1), by = .(n, Method)]
+
+p3 <- ggplot(toplot3, aes(x = n, y = V1, fill = Method, group = interaction(n, Method))) + 
   geom_boxplot(position = position_dodge(width = 9), alpha = .6) + 
+  geom_label(aes(x = n, y = V1, label = Method), data = labels3,
+             position = position_dodge(width = 9), fill = 'white') + 
   labs(title = '# Subjects')
 p3 <- add_same_stuff(p3); p3
 
 out3 <- arrangeGrob(p1, p2, p3, nrow=3)
 plot(out3)
 
-custom_ggsave('power_r.png', out3)
+custom_ggsave('power_r.png', out3, width = 2, height = 1.5)

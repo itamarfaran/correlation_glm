@@ -3,7 +3,7 @@ source("main_work/code/02_simulation_functions.R")
 source("main_work/code/03_estimation_functions.R")
 source("main_work/code/04_inference_functions.R")
 
-linkFun <- linkFunctions$additive_quotent
+linkFun <- linkFunctions$multiplicative_identity
 
 conf <- list(
   TGA = list(
@@ -22,7 +22,7 @@ conf <- list(
     sick_index_name = 'NMDA'
   )
 )
-desease_data <- 'NMDA'
+desease_data <- 'TGA'
 file <- paste0('main_work/simulations/analysis_', tolower(desease_data), '.RData')
 
 if (file.exists(file)){
@@ -54,4 +54,5 @@ out <- data.table(
 out[,z_value := (estimate - linkFun$NULL_VAL)/sd]
 out[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 out[,p_adjusted := p.adjust(p_value, 'BH')]
+out[,index := 1:.N]
 print(out[p_adjusted < .05])

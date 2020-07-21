@@ -506,6 +506,19 @@ Model Definition
 \end_layout
 
 \begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Model Identifiability????
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Suppose that the collected data consists of two sets of independent samples,
  denoted by 
 \begin_inset Formula $\mathcal{D}$
@@ -1717,32 +1730,6 @@ Bias of
 
 \end_layout
 
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Not Bias - Estimate vs real
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Instead of boxplot - have less null alphas
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \end_inset
 
 
@@ -1752,7 +1739,7 @@ Instead of boxplot - have less null alphas
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1785,73 +1772,8 @@ Bias of
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Narrower Boxplots - without dots
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-More sample size
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Show only alpha
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Show RMSE also
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-For p - do group by (with fill) instead of facet grid
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
 two rows - the first is bias, the second is RMSE.
- No Theta, P with aes(fill=p) instaed of facet_grid
+ 
 \end_layout
 
 \begin_layout Plain Layout
@@ -1891,6 +1813,12 @@ Consistency of
 \end_inset
 
 
+\begin_inset Graphics
+	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/variance_emp_theo_null.png
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1918,6 +1846,12 @@ Consistency of
 
 , Under Weak Null and Time Dependency
 \end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/variance_emp_theo_nonnull.png
 
 \end_inset
 
@@ -1955,6 +1889,112 @@ Effect of
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/percent_sick_effect.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Ignore Non-balanced case for now and enlarge p
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Computation Times
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/performance_sim.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Calculation Time of 
+\begin_inset Formula $O\left(p^{4.6}\right)\approx O\left(m^{2.3}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+FWER & FDR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/fwer_fdr.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Algorithm
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Power vs.
+ FDR Corrected T-tests
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/power_r.png
 	scale 50
 
 \end_inset
@@ -2105,66 +2145,96 @@ explain why
 \end_layout
 
 \begin_layout Standard
-We further show 
-\end_layout
-
-\begin_layout Standard
+In plot [[ref]] we examine the Control on the FWER (with Holm's correction)
+ and the control on the FDR (BH correction 
 \begin_inset Flex TODO Note (inline)
 status open
 
 \begin_layout Plain Layout
-calculation times
+quote
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-FWER & FDR
-\end_layout
-
+).
+ We test the control in two factors: under the strong null (all 
+\begin_inset Formula $H_{0,j}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-Power: effect size 
-\begin_inset Formula $\alpha$
+ are true) and the weak null (some 
+\begin_inset Formula $H_{0,j}$
 \end_inset
 
-, number of non-null, n VS power
-\end_layout
-
+ are true) and when the autocorrelation is or is not present.
+ Under the strong null, the FDR and FWER are controlled, while the general
+ type-I error (% of rejected nulls out of all nulls) is kept under .05.
+ In plot [[ref]] we compare the statistical power of our proposed method
+ versus an ordinary series of FDR corrected T-test; For each voxel 
+\begin_inset Formula $\left(k,l\right)$
 \end_inset
 
-for every sample, mean(p<.05) by is_null -> alot of samples (to show power
- + FWER/FDR).
+, we conduct 
+\begin_inset Formula $m$
+\end_inset
+
+ T-tests comparing the means of 
+\begin_inset Formula $\left\{ \zeta\left(R_{i,kl}\right)\right\} _{i\in\mathcal{H}},\left\{ \zeta\left(R_{i,kl}\right)\right\} _{i\in\mathcal{D}}$
+\end_inset
+
  
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
+\begin_inset Foot
 status open
 
 \begin_layout Plain Layout
-Power: Comparison - for T statisics - atleast one element in column is significa
-nt
+\begin_inset Formula $\zeta$
+\end_inset
+
+ is Fisher's Transformation, 
+\begin_inset Formula $\zeta\left(r\right)=\frac{1}{2}\ln\left(\frac{1+r}{1-r}\right)$
+\end_inset
+
+
 \end_layout
 
 \end_inset
 
+ and conduct a BH correction on them.
+ In order to compare to our method, which examines whole columns, we define
+ a 'rejected column' as a column where at least 20% of the T-tests' P-values
+ are below .05.
+ Our simulations show that under assumptions of column-wise divergence,
+ our method is more powerful than ordinary T-tests.
+\end_layout
 
+\begin_layout Standard
+We further show the computation time as a function of 
+\begin_inset Formula $p$
+\end_inset
+
+ in plot [[ref]] (recall 
+\begin_inset Formula $m=\frac{p\left(p-1\right)}{2}\Rightarrow p\approx\sqrt{2m}$
+\end_inset
+
+ ).
+ Interestingly, we find that the calculation time is approximatly 
+\begin_inset Formula $O\left(m^{2.3}\right)$
+\end_inset
+
+, which is the time needed to invert an 
+\begin_inset Formula $m\times m$
+\end_inset
+
+ matrix 
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+quote
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -2231,14 +2301,84 @@ Does n_eff vary when ARMA is different??
 Does n_eff ecreases when dim(alpha) increases?
 \end_layout
 
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1.
+ Do all notes from previous figures
+\end_layout
+
+\begin_layout Standard
+2.
+ remove unbalanced problems for now
+\end_layout
+
+\begin_layout Standard
+3.
+ check effect of random effect on effron's rms
+\end_layout
+
+\begin_layout Standard
+4.
+ finish power simulations with ordinary t test
+\end_layout
+
 \begin_layout Section
 Estimate on Real Data
 \end_layout
 
 \begin_layout Standard
+Show only TGA
+\end_layout
+
+\begin_layout Standard
+Plot heat map of both matrices
+\end_layout
+
+\begin_layout Standard
+Show 
+\begin_inset Formula $\Lambda_{h}-\Lambda_{d}$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha\alpha^{t}$
+\end_inset
+
+ or 
+\begin_inset Formula $\Lambda_{d}-\Lambda_{h}=\Theta_{ij}\left(\frac{\alpha_{i}+\alpha_{j}}{1+\alpha_{i}+\alpha_{j}}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Show link function vs link function
+\end_layout
+
+\begin_layout Standard
+check T also here!
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-g_{ij}=\frac{\Theta_{ij}}{\left(1+\alpha_{i}+\alpha_{j}\right)}
+g_{ij}=\frac{\Theta_{ij}}{\left(1+\alpha_{i1}+\alpha_{i2}+\alpha_{j1}+\alpha_{j2}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g_{ij}=\Theta_{ij}\alpha_{i}\alpha_{j}
 \]
 
 \end_inset

@@ -15,7 +15,7 @@ toplot <- do.call(rbind, lapply(1:nrow(examples), function(i) create_variance_es
 toplot[,`:=`(is_null = ifelse(alpha == 1, 'Null', 'Non Null'))]
 p1 <- ggplot(toplot[case == 'No Effect' & autocorrelated == 'Not Autocorrelated'],
        aes(x = emp, y = est)) + 
-  geom_point() + 
+  geom_point(shape = 21, col = 'black', fill = 'darkgrey', alpha = 0.7) + 
   facet_grid(p ~ n, labeller = label_both) + 
   geom_abline(slope = 1, intercept = 0) + 
   theme_user() + 
@@ -28,7 +28,7 @@ p1 <- ggplot(toplot[case == 'No Effect' & autocorrelated == 'Not Autocorrelated'
 
 p2 <- ggplot(toplot[case == 'Effect' & autocorrelated == 'Autocorrelated'],
        aes(x = emp, y = est, shape = is_null)) + 
-  geom_point() + 
+  geom_point(shape = 21, col = 'black', fill = 'darkgrey', alpha = 0.7) + 
   facet_grid(p ~ n, labeller = label_both) + 
   geom_abline(slope = 1, intercept = 0) + 
   theme_user() + 

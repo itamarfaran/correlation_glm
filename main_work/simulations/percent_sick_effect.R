@@ -4,8 +4,8 @@ source('main_work/code/03_estimation_functions.R')
 source('main_work/code/04_inference_functions.R')
 
 n_sim <- 200
-n = 50
-p = 25
+n = 80
+p = 32
 percent_alpha = 0
 
 examples <- expand.grid(p_s = c(0.2, 0.35, 0.5, 0.65, 0.8), ARMA = c(0, 0.5))

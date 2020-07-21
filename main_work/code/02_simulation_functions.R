@@ -156,6 +156,7 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = 1){
   }
 
   rawFun <- function(k){
+    #todo: add random effect := Sigma <- rWishart(1, p, Sigma)/p
     normal_matrix <- rmvnorm(n = df, sigma = Sigma)
     normal_matrix_arma <- normal_matrix
     

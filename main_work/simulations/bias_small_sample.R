@@ -3,7 +3,7 @@ source('main_work/simulations/auxilary_functions.R')
 n_sim <- 1
 n <- 100
 p <- 50
-percent_alpha <- 0.4
+percent_alpha <- 0.8
 range_alpha <- c(0.7, 1.1)
 
 
@@ -13,19 +13,20 @@ out <- do.call(rbind, list(
   ))
 
 p1 <- ggplot(out[type == 'Theta'], aes(x = Parameter, y = Estimate)) + 
-  geom_point(alpha = 0.3) + 
+  geom_point(alpha = 0.2, shape = 21, color = 'black', fill = 'grey') + 
   facet_grid(. ~ autocorrelated) + 
   geom_abline(intercept = 0, slope = 1) + 
-  ggtitle('Bias of Theta Estimate') + 
+  ggtitle('Real Theta vs. Estimate') + 
   theme_user()
 
-p2 <- ggplot(mapping = aes(x = Parameter, y = Estimate)) + 
-  geom_point(data = out[type == 'Alpha' & Value != 'Null'], shape = 17) + 
-  geom_boxplot(data = out[type == 'Alpha' & Value == 'Null'], width = 0.1, outlier.shape = 1) + 
+p2 <- ggplot(out[type == 'Alpha'], mapping = aes(x = Parameter, y = Estimate, shape = Value)) + 
+  geom_point(alpha = 0.6, color = 'black', fill = 'grey') + 
+  scale_shape_manual(values = c('Null'=23, 'Non-Null'=16)) + 
   facet_grid(. ~ autocorrelated) + 
   geom_abline(intercept = 0, slope = 1) + 
-  ggtitle('Bias of Alpha Estimate', 'Showing Box Plot for Null Values (\u03B1 = 1)') + 
-  theme_user()
+  ggtitle('Real Alpha vs. Estimate') + 
+  theme_user() + 
+  theme(legend.position = 'bottom')
 
 out2 <- arrangeGrob(p1, p2, nrow=2)
 custom_ggsave('bias_small_sample.png', out2, 1.5, 1.2)

@@ -11,22 +11,22 @@ sig_level = .05
 samples <- rbind(
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0, range_alpha = range_alpha, ARMA = 0,
     ncores = ncores
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0, range_alpha = range_alpha, ARMA = 0.6,
     ncores = ncores
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = 0,
     ncores = ncores
   )),
   rbindlist(lapply(
     1:reps, create_sample_estimates,
-    n_sim = n_sim, n = n, p = p, p_s = 0.8, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = ARMA,
+    n_sim = n_sim, n = n, p = p, p_s = 0.5, percent_alpha = 0.5, range_alpha = range_alpha, ARMA = 0.6,
     ncores = ncores
   ))
 )
@@ -59,7 +59,7 @@ save(samples, out, file = 'main_work/simulations/fwer_fdr.RData')
 
 pl <- ggplot(out, aes(x = type, y = value)) + 
   geom_boxplot(fill = 'lightgrey') +
-  facet_grid(case~scales::percent(p_s)) + 
+  facet_grid(case~autocorrelated ) + 
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 

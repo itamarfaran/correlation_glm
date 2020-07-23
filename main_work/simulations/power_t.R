@@ -1,12 +1,11 @@
 source('main_work/simulations/auxilary_functions.R')
 
 n_sim = ncores
-sim = 20
 p = 32
 
 create_power_comparison <- function(
   sim, n_sim, n, p, percent_alpha, range_alpha, ARMA = 0,
-  method = 'BH', sig_level = .05, fraction = 1/5, ncores = 1){
+  method = 'BH', sig_level = .05, linkFun = linkFunctions$multiplicative_identity, ncores = 1){
   fisher_z <- function(x) 0.5*log((1 + x)/(1 - x))
   
   case = if(percent_alpha == 0) 'No Effect' else "Effect"
@@ -17,25 +16,28 @@ create_power_comparison <- function(
   
   samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
-                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA, ncores = ncores)
-  results <- pbmclapply(
+                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
+                            linkFun = linkFun, ncores = ncores)
+  results <- mclapply(
     1:n_sim, function(i) estimate_alpha(
       healthy_dt = samples$samples[[i]]$healthy,
       sick_dt = samples$samples[[i]]$sick,
-      verbose = FALSE), mc.cores = ncores
+      linkFun = linkFun, verbose = FALSE), mc.cores = ncores
   )
   
-  gee_vars <- pbmclapply(1:n_sim, function(i) compute_gee_variance(
+  gee_vars <- mclapply(1:n_sim, function(i) compute_gee_variance(
     cov_obj = results[[i]],
     healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick
-  ), mc.cores = ncores)
+    sick_dt = samples$samples[[i]]$sick), mc.cores = ncores)
   
   compare <- function(i){
     z_ <- (as.vector(results[[i]]$alpha) - 1)/sqrt_diag(gee_vars[[i]])
     p_ <- 2*pnorm(abs(z_), lower.tail = F)
     p_adj <- p.adjust(p_, method)
-    out_gee <- p_adj < sig_level
+    
+    to_reject_gee <- samples$alpha != linkFun$NULL_VAL
+    power_gee <- p_adj[to_reject_gee] < sig_level
+    error_gee <- p_adj[!to_reject_gee] < sig_level
     
     t_test_mat <- matrix(0, p, p)
     for(i_ in 1:(p-1)) for(j_ in (i_+1):p)
@@ -43,22 +45,35 @@ create_power_comparison <- function(
         samples$samples[[i]],
         t.test(fisher_z(healthy[i_,j_,]), fisher_z(sick[i_,j_,]))$p.value
       )
-    
-    t_test_mat[lower.tri(t_test_mat)] <- p.adjust(t_test_mat[lower.tri(t_test_mat)], method)
+    t_test_mat[upper.tri(t_test_mat)] <- p.adjust(t_test_mat[upper.tri(t_test_mat)], method)
     t_test_mat <- t_test_mat + t(t_test_mat)
     diag(t_test_mat) <- 1
-    out_t <- colSums(t_test_mat < sig_level) > fraction*p
     
-    out <- data.table(sim_num = i, voxel = 1:p, rejected_gee = out_gee, rejected_t = out_t)
+    pvals_t <- t_test_mat[lower.tri(t_test_mat)]
+    to_reject_t <- with(samples, linkFun$FUN(triangle2vector(real_theta), alpha, d=1) != real_theta)
+    to_reject_t <- to_reject_t[lower.tri(to_reject_t)]
+    
+    power_t <- pvals_t[to_reject_t] < sig_level
+    error_t <- pvals_t[!to_reject_t] < sig_level
+    
+    out <- data.table(
+      sim_num = i,
+      t_true_null = sum(!to_reject_t),
+      t_fp = sum(error_t),
+      t_true_alt = sum(to_reject_t),
+      t_tp = sum(power_t),
+      gee_true_null = sum(!to_reject_gee),
+      gee_fp = sum(error_gee),
+      gee_true_alt = sum(to_reject_gee),
+      gee_tp = sum(power_gee)
+    )
+    
     return(out)
   }
   
   out <- do.call(rbind, lapply(1:n_sim, compare))
   out[,`:=`(
-    sim = sim, estimated_alpha = do.call(c, transpose(results)$alpha),
-    real_alpha = rep(samples$alpha, times = n_sim),
-    n = n, p = p, percent_alpha = percent_alpha, min_alpha = min(range_alpha),
-    sd = do.call(c, lapply(gee_vars, sqrt_diag)),
+    sim = sim, n = n, p = p, percent_alpha = percent_alpha, min_alpha = min(range_alpha),
     autocorrelated = autocorrelated, case = case
   )]
   
@@ -72,67 +87,77 @@ file_loc <- 'main_work/simulations/power_t.RData'
 if(file.exists(file_loc)){
   load(file_loc)
 } else {
-  out <- lapply(1:nrow(examples), function(i)
-    lapply(
-      1:sim, create_power_comparison,
-      n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2], range_alpha = c(examples[i, 3], 1),
-      ncores = ncores
-    )
-  )
+  out <- pblapply(1:nrow(examples), function(i) create_power_comparison(
+    sim = i, n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2],
+    range_alpha = c(examples[i, 3], 1), ncores = ncores
+    ))
   
-  out <- do.call(rbind, lapply(out, do.call, what=rbind))
+  out <- do.call(rbind, out)
   
   save(out, file = file_loc)
 }
 
+out[,`:=`(
+  t_fdr = t_fp/(t_fp + t_tp + (t_fp + t_tp == 0)),
+  t_power = t_tp/t_true_null,
+  gee_fdr = gee_fp/(gee_fp + gee_tp + (gee_fp + gee_tp == 0)),
+  gee_power = gee_tp/gee_true_null
+)]
 
-id.vars <- names(out)[!startsWith(names(out), 'rejected')]
-out2 <- melt(out, id.vars=id.vars, variable.name = 'Method')
-out2[,Method := ifelse(Method == 'rejected_gee', 'GEE', 'T Test')]
 
 add_same_stuff <- function(plt){
   plt <- plt + 
-    scale_y_log10(limits = c(.001, 1)) + 
-    # geom_hline(yintercept = 0) + 
+  return(plt)
+}
+
+
+id_cols <- c('sim_num', 'n', 'p', 'percent_alpha', 'min_alpha', 'autocorrelated', 'case')
+value_cols <- c('t_fdr', 't_power', 'gee_fdr', 'gee_power')
+cols <- c(id_cols, value_cols)
+toplot <- melt(out[,..cols], id.vars = id_cols)
+
+cols <- c('method', 'rate')
+toplot[,(cols) := asplit(do.call(rbind, str_split(toplot[,variable], '_')), 2)]
+toplot[,variable := NULL]
+toplot[,method := ifelse(method == 't', 'T Test', 'GEE')]
+
+
+plot_by <- function(x, title, scales, width = NULL, type = 'power'){
+  toplot %>%
+    filter(rate == type) %>% 
+    group_by(.dots = c('method', x)) %>% 
+    summarise(value = median(value)) ->
+    labels
+  
+  interactions <- list(
+    x = toplot[rate == type, get(x)],
+    y = toplot[rate == type, method]
+  )
+  
+  p_out <-
+    ggplot(toplot[rate == type], aes_string(x = x, y = 'value', fill = 'method')) +
+    geom_boxplot(
+      aes(group = interaction(interactions$x, interactions$y)),
+      position = position_dodge(width = width), alpha = .6) +
+    geom_label(aes(label = method, group = NULL), labels, fill = 'white') + 
+    labs(title = title) +
+    scale_x_continuous(labels = scales) + 
+    scale_y_log10(limits = c(.001, 1)) +
+    # geom_hline(yintercept = 0) +
     scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
     theme_user() + theme(
       legend.position = 'none',
       axis.title.y = element_blank(),
       axis.title.x = element_blank()
-    )
-  return(plt)
+    ); p_out
+  
 }
 
-toplot1 <- out2[real_alpha != 1, mean(value), by = .(sim, percent_alpha, Method)]
-labels1 <- toplot1[,median(V1), by = .(percent_alpha, Method)]
-p1 <- ggplot(toplot1, aes(x = percent_alpha, y = V1, fill = Method, group = interaction(percent_alpha, Method))) + 
-  geom_boxplot(position = position_dodge(width = .03), alpha = .6) +
-  geom_label(aes(x = percent_alpha, y = V1, label = Method), data = labels1,
-             position = position_dodge(width = .03), fill = 'white') + 
-  labs(title = '% Non-Null Parameters') + scale_x_continuous(labels = scales::percent)
-p1 <- add_same_stuff(p1); p1
-
-toplot2 <- out2[real_alpha != 1, mean(value), by = .(sim, min_alpha, Method)]
-labels2 <- toplot2[,median(V1), by = .(min_alpha, Method)]
-
-p2 <- ggplot(toplot2, aes(x = min_alpha, y = V1, fill = Method, group = interaction(min_alpha, Method))) + 
-  geom_boxplot(position = position_dodge(width = .02), alpha = .6) + 
-  geom_label(aes(x = min_alpha, y = V1, label = Method), data = labels2,
-             position = position_dodge(width = .02), fill = 'white') + 
-  labs(title = 'Minimal Value of Alpha')
-p2 <- add_same_stuff(p2); p2
-
-toplot3 <- out2[real_alpha != 1, mean(value), by = .(sim, n, Method)]
-labels3 <- toplot3[,median(V1), by = .(n, Method)]
-
-p3 <- ggplot(toplot3, aes(x = n, y = V1, fill = Method, group = interaction(n, Method))) + 
-  geom_boxplot(position = position_dodge(width = 9), alpha = .6) + 
-  geom_label(aes(x = n, y = V1, label = Method), data = labels3,
-             position = position_dodge(width = 9), fill = 'white') + 
-  labs(title = '# Subjects')
-p3 <- add_same_stuff(p3); p3
-
-out3 <- arrangeGrob(p1, p2, p3, nrow=3)
+out3 <- arrangeGrob(
+  plot_by('percent_alpha', '% Non-Null Parameters', scales::percent, width = .3),
+  plot_by('min_alpha', 'Minimal Value of Alpha', scales::number, width = .2),
+  plot_by('n', '# Subjects', scales::number, width = 9),
+  nrow=3)
 plot(out3)
 
 custom_ggsave('power_r.png', out3, width = 2, height = 1.5)

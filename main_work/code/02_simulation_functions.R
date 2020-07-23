@@ -123,8 +123,9 @@ create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0
 }
 
 
-gen_random_effect_sigma(Sigma, random_effect = NULL){
+gen_random_effect_sigma <- function(Sigma, random_effect = NULL){
   if(is.null(random_effect)) return(Sigma)
+  p <- ncol(Sigma)
   if(0 <= random_effect & random_effect < Inf) p <- p*(1 + 1/random_effect)
   return(rWishart(1, p, Sigma)[,,1]/p)
 }

@@ -85,8 +85,8 @@ build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_s
 }
 
 
-create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0, AR = NULL, MA = NULL, 
-                                        seed_control, ncores = 1){
+create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0, AR = NULL, MA = NULL,
+                                        random_effect = NULL, seed_control, ncores = 1){
   if(missing(real_var)){
     if(!is.positive.definite(real_corr)) stop("real_corr not positive definite")
     p <- nrow(real_corr)
@@ -105,10 +105,10 @@ create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0
         stop("seed_control not available for rWishart2")
       }
     }
-    out <- rWishart2(sample_size, df, real_var)
+    out <- rWishart2(sample_size, df, real_var, random_effect = random_effect)
   } else {
     if(!missing(seed_control)) stop("seed_control not available for rWishart_ARMA")
-    out <- rWishart_ARMA(sample_size, df, real_var, AR = AR, MA = MA, ncores = ncores)
+    out <- rWishart_ARMA(sample_size, df, real_var, AR = AR, MA = MA, random_effect = random_effect, ncores = ncores)
   }
 
   return(
@@ -123,25 +123,32 @@ create_correlation_matrices <- function(real_corr, real_var, sample_size, df = 0
 }
 
 
-rWishart2 <- function(n = 1, df, Sigma){
+gen_random_effect_sigma(Sigma, random_effect = NULL){
+  if(is.null(random_effect)) return(Sigma)
+  if(0 <= random_effect & random_effect < Inf) p <- p*(1 + 1/random_effect)
+  return(rWishart(1, p, Sigma)[,,1]/p)
+}
+
+
+rWishart2 <- function(n = 1, df, Sigma, random_effect = NULL){
   p <- ncol(Sigma)
   
-  if(df >= p) return(rWishart(n, df, Sigma))
-  warning("Wishart degrees of freedom lower than matrix dimension.")
+  if(df >= p & is.null(random_effect)) return(rWishart(n, df, Sigma))
+  if(df < p) warning("Wishart degrees of freedom lower than matrix dimension.")
   
   rawFun <- function(k){
+    Sigma <- gen_random_effect_sigma(Sigma, random_effect)
     matrices <- rmvnorm(n = df, sigma = Sigma)
     return(t(matrices) %*% matrices)
   }
-  
   simplify2array(lapply(1:n, rawFun))
 }
 
 
-rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = 1){
+rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, random_effect = NULL, ncores = 1){
   p <- ncol(Sigma)
   
-  if(is.null(MA) & is.null(AR)) return(rWishart2(n = n, df = df, Sigma = Sigma))
+  if(is.null(MA) & is.null(AR)) return(rWishart2(n = n, df = df, Sigma = Sigma, random_effect = random_effect))
   if(df < p) warning("Wishart degrees of freedom lower than matrix dimension.")
   
   max_ar <- max_ma <- NULL
@@ -156,7 +163,7 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = 1){
   }
 
   rawFun <- function(k){
-    #todo: add random effect := Sigma <- rWishart(1, p, Sigma)/p
+    Sigma <- gen_random_effect_sigma(Sigma, random_effect)
     normal_matrix <- rmvnorm(n = df, sigma = Sigma)
     normal_matrix_arma <- normal_matrix
     
@@ -182,7 +189,7 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, ncores = 1){
 create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
                            percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1),
                            linkFun = linkFunctions$multiplicative_identity,
-                           ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL,
+                           ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, random_effect = NULL,
                            seed = NULL, ncores = 1){
   
   parameters <- build_parameters(
@@ -199,18 +206,18 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
     list(
       healthy = create_correlation_matrices(
         real_corr = real_theta, sample_size = n_h, df = Tlength,
-        AR = ARsick, MA = MAsick, ncores = 1
+        AR = ARsick, MA = MAsick, random_effect = random_effect, ncores = 1
         ),
       sick = create_correlation_matrices(
         real_corr = g11, sample_size = n_s, df = Tlength,
-        AR = ARsick, MA = MAsick, ncores = 1
+        AR = ARsick, MA = MAsick, random_effect = random_effect, ncores = 1
         )
     )
   }
   
   output <- list(real_theta = real_theta, real_sigma = real_sigma, alpha = alpha, samples = list())
   
-  output$samples <- if(n_sim == 1) rawFun(1) else mclapply(1:n_sim, rawFun, mc.cores = ncores)
+  output$samples <- if(n_sim == 1) list(rawFun(1)) else mclapply(1:n_sim, rawFun, mc.cores = ncores)
   
   return(output)
 }

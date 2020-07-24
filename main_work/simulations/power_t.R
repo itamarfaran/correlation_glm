@@ -81,7 +81,11 @@ create_power_comparison <- function(
 }
 
 
-examples <- expand.grid(n = c(60, 90, 120), percent_alpha = c(0.1, 0.2, 0.3), min_alpha = c(0.85, 0.9, 0.95))
+examples <- expand.grid(
+  n = c(60, 80, 100, 120),
+  percent_alpha = c(0.05, 0.1, 0.15, 0.2),
+  min_alpha = c(0.8, 0.85, 0.9, 0.95)
+  )
 
 file_loc <- 'main_work/simulations/power_t.RData'
 if(file.exists(file_loc)){
@@ -105,12 +109,6 @@ out[,`:=`(
 )]
 
 
-add_same_stuff <- function(plt){
-  plt <- plt + 
-  return(plt)
-}
-
-
 id_cols <- c('sim_num', 'n', 'p', 'percent_alpha', 'min_alpha', 'autocorrelated', 'case')
 value_cols <- c('t_fdr', 't_power', 'gee_fdr', 'gee_power')
 cols <- c(id_cols, value_cols)
@@ -126,20 +124,25 @@ plot_by <- function(x, title, scales, width = NULL, type = 'power'){
   toplot %>%
     filter(rate == type) %>% 
     group_by(.dots = c('method', x)) %>% 
-    summarise(value = median(value)) ->
+    summarise(value = median(value)) %>%
+    as.data.table() ->
     labels
   
-  interactions <- list(
+  interactions_all <- list(
     x = toplot[rate == type, get(x)],
     y = toplot[rate == type, method]
+  )
+  interactions_lab <- list(
+    x = labels[, get(x)],
+    y = labels[, method]
   )
   
   p_out <-
     ggplot(toplot[rate == type], aes_string(x = x, y = 'value', fill = 'method')) +
     geom_boxplot(
-      aes(group = interaction(interactions$x, interactions$y)),
+      aes(group = interaction(interactions_all$x, interactions_all$y)),
       position = position_dodge(width = width), alpha = .6) +
-    geom_label(aes(label = method, group = NULL), labels, fill = 'white') + 
+    # geom_label(aes(label = method, group = NULL), labels, position = position_dodge(width = width), fill = 'white')  +
     labs(title = title) +
     scale_x_continuous(labels = scales) + 
     scale_y_log10(limits = c(.001, 1)) +
@@ -149,13 +152,13 @@ plot_by <- function(x, title, scales, width = NULL, type = 'power'){
       legend.position = 'none',
       axis.title.y = element_blank(),
       axis.title.x = element_blank()
-    ); p_out
-  
+    )
+  return(p_out)
 }
 
 out3 <- arrangeGrob(
-  plot_by('percent_alpha', '% Non-Null Parameters', scales::percent, width = .3),
-  plot_by('min_alpha', 'Minimal Value of Alpha', scales::number, width = .2),
+  plot_by('percent_alpha', '% Non-Null Parameters', scales::percent, width = .04),
+  plot_by('min_alpha', 'Minimal Value of Alpha', scales::number, width = .02),
   plot_by('n', '# Subjects', scales::number, width = 9),
   nrow=3)
 plot(out3)

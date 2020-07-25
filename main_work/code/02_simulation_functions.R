@@ -2,6 +2,7 @@
 
 linkFunctions <- list(
   "multiplicative_identity" = list(
+    NAME = 'multiplicative_identity',
     FUN = function(t, a, d) {
       a <- matrix(a, nc = d)
       a_mat <- a %*% t(a)
@@ -19,6 +20,7 @@ linkFunctions <- list(
     NULL_VAL = 1
   ),
   "additive_identity" = list(
+    NAME = 'additive_identity',
     FUN = function(t, a, d) {
       a <- matrix(a, nc = d)
       a_mat <- a %*% t(a)
@@ -36,6 +38,7 @@ linkFunctions <- list(
     NULL_VAL = 0
   ),
   "additive_quotent" = list(
+    NAME = 'additive_quotent',
     FUN = function(t, a, d) {
       a <- as.vector(a)
       a_mat_t <- replicate(length(a), a)

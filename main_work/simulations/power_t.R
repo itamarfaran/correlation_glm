@@ -163,4 +163,4 @@ out3 <- arrangeGrob(
   nrow=3)
 plot(out3)
 
-custom_ggsave('power_r.png', out3, width = 2, height = 1.5)
+custom_ggsave('power_t.png', out3, width = 2, height = 1.5)

@@ -23,7 +23,7 @@ conf <- list(
   )
 )
 desease_data <- 'TGA'
-file <- paste0('main_work/simulations/analysis_', tolower(desease_data), '.RData')
+file <- paste0('main_work/tga_analysis/analysis_', tolower(desease_data), '_', linkFun$NAME, '.RData')
 
 if (file.exists(file)){
   load(file)
@@ -43,7 +43,7 @@ if (file.exists(file)){
     healthy_dt = healthy, sick_dt = sick, cov_obj = results, est_mu = F
   ))
   
-  save.image(file)
+  save(sample_data, results, gee_var, file = file)
 }
 
 out <- data.table(

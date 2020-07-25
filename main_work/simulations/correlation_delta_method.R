@@ -38,5 +38,5 @@ p2 <- ggplot(toplot_samp, aes(x = theo, y = diff)) +
     y='Difference Between Bootstrap & Delta Estimates'
   ) + theme_user()
 
-out <- arrangeGrob(p1, p2, nrow=1)
-custom_ggsave('correlation_delta_method.png', out, width=2)
+out <- arrangeGrob(p1, p2, ncol=1)
+custom_ggsave('correlation_delta_method.png', out, width = .75, height = 1.5)

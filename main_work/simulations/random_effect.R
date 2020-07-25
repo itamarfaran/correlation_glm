@@ -13,7 +13,7 @@ examples <- data.table(expand.grid(
   AR = arma_vec,
   MA = arma_vec,
   random_effect = rand_vec
-  ))
+))
 simulate_rms <- Vectorize(function(df, sample_size, AR, MA, random_effect, ncores = 1){
   create_correlation_matrices(
     real_corr = corr_mat,
@@ -43,14 +43,16 @@ if(ncores > 1){
     random_effect = random_effect
   )]
 }
+examples[random_effect < 0, random_effect := 0]
 save(examples, file='main_work/simulations/random_effect.RData')
 
 plot_fun <- function(col){
-  p <- ggplot(examples, aes_string(x = col, y = 'rms')) + 
-    geom_point(fill = 'grey', position = 'jitter') +
+  p <- ggplot(examples[sample(.N, 2500)], aes_string(x = col, y = 'rms')) + 
+    geom_point(fill = 'grey', position = 'jitter', alpha = .4) +
     ylim(examples[,range(rms)]*c(0.97, 1.03)) +
     labs(x='', y='', title = col) + 
     theme_user()
+  if(col == 'random_effect') p <- p + scale_x_sqrt()
   return(p)
 }
 

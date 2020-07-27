@@ -58,7 +58,7 @@ todonotes
 \use_package undertilde 1
 \cite_engine basic
 \cite_engine_type default
-\biblio_style plain
+\biblio_style apacann
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
@@ -248,15 +248,33 @@ T\cdot Cov\left(W_{ij},W_{kl}\right) & =\Sigma_{ij,kl}^{\left(2\right)}=\Sigma_{
 
 \end_inset
 
-as shown for example by [[CITE]].
+as shown for example by 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "efron2012large"
+literal "false"
+
+\end_inset
+
+.
  However, the elements of empirical correlation matrices have distinctly
  smaller variances because of the scaling.
  The following lemma describes the limiting covariance of values in empirical
  correlation matrices: 
 \end_layout
 
+\begin_layout Lemma*
+\begin_inset CommandInset label
+LatexCommand label
+name "lemma-cor-cov"
+
+\end_inset
+
+The asymptotic moments of empirical correlation matrices.
+\end_layout
+
 \begin_layout Standard
-The asymptotic moments of empirical correlation matrices: Let 
+Let 
 \begin_inset Formula $R=corr(X)$
 \end_inset
 
@@ -298,7 +316,7 @@ The asymptotic moments of empirical correlation matrices: Let
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-C_{ij,kl}\left(\boldsymbol{\rho}\right)\coloneqq\frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)
+C_{ij,kl}\left(\boldsymbol{\rho}\right)\coloneqq\frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)\label{equation-cor-cov}
 \end{equation}
 
 \end_inset
@@ -326,14 +344,17 @@ width "50col%"
 status open
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
 The Delta Method on Correlation Matrices
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-delta-method"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -372,11 +393,11 @@ status open
 \begin_layout Plain Layout
 Since the Wishart distribution is closed under convolution, in the sense
  that if 
-\begin_inset Formula $U\sim W_{p}\left(\Sigma,n\right),V\sim W_{p}\left(\Sigma,m\right)$
+\begin_inset Formula $U\sim W_{p}\left(\Sigma,n_{u}\right),V\sim W_{p}\left(\Sigma,n_{v}\right)$
 \end_inset
 
  then 
-\begin_inset Formula $U+V\sim W_{p}\left(\Sigma,m+n\right)$
+\begin_inset Formula $U+V\sim W_{p}\left(\Sigma,n_{u}+n_{v}\right)$
 \end_inset
 
 , The CLT applies and 
@@ -414,9 +435,26 @@ In fMRI time-series data, the correlation between adjacent samples can be
 \begin_inset Formula $Var(R)$
 \end_inset
 
- will be inflated compared to [[Eq Refs]].
- The following correction, due to Efron [[CITE]], identifies an effective
- degrees of freedom Maybe effective sample size 
+ will be inflated compared to equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "equation-cor-cov"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ The following correction, due to Efron 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "efron2012large"
+literal "false"
+
+\end_inset
+
+, identifies an effective degrees of freedom 
 \begin_inset Formula $T_{eff}$
 \end_inset
 
@@ -447,9 +485,24 @@ The Effective Degrees of Freedom: Let
 \begin_inset Formula $\psi(\Sigma)$
 \end_inset
 
- the root-mean-square factor [[Add Equation]].
- Then the covariances of empirical covariance and correlation matrices W
- and R are as before, with the replacement of T with 
+ the root-mean-square factor 
+\begin_inset Formula $\psi=\sum_{i<j}\boldsymbol{\rho}_{ij}^{2}/{p \choose 2}$
+\end_inset
+
+.
+ Then the covariances of empirical covariance and correlation matrices 
+\begin_inset Formula $W$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ are as before, with the replacement of 
+\begin_inset Formula $T$
+\end_inset
+
+ with 
 \begin_inset Formula $T_{eff}$
 \end_inset
 
@@ -482,7 +535,7 @@ T_{eff}(T,\psi)\cdot Cov\left(W_{ij},W_{kl}\right)=\Sigma_{ij,kl}^{\left(2\right
 Finally, we would like to define the vectorizing operator for correlation
  matrices.
  Correlation matrices can be fully characterized using the 
-\begin_inset Formula $m=p(p-1)/2$
+\begin_inset Formula $m={p \choose 2}=p\cdot(p-1)/2$
 \end_inset
 
  upper triangle elements, because they are symmetric with a degenerate diagonal.
@@ -511,7 +564,17 @@ Finally, we would like to define the vectorizing operator for correlation
 \begin_inset Formula $\Sigma_{\boldsymbol{\rho}}^{\star}=\Sigma^{\star}\left(\boldsymbol{\rho}\right)$
 \end_inset
 
- as describe in [[Eq Refs]]).
+ as describe in equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "equation-cor-cov"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Section
@@ -520,19 +583,6 @@ Non-Linear Modeling of Correlation Matrices
 
 \begin_layout Subsection
 Model Definition
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-Model Identifiability????
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -662,7 +712,7 @@ Suppose that the collected data consists of two sets of independent samples,
 \begin_inset Formula $g$
 \end_inset
 
- (not necessarly it's inverse).
+ (not necessary it's inverse).
  Our working example throughout the paper will be 
 \begin_inset Formula $g\left(\Theta,\alpha\right)=\Theta\circ\alpha\alpha^{t}$
 \end_inset
@@ -698,8 +748,28 @@ Suppose that the collected data consists of two sets of independent samples,
  link functions.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Model Identifiability????
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Model Estimation
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Model-Estimation"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -728,7 +798,17 @@ Define
 \begin_inset Formula $\Sigma_{g}^{\star}=\Sigma^{\star}\left(g\left(\Theta,\alpha\right)\right)$
 \end_inset
 
- is defined as in lemma (), with 
+ is defined as in lemma 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "lemma-cor-cov"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, with 
 \begin_inset Formula $g\left(\Theta,\alpha\right)$
 \end_inset
 
@@ -757,7 +837,7 @@ lines 0
 placement o
 overhang 0col%
 width "50col%"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -765,6 +845,13 @@ status collapsed
 \begin_layout Plain Layout
 Bias of 
 \begin_inset Formula $\hat{\Theta},\hat{\alpha}$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-bias-static"
+
 \end_inset
 
 
@@ -843,7 +930,7 @@ n method will lead to limiting results.
 \end_inset
 
  as the weighting matrix in the loss function.
- This optimization, that is indefferent to the determinant that appears
+ This optimization, that is indifferent to the determinant that appears
  in the Gaussian PDF, yields more stable results than the full log-likelihood
  model.
  Define the following loss functions:
@@ -977,7 +1064,7 @@ The starting point of the algorithm,
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -989,6 +1076,13 @@ Bias of
 
  as a Function of 
 \begin_inset Formula $n,p$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-bias-dynamic"
+
 \end_inset
 
 
@@ -1024,6 +1118,13 @@ Write that ARMA doesn't matter - maybe plot but don't show
 
 \begin_layout Subsection
 Model Inference
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Model-Inference"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1068,6 +1169,7 @@ The gradient of
 \begin_inset Formula $E\left[\nabla_{\alpha}\mathcal{S}\right]=0$
 \end_inset
 
+.
  
 \begin_inset Flex TODO Note (inline)
 status open
@@ -1078,19 +1180,16 @@ do we need to prove this?
 
 \end_inset
 
-.
  Thus the minimization of 
 \begin_inset Formula $\mathcal{S}$
 \end_inset
 
  can be viewed as a solution of General Estimation Equations.
- Using the methodology of the latter
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-quote GEE paper
-\end_layout
+ Using the methodology of the latter 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "liang1986longitudinal"
+literal "false"
 
 \end_inset
 
@@ -1130,8 +1229,8 @@ quote GEE paper
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align}
-I_{d}^{\left(0\right)} & =n_{d}\cdot\mathbf{J}_{\alpha}g^{t}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot\mathbf{J}_{\alpha}g|_{\alpha=\hat{\alpha}}\\
-I_{d}^{\left(1\right)} & =n_{d}\cdot\mathbf{J}_{\alpha}g^{t}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot C_{d}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot\mathbf{J}_{\alpha}g|_{\alpha=\hat{\alpha}}
+I_{d}^{\left(0\right)} & =n_{d}\cdot\mathbf{J}_{\alpha}g^{t}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot\mathbf{J}_{\alpha}g|_{\alpha=\hat{\alpha}il}\label{eq-gee-var-1}\\
+I_{d}^{\left(1\right)} & =n_{d}\cdot\mathbf{J}_{\alpha}g^{t}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot C_{d}\cdot\bar{\Sigma}_{d}^{\star-1}\cdot\mathbf{J}_{\alpha}g|_{\alpha=\hat{\alpha}}\label{eq-gee-var-2}
 \end{align}
 
 \end_inset
@@ -1195,7 +1294,27 @@ C_{d}=n_{eff}^{-1}\sum_{i\in\mathcal{D}}\left(Y_{i}-\vec{g}\left(\Theta,\alpha\r
 \begin_inset Formula $T_{eff}$
 \end_inset
 
- in equations (),(); in practice 
+ in equations 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq-gee-var-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+,
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq-gee-var-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+; in practice 
 \begin_inset Formula $T_{eff}$
 \end_inset
 
@@ -1239,15 +1358,14 @@ WHY?
 
 \end_inset
 
- we find that psi also fixes the bias introduced by ...
- [[can we show that n_eff ecreases when dim(alpha) increases? no]]
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1262,6 +1380,13 @@ Consistency of
 \end_inset
 
 , Under Weak Null and Time Dependency
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-gee-var-consistency-1"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1302,15 +1427,33 @@ We estimate
  with Z-tests.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Subsubsection*
 The Limiting Distribution of Weighted Least Squares Estimates of Correlation
  Matrices
 \end_layout
 
 \begin_layout Standard
-The estimates derived in chapter [[Model Estimation]] and the GEE Sandwich
- Estimates of their variance derived in chapter [[Model Inference]] have
- a limiting distribution of 
+The estimates derived in chapter 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "subsec:Model-Estimation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and the GEE Sandwich Estimates of their variance derived in chapter 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "subsec:Model-Inference"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ have a limiting distribution of 
 \end_layout
 
 \begin_layout Standard
@@ -1339,13 +1482,20 @@ lines 0
 placement o
 overhang 0col%
 width "50col%"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
 FWER & FDR
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-fdr"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1452,7 +1602,7 @@ In this chapter, we will present the model's performance on simulated data.
 \begin_inset Formula $g\left(\Theta,\alpha\right)$
 \end_inset
 
-, respectivaly, each matrix based on 
+, respectively, each matrix based on 
 \begin_inset Formula $T$
 \end_inset
 
@@ -1464,15 +1614,44 @@ In this chapter, we will present the model's performance on simulated data.
 on matrices (with no link function).
  We will also present the model's ability to keep the FWER, Power simulations
  and comparisons, and calculation times.
- We present the algorithms to simulate the data in [[ref algorithms]].
- 
+ We present the algorithms to simulate the data in algorithms 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "algo-sample-pars"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "algo-arma-mvnorm"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "algo-gen-samples"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1487,6 +1666,13 @@ Consistency of
 \end_inset
 
 , Under Strong Null and No Time Dependency
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-gee-var-consistency-2"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1512,8 +1698,18 @@ The first simulations show the bias of the estimates
 \end_inset
 
 .
- In figure [[ref]], we simulate a random sample of 50 diagnosed and control
- subjects each, with 
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-bias-static"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we simulate a random sample of 50 diagnosed and control subjects each,
+ with 
 \begin_inset Formula $p=50$
 \end_inset
 
@@ -1522,17 +1718,27 @@ The first simulations show the bias of the estimates
 \begin_inset Formula $\alpha$
 \end_inset
 
- values are uniformilly distributed between 
+ values are uniformly distributed between 
 \begin_inset Formula $\left(0.7,1.1\right)$
 \end_inset
 
  whilst the other are equal to 1.
  The estimates are unbiased for both parameters.
- In figure [[ref]], we allow the sample size and the dimension 
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-bias-dynamic"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we allow the sample size and the dimension 
 \begin_inset Formula $p$
 \end_inset
 
- to vary - the sample size varies from 20 to 100 while the dmension varies
+ to vary - the sample size varies from 20 to 100 while the dimension varies
  from 20 to 60.
  
 \begin_inset Flex TODO Note (inline)
@@ -1551,7 +1757,7 @@ talk about other parameters
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1563,6 +1769,13 @@ Effect of
 
  on
 \begin_inset Formula $\hat{V}\left(\text{\hat{\alpha}}\right)$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-percent-sick"
+
 \end_inset
 
 
@@ -1589,8 +1802,8 @@ Effect of
 \end_layout
 
 \begin_layout Standard
-In the next simulations, we compare the estimated GEE variance to the bootstrape
-d empirical variance - for each 
+In the next simulations, we compare the estimated GEE variance to the bootstrapp
+ed empirical variance - for each 
 \begin_inset Formula $\Theta,\alpha$
 \end_inset
 
@@ -1604,7 +1817,27 @@ d empirical variance - for each
 \end_inset
 
  and compare it the average GEE variance estimate, computed in each simulation.
- In figure [[ref]], we hold the the proportion of diagnosed subjects (
+ In figures 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-gee-var-consistency-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-gee-var-consistency-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we hold the the proportion of diagnosed subjects (
 \begin_inset Formula $\frac{n_{d}}{n_{d}+n_{h}}$
 \end_inset
 
@@ -1626,7 +1859,17 @@ d empirical variance - for each
 \end_inset
 
 -s don't equal to 1) with time-dependence as well.
- In figure [[ref]], we set 
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-percent-sick"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we set 
 \begin_inset Formula $n=50$
 \end_inset
 
@@ -1639,8 +1882,8 @@ d empirical variance - for each
 \end_inset
 
  to vary.
- Interestingly, but somewhat intuitivly, we find that the GEE estimate tends
- to be lower when the proportion is low, in reference to the bootstrapped
+ Interestingly, but somewhat intuitively, we find that the GEE estimate
+ tends to be lower when the proportion is low, in reference to the bootstrapped
  variance.
  However - the GEE estimate always overestimates the variance, keeping the
  FWER under strong control.
@@ -1661,7 +1904,7 @@ explain why
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -1669,6 +1912,13 @@ status collapsed
 \begin_layout Plain Layout
 Power vs.
  FDR Corrected T-tests
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-power"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1700,6 +1950,13 @@ width "50col%"
 status collapsed
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-time"
+
+\end_inset
+
+
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
@@ -1731,11 +1988,28 @@ Calculation Time of
 
 \end_inset
 
-In figure [[ref]] we examine the control of the FWER (with Holm's correction)
- and the control of the FDR (with B-H correction
+In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-fdr"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we examine the control of the FWER (with Holm's correction
 \begin_inset CommandInset citation
 LatexCommand cite
-key "fdr-bh"
+key "holm1979simple"
+literal "false"
+
+\end_inset
+
+) and the control of the FDR (with B-H correction
+\begin_inset CommandInset citation
+LatexCommand cite
+key "benjamini1995controlling"
 literal "false"
 
 \end_inset
@@ -1743,12 +2017,22 @@ literal "false"
 ).
  We test the control in two factors: under the strong null (all null hypothesis
  are true) and the weak null (some alternative hypothesis are true) and
- when the autocorrelation is or is not present.
+ when the auto-correlation is or is not present.
  Our proposed method keeps the FDR and FWER under control in all cases,
  while the general type-I error (% of rejected nulls out of all nulls) is
  kept under .05.
- In figure [[ref]] we compare the statistical power of our proposed method
- versus an ordinary series of FDR corrected T-test; For each voxel 
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-power"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we compare the statistical power of our proposed method versus an ordinary
+ series of FDR corrected T-test; For each voxel 
 \begin_inset Formula $\left(k,l\right)$
 \end_inset
 
@@ -1783,7 +2067,7 @@ status open
 \end_inset
 
 .
- Under the assumption of columnwise effect - our model has more statistical
+ Under the assumption of column-wise effect - our model has more statistical
  power.
  
 \end_layout
@@ -1793,12 +2077,22 @@ We further show the computation time as a function of
 \begin_inset Formula $p$
 \end_inset
 
- in figure [[ref]] (recall 
+ in figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-time"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ (recall 
 \begin_inset Formula $m=\frac{p\left(p-1\right)}{2}\Rightarrow p\approx\sqrt{2m}$
 \end_inset
 
  ).
- Interestingly, we find that the calculation time is approximatly 
+ Interestingly, we find that the calculation time is approximately 
 \begin_inset Formula $O\left(m^{2.3}\right)$
 \end_inset
 
@@ -1807,17 +2101,6 @@ We further show the computation time as a function of
 \end_inset
 
  matrix.
- 
-\begin_inset Flex TODO Note (inline)
-status open
-
-\begin_layout Plain Layout
-quote
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1842,13 +2125,20 @@ Application on Transient Global Amnesia Research Data
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Difference Between Diagnosed and Control Subjects
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-tga-difference"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1874,7 +2164,7 @@ Difference Between Diagnosed and Control Subjects
 \end_layout
 
 \begin_layout Plain Layout
-Ploting of the differences between diagnosed and control subjects.
+Plotting of the differences between diagnosed and control subjects.
  On the left, we examine the empirical differences between average matrices
  (
 \begin_inset Formula $\bar{R}_{d}-\bar{R}_{h}$
@@ -1895,12 +2185,10 @@ Ploting of the differences between diagnosed and control subjects.
 
 \begin_layout Standard
 We inspect the data gathered by 
-\begin_inset Flex TODO Note (Margin)
-status open
-
-\begin_layout Plain Layout
-Quote Michael
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "peer2014reversible"
+literal "false"
 
 \end_inset
 
@@ -1916,15 +2204,34 @@ Quote Michael
 ; 8 male) that served as a control group.
  The whole brain network was defined using the Automatic Anatomical Labeling
  (AAL) atlas, which defines 45 brain regions in each cerebral hemisphere
- resulting; 2 columns where omitted from the data as some subjects's had
+ resulting; 2 columns where omitted from the data as some subject's had
  missing values, resulting with 29 
 \begin_inset Formula $88\times88$
 \end_inset
 
  correlation matrices.
- In figure [[ref]] we plot the two average correlation matrices per each
- group, and in figure [[ref]] we plot the difference between two matrices
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-tga-exploratory"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we plot the two average correlation matrices per each group, and in figure
  
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-tga-difference"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we plot the difference between two matrices 
 \begin_inset Formula $\left(\bar{R}_{d}-\bar{R}_{h}\right)$
 \end_inset
 
@@ -1935,7 +2242,7 @@ Quote Michael
 
  T-tests over all correlation coefficients, and the P-values of these tests
  range from 0.0002 to 0.9997; After BH correction, the P-values range from
- 0.237 to 1 - and we are unable te reject the global null.
+ 0.237 to 1 - and we are unable the reject the global null.
 \end_layout
 
 \begin_layout Standard
@@ -1949,6 +2256,13 @@ status open
 
 \begin_layout Plain Layout
 Average Correlation Matrices
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-tga-exploratory"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1974,7 +2288,7 @@ Average Correlation Matrices
 \end_layout
 
 \begin_layout Plain Layout
-Exploratory correlation plot of average functional connectivty in control
+Exploratory correlation plot of average functional connectivity in control
  subjects (
 \begin_inset Formula $\bar{R}_{h}$
 \end_inset
@@ -1994,20 +2308,40 @@ Exploratory correlation plot of average functional connectivty in control
 \begin_layout Standard
 In order to reduce the number of hypothesis tested, and increase the statistical
  power after the FDR correction, we proceed with applicating the method
- decribed in this paper on the TGA research data using two different link
+ described in this paper on the TGA research data using two different link
  functions and compare both results.
- In figure [[ref]] we show the estimates of 
+ In figure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "figure-tga-model-diff"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we show the estimates of 
 \begin_inset Formula $\Lambda_{d}-\Lambda_{h}$
 \end_inset
 
- with the quotent link function 
+ with the quotient link function 
 \begin_inset Formula $g_{ij}=\Theta_{ij}/\left(1+\alpha_{i}+\alpha_{j}\right)$
 \end_inset
 
 ; While our method underestimates the difference between diagnosed and control
  subjects due the column-wise structure assumed in the model, it allows
  to statistically identify affected regions whilst controlling the FDR.
- In table [[ref]] we examine the estimates produced by each link function.
+ In table 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "table-tga-results"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we examine the estimates produced by each link function.
  Our method suggests a significant effect in the following regions: 
 \begin_inset Flex TODO Note (inline)
 status open
@@ -2032,6 +2366,13 @@ status open
 
 \begin_layout Plain Layout
 Alpha Effect
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-tga-model-diff"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2093,6 +2434,13 @@ status open
 
 \begin_layout Plain Layout
 Estimates under Different Link Functions
+\begin_inset CommandInset label
+LatexCommand label
+name "figure-tga-link-estimates"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2122,8 +2470,20 @@ Estimates under Different Link Functions
 
 \end_layout
 
-\begin_layout Section*
-Discussion
+\begin_layout Section
+Supplementaries
+\end_layout
+
+\begin_layout Subsection
+Full Results on TGA Data
+\end_layout
+
+\begin_layout Subsection
+The Delta Method on Correlation Matrices
+\end_layout
+
+\begin_layout Subsection
+Simulation Algorithms
 \end_layout
 
 \begin_layout Standard
@@ -2137,6 +2497,13 @@ status collapsed
 
 \begin_layout Plain Layout
 Generate Sample Parameters
+\begin_inset CommandInset label
+LatexCommand label
+name "algo-sample-pars"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2237,7 +2604,14 @@ status collapsed
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Generate ARMA-Based Covariance Martrix
+Generate ARMA-Based Covariance Matrix
+\begin_inset CommandInset label
+LatexCommand label
+name "algo-arma-mvnorm"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2328,6 +2702,13 @@ status collapsed
 
 \begin_layout Plain Layout
 Generate Samples
+\begin_inset CommandInset label
+LatexCommand label
+name "algo-gen-samples"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2436,6 +2817,10 @@ Else:
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+Discussion
 \end_layout
 
 \begin_layout Standard
@@ -2565,6 +2950,12 @@ status collapsed
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "table-tga-results"
+
+\end_inset
+
 
 \end_layout
 
@@ -2603,7 +2994,7 @@ Multiplicative
 \begin_inset Text
 
 \begin_layout Plain Layout
-Quotent
+Quotient
 \end_layout
 
 \end_inset

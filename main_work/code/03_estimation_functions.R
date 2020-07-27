@@ -17,7 +17,7 @@ compute_estimated_n <- function(dt, only_diag = TRUE){
   return(compute_estimated_n_raw(est = est, theo = theo, only_diag = only_diag))
 }
 
-corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"), use_cpp = FALSE){
+corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"), fisher_z = FALSE, use_cpp = FALSE){
   
   nonpositive <- match.arg(nonpositive, c("stop", "force", "ignore"))
   if(!is.positive.definite(matr)){
@@ -70,6 +70,13 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
   }
   
   output <- output + t(output) - diag(diag(output))
+  
+  if(fisher_z){
+    diagonalized <- triangle2vector(matr)
+    transformed <- 1/(1 - diagonalized^2)
+    gradient <- diag(transformed)
+    output <- gradient %*% output %*% gradient
+  }
   return(output)
 }
 
@@ -155,7 +162,7 @@ estimate_loop <- function(
       )
     } else g12
   
-  solve_g12_reg <- solve(g12_reg)
+  solve_g12_reg <- if(cov_method == 'identity') diag(m) else solve(g12_reg)
   
   temp_theta <- theta0
   temp_alpha <- alpha0

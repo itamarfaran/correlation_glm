@@ -221,7 +221,7 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
   
   output <- list(real_theta = real_theta, real_sigma = real_sigma, alpha = alpha, samples = list())
   
-  output$samples <- if(n_sim == 1) list(rawFun(1)) else mclapply(1:n_sim, rawFun, mc.cores = ncores)
+  output$samples <- if(n_sim == 1) rawFun(1) else mclapply(1:n_sim, rawFun, mc.cores = ncores)
   
   return(output)
 }

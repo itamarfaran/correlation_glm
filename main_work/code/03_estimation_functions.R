@@ -35,14 +35,13 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
   order_vectj <- unlist(lapply(1:(p - 1), function(i) (i + 1):p)) - use_cpp
   
   if(use_cpp){
-    cppFunction(
-      paste0(scan(
+    cppFunction(paste0(scan(
         "main_work/Code/corcalc_c.cpp",
         what = "character",
         sep = "\n",
         quiet = TRUE),
-        collapse = "\n")
-    )
+        collapse = "\n"))
+
     output <- corcalc_c(matr, p, m, order_vecti, order_vectj)
   } else {
     output <- matrix(0, nrow = m, ncol = m)
@@ -137,7 +136,7 @@ estimate_loop <- function(
   m <- 0.5*p*(p-1)
   
   if(is.null(theta0)) theta0 <- colMeans(healthy_dt)
-  if(is.null(alpha0)) alpha0 <- matrix(1, nr = p, nc = dim_alpha)
+  if(is.null(alpha0)) alpha0 <- matrix(linkFun$NULL_VAL, nr = p, nc = dim_alpha)
   dim_alpha <- length(alpha0)/p
   if(dim_alpha %% 1 != 0) stop("alpha0 not multiplicative of p")
   
@@ -266,12 +265,16 @@ estimate_loop <- function(
     )
   })
   
-  return( list(
+  output <- list(
     theta = temp_theta,
     alpha = temp_alpha,
     linkFun = linkFun,
+    vcov = solve_g12_reg,
     convergence = convergence[1:max_convergence],
-    steps = steps, log_optim = log_optim_out) )
+    steps = steps, log_optim = log_optim_out
+    )
+  
+  return(output)
 }
 
 
@@ -332,11 +335,11 @@ estimate_alpha_jacknife <- function(
   
   apply_fun <- function(i, boot_dt){
     if(boot_dt == 'sick'){
-      sick_dt_ = sick_dt[-i,]
-      healthy_dt_ = healthy_dt
+      sick_dt_ <- sick_dt[-i,]
+      healthy_dt_ <- healthy_dt
     } else if(boot_dt == 'healthy'){
-      sick_dt_ = sick_dt
-      healthy_dt_ = healthy_dt[-i,]
+      sick_dt_ <- sick_dt
+      healthy_dt_ <- healthy_dt[-i,]
     }
     
     out <- estimate_loop(

@@ -26,12 +26,11 @@ efrons_rms <- function(m, p = NULL){
     stop('diag of m is not 1')
   
   m_vect <- triangle2vector(m, diag = FALSE)
+  m_elements <- 0.5*ncol(m)*(ncol(m) - 1)
   sum_sqrd_corrs <- sum(m_vect^2)
-  rms <- sqrt(sum_sqrd_corrs/choose(ncol(m), 2))
+  rms <- sqrt(sum_sqrd_corrs/m_elements)
   
-  if(!is.null(p))
-    rms <- sqrt(p/(p - 1) * (rms^2 - 1/(p - 1)))
-  
+  if(!is.null(p)) rms <- sqrt(p/(p - 1) * (rms^2 - 1/(p - 1)))
   return(rms)
 }
 

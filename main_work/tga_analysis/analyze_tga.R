@@ -25,6 +25,12 @@ corrplot(
   method = 'color', tl.pos = "n")
 dev.off()
 
+png('main_work/tga_analysis/control_explanatory_diag.png', 2*w, 2*h)
+corrplot(
+  corr = calculate_mean_matrix(sample_data$samples$healthy), 
+  method = 'color', tl.pos = "n", type = 'upper', diag = F)
+dev.off()
+
 png('main_work/tga_analysis/diagnosed_explanatory.png', w, h)
 corrplot(
   corr = calculate_mean_matrix(sample_data$samples$sick), 
@@ -38,6 +44,12 @@ png('main_work/tga_analysis/difference_explanatory.png', w, h)
 corrplot(
   corr = empirical_difference_corrmat, 
   method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35))
+dev.off()
+
+png('main_work/tga_analysis/difference_explanatory_diag.png', 2*w, 2*h)
+corrplot(
+  corr = empirical_difference_corrmat, 
+  method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35), type = 'upper', diag = F)
 dev.off()
 
 

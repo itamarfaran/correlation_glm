@@ -118,7 +118,7 @@ vector_sum <- function(matr, index = 1:(nrow(matr)), constants = rep(1, length(i
   
   if(weights) constants <- constants/sum(constants)
   
-  for(i in 1:length(index)) out <- out + constants[i]*matr[index[i],]*
+  for(i in 1:length(index)) out <- out + constants[i]*matr[index[i],]
   return(out)
 }
 

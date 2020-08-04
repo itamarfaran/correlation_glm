@@ -18,6 +18,7 @@ compute_estimated_n <- function(dt, only_diag = TRUE){
 }
 
 corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"), fisher_z = FALSE, use_cpp = FALSE){
+  if(is.vector(matr)) matr <- vector2triangle(matr, diag_value = 1)
   
   nonpositive <- match.arg(nonpositive, c("stop", "force", "ignore"))
   if(!is.positive.definite(matr)){
@@ -79,8 +80,15 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
   return(output)
 }
 
-corrmat_covariance_from_dt <- function(dt, est_n = FALSE, only_diag = TRUE){
-  sigma <- corrmat_covariance(vector2triangle(colMeans(dt), diag_value = 1))
+corrmat_covariance_from_dt <- function(dt, use_cpp = FALSE, est_n = FALSE, only_diag = TRUE, ncores = 1){
+  out <- mclapply(
+    1:nrow(dt),
+    function(i) corrmat_covariance(dt[i,], 'ignore', use_cpp = use_cpp),
+    mc.cores = ncores
+    )
+  
+  sigma <- calculate_mean_matrix(simplify2array(out))
+  
   if(est_n){
     est <- t(dt) %*% dt / nrow(dt)
     estimated_n <- compute_estimated_n_raw(est = est, theo = sigma, only_diag = only_diag)

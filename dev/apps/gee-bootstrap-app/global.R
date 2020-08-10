@@ -26,7 +26,7 @@ sidebar_options <- list(
   'GEE Estimated SD Upper' = 'gee_sd_upper')
 
 sidebar_options_reverse <- list()
-for(i in 1:length(sidebar_options)){
+for(i in seq_along(sidebar_options)){
   sidebar_options_reverse[[i]] <- names(sidebar_options)[i]
   names(sidebar_options_reverse)[i] <- sidebar_options[[i]]
 }

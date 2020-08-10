@@ -15,8 +15,8 @@ custom_ggsave <- function(filename, plot, width = 1, height = 1, ...){
   
 create_estimates <- function(n_sim, n, p, percent_alpha, range_alpha, ARMA = 0, verbose = FALSE){
   # no arma, null case
-  case = if(percent_alpha == 0) 'No Effect' else 'Effect'
-  autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
+  case <- if(percent_alpha == 0) 'No Effect' else 'Effect'
+  autocorrelated <- if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if(ARMA == 0) ARMA <- NULL
   
   samples <- create_samples(n_sim = n_sim, n_h = n/2, n_s = n/2, p = p, Tlength = 115,
@@ -34,8 +34,8 @@ create_estimates <- function(n_sim, n, p, percent_alpha, range_alpha, ARMA = 0, 
 }
 
 create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, ncores = 1){
-  case = if(percent_alpha == 0) 'No Effect' else "Effect"
-  autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
+  case <- if(percent_alpha == 0) 'No Effect' else "Effect"
+  autocorrelated <- if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if (ARMA == 0) ARMA <- NULL
   n_s <- ceiling(p_s*n)
   n_h <- n - n_s
@@ -65,8 +65,8 @@ create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alp
 
 
 create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha, ARMA = 0, ncores = 1, sim = NULL){
-  case = if(percent_alpha == 0) 'No Effect' else "Effect"
-  autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
+  case <- if(percent_alpha == 0) 'No Effect' else "Effect"
+  autocorrelated <- if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if (ARMA == 0) ARMA <- NULL
   n_s <- ceiling(p_s*n)
   n_h <- n - n_s

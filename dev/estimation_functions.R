@@ -83,7 +83,7 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
 corrmat_covariance_array_from_dt <- function(dt, use_cpp = FALSE, ncores = 1, verbose = FALSE){
   lapply_fun <- if(verbose) pbmclapply else mclapply
   out <- simplify2array(lapply_fun(
-    1:nrow(dt),
+    seq_len(nrow(dt)),
     function(i) corrmat_covariance(dt[i,], 'ignore', use_cpp = use_cpp),
     mc.cores = ncores
   ))
@@ -133,7 +133,7 @@ sum_of_squares2 <- function(
   
   g11 <- as.matrix(triangle2vector(linkFun$FUN(t = theta, a = alpha, d = dim_alpha)))
   sse <- sum(sapply(
-    1:nrow(sick_dt),
+    seq_len(nrow(sick_dt)),
     function(i) t(g11) %*% inv_sigma_array[,,i] %*% (0.5 * g11 - sick_dt[i,])
   ))
   
@@ -577,7 +577,7 @@ estimate_alpha_jacknife <- function(
   }
   
   if(verbose) cat('\njacknifing Sick Observations...\n')
-  cov_obj_sick <- mclapply_(1:nrow(sick_dt), apply_fun, boot_dt = 'sick', mc.cores = ncores)
+  cov_obj_sick <- mclapply_(seq_len(nrow(sick_dt)), apply_fun, boot_dt = 'sick', mc.cores = ncores)
   cov_obj_sick_t <- purrr::transpose(cov_obj_sick)
   
   theta <- do.call(rbind, cov_obj_sick_t$theta)
@@ -589,7 +589,7 @@ estimate_alpha_jacknife <- function(
   
   if(jack_healthy){
     if(verbose) cat('\njacknifing Healthy Observations...\n')
-    cov_obj_healthy <- mclapply_(1:nrow(healthy_dt), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
+    cov_obj_healthy <- mclapply_(seq_len(nrow(healthy_dt)), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
     cov_obj_healthy_t <- purrr::transpose(cov_obj_healthy)
     
     theta_h <- do.call(rbind, cov_obj_healthy_t$theta)

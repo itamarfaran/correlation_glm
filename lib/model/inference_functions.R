@@ -187,9 +187,6 @@ compute_sandwhich_fisher_variance <- function(cov_obj, sick_dt, linkFun = linkFu
 
 
 wilks_test <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1, linkFun){
-  healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
-  sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
-
   #Do a wilks test (chi-square)
   chisq <- -2*( minusloglik(theta = cov_obj$theta,
                             alpha = cov_obj$alpha,

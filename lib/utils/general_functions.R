@@ -92,7 +92,7 @@ regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase
 
 #Check stationarity/invertability of AR/MA process
 check_invertability_arma <- function(coefs, perc = 1e-03){
-  polfun <- function(x) 1 - sum(coefs*x^(1:length(coefs)))
+  polfun <- function(x) 1 - sum(coefs*x^(seq_along(coefs)))
   x <- sign(sapply(seq(-1, 1, by = perc), polfun))
   return(all(x == 1) | all(x == -1))
 }
@@ -104,7 +104,7 @@ matrix_sum <- function(array_, index = 1:(dim(array_)[3]), constants = rep(1, le
   
   if(weights) constants <- constants/sum(constants)
   
-  for(i in 1:length(index)) out <- out + constants[i]*array_[,,index[i]]
+  for(i in seq_along(index)) out <- out + constants[i]*array_[,, index[i]]
   
   return(out)
 }
@@ -118,7 +118,7 @@ vector_sum <- function(matr, index = 1:(nrow(matr)), constants = rep(1, length(i
   
   if(weights) constants <- constants/sum(constants)
   
-  for(i in 1:length(index)) out <- out + constants[i]*matr[index[i],]
+  for(i in seq_along(index)) out <- out + constants[i]*matr[index[i],]
   return(out)
 }
 

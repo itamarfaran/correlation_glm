@@ -4,13 +4,13 @@ source('lib/model/estimation_functions.R')
 source('lib/model/inference_functions.R')
 
 n_sim <- 200
-n = 80
-p = 32
-percent_alpha = 0
+n <- 80
+p <- 32
+percent_alpha <- 0
 
 examples <- expand.grid(p_s = c(0.2, 0.35, 0.5, 0.65, 0.8), ARMA = c(0, 0.5))
 
-toplot <- do.call(rbind, pbmclapply(1:nrow(examples), function(i) create_variance_estimates(
+toplot <- do.call(rbind, pbmclapply(seq_len(nrow(examples)), function(i) create_variance_estimates(
   n_sim = n_sim, n = n, p = p, percent_alpha = percent_alpha,
   range_alpha = c(1, 1), p_s = examples[i, 1], ARMA = examples[i, 2]), mc.cores = ncores))
 

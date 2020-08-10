@@ -105,7 +105,7 @@ abline(a = 0, b = 1)
 hist(combinations2boot$type1error)
 summary(combinations2boot$type1error)
 
-cols = c('gee_sd', 'gee_old_sd', 'mle_sd')
+cols <- c('gee_sd', 'gee_old_sd', 'mle_sd')
 combinations2boot_ratio_long <- 
   combinations2boot[,.(
     p, n, sick_obs_percentage, Tlength,

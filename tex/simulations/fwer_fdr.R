@@ -1,12 +1,12 @@
 source('tex/simulations/aux.R')
 
-n_sim = 60
-n = 100
-p = 32
-range_alpha = c(0.7, 0.9)
-ARMA = 0.6
-reps = 20
-sig_level = .05
+n_sim <- 60
+n <- 100
+p <- 32
+range_alpha <- c(0.7, 0.9)
+ARMA <- 0.6
+reps <- 20
+sig_level <- .05
 
 samples <- rbind(
   rbindlist(lapply(

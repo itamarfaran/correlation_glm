@@ -31,7 +31,7 @@ if(ncores > 1){
     sample_size = sample_size,
     AR = AR, MA = MA,
     random_effect = random_effect))
-  res <- simplify(pbmclapply(1:nrow(examples), tt, mc.cores = ncores))
+  res <- simplify(pbmclapply(seq_len(nrow(examples)), tt, mc.cores = ncores))
   examples[,rms := res]
 } else {
   examples[,rms := simulate_rms(

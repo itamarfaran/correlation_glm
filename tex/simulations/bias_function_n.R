@@ -8,7 +8,7 @@ examples <- expand.grid(n = c(20, 40, 60, 80, 100), p = c(15, 30, 45, 60))
 # examples <- expand.grid(n = c(20, 40), p = c(10, 20))
 examples <- rbind(examples, examples, examples)
 
-toplot <- do.call(rbind, lapply(1:nrow(examples), function(i) create_estimates(
+toplot <- do.call(rbind, lapply(seq_len(nrow(examples)), function(i) create_estimates(
   n_sim = n_sim, n = examples[i, 1], p = examples[i, 2], percent_alpha = 0, range_alpha = range_alpha, ARMA = 0,
   verbose = FALSE
   )))
@@ -23,7 +23,7 @@ toplot[,`:=`(Bias = Estimate - Parameter, RMSE = (Estimate - Parameter)^2)]
 #   value.name = 'Value_'
 #   )
 
-pow = 1.414
+pow <- 1.414
 S_sqrt <- function(x) sign(x)*abs(x)^(1/pow)
 IS_sqrt <- function(x) (abs(x)^pow)*sign(x)
 S_sqrt_trans <- function() scales::trans_new("S_sqrt",S_sqrt,IS_sqrt)

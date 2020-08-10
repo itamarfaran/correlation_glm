@@ -11,7 +11,7 @@ get_par_path <- function(model, par = 'alpha', model_name = NULL){
     lapply(as.vector) %>% do.call(cbind, .) %>%
     data.table() -> dt
   
-  colnames(dt) <- as.character(1:ncol(dt))
+  colnames(dt) <- as.character(seq_len(ncol(dt)))
   dt[,index := 1:.N]
   dt <- melt(dt, id.vars = 'index', variable.name = 'step', value.name = 'parameter')
   dt[,step := as.numeric(step)]
@@ -65,7 +65,7 @@ minimize_cov_distance <- function(data, model, reg_method = 'increase_diag'){
 
 ggsave_batch <- function(l_plots, names, dir = 'temp'){
   if(!dir.exists(dir)) dir.create(dir)
-  for(i in 1:length(l_plots)) ggsave(paste0(dir, '/', names[i], '.png'), l_plots[[i]])
+  for(i in seq_along(l_plots)) ggsave(paste0(dir, '/', names[i], '.png'), l_plots[[i]])
 }
 
 ##### definitions #####
@@ -157,8 +157,8 @@ ARMAdetails <- list(
   ARsick = c(0.5, 0.1), MAsick = c(0.5, 0.1),
   ARhealth = c(0.4, 0.2), MAhealth = c(0.4, 0.2)
 )
-percent_alpha = 0.2
-range_alpha = c(0.85, 1.05)
+percent_alpha <- 0.2
+range_alpha <- c(0.85, 1.05)
 
 
 n_h <- 180

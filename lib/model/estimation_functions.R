@@ -82,7 +82,7 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
 
 corrmat_covariance_from_dt <- function(dt, use_cpp = FALSE, est_n = FALSE, only_diag = TRUE, ncores = 1){
   out <- mclapply(
-    1:nrow(dt),
+    seq_len(nrow(dt)),
     function(i) corrmat_covariance(dt[i,], 'ignore', use_cpp = use_cpp),
     mc.cores = ncores
     )
@@ -136,10 +136,7 @@ estimate_loop <- function(
   iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_loop = 3), iter_config)
   optim_config <- modifyList(list(method = "BFGS", reltol = 1e-06, log_optim = FALSE), optim_config)
   cov_method <- match.arg(cov_method, c('identity', 'corrmat'))
-  
-  healthy_n <- nrow(healthy_dt)
-  sick_n <- nrow(sick_dt)
-  
+
   p <- 0.5 + sqrt(1 + 8*ncol(sick_dt))/2
   m <- 0.5*p*(p-1)
   
@@ -193,13 +190,11 @@ estimate_loop <- function(
   #Convergence is a matrix wich tells us if the convergence in each iteration is completed
   convergence <- rep(-1, iter_config$max_loop)
   convergence[1] <- 0
-  condition0 <- FALSE
-  
+
   tt <- Sys.time()
   if(verbose) message(paste0("Time of intialization: ", tt, "; Progress: 'Loop, (Time, Convergence, Distance)'"))
   for(i in 2:iter_config$max_loop){
-    g11 <- linkFun$FUN(t = temp_theta, a = temp_alpha, d = dim_alpha)
-    
+
     temp_theta <- theta_of_alpha(
       alpha = temp_alpha,
       healthy_dt = healthy_dt,
@@ -254,7 +249,7 @@ estimate_loop <- function(
     if(i > iter_config$min_loop){
       look_back <- iter_config$min_loop - 1
       index <- if(look_back > 0) i - 0:look_back else i
-      condition0 <- distance_lower_than_threshold & (sum(convergence[i]) == 0)
+      condition0 <- distance_lower_than_threshold & (sum(convergence[index]) == 0)
     }
     if(condition0) break()
   }
@@ -401,24 +396,20 @@ estimate_alpha_jacknife <- function(
       optim_config = iid_config$optim_config,
       verbose = FALSE
     )
-    alpha0 <- iid_model$alpha
-    theta0 <- iid_model$theta
   }
   
   if(verbose) cat('\njacknifing Sick Observations...\n')
-  cov_obj_sick <- mclapply_(1:nrow(sick_dt), apply_fun, boot_dt = 'sick', mc.cores = ncores)
+  cov_obj_sick <- mclapply_(seq_len(nrow(sick_dt)), apply_fun, boot_dt = 'sick', mc.cores = ncores)
   cov_obj_sick_t <- purrr::transpose(cov_obj_sick)
   
   theta <- do.call(rbind, cov_obj_sick_t$theta)
   alpha <- do.call(rbind, lapply(cov_obj_sick_t$alpha, as.vector))
   convergence <- do.call(c, cov_obj_sick_t$convergence)
   gee_var <- do.call(rbind, cov_obj_sick_t$gee_var)
-  
-  sick_index = NA
-  
+
   if(jack_healthy){
     if(verbose) cat('\njacknifing Healthy Observations...\n')
-    cov_obj_healthy <- mclapply_(1:nrow(healthy_dt), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
+    cov_obj_healthy <- mclapply_(seq_len(nrow(healthy_dt)), apply_fun, boot_dt = 'healthy', mc.cores = ncores)
     cov_obj_healthy_t <- purrr::transpose(cov_obj_healthy)
     
     theta_h <- do.call(rbind, cov_obj_healthy_t$theta)

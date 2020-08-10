@@ -1,10 +1,10 @@
 source('tex/simulations/aux.R')
 
-n = 50
-p = 12
-ARMA = 0.5
-percent_alpha = 0.4
-range_alpha = c(0.6, 1)
+n <- 50
+p <- 12
+ARMA <- 0.5
+percent_alpha <- 0.4
+range_alpha <- c(0.6, 1)
 
 create_variance_estimates_different_link <- function(n_sim, simulate_link, name_sim, estimate_link, name_est){
   if (ARMA == 0) ARMA <- NULL

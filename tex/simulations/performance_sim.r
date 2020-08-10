@@ -33,7 +33,7 @@ out <- data.table(p = numeric(), est = numeric(), gee = numeric())
 for(p_ in p) out <- rbind(out, timeit(p_, r))
 out[,`:=`(Estimation = est, GEE = gee, Total = est + gee, est = NULL, gee = NULL)]
 
-cols = colnames(out)[-1]
+cols <- colnames(out)[-1]
 
 results <- out[,.(
   Type = cols,

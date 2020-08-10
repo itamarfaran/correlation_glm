@@ -20,7 +20,7 @@ transpose(multiplicative_load$estimates$steps)$alpha %>%
   lapply(as.vector) %>% do.call(cbind, .) %>%
   data.table() -> alpha_steps
 
-colnames(alpha_steps) <- as.character(1:ncol(alpha_steps))
+colnames(alpha_steps) <- as.character(seq_len(ncol(alpha_steps)))
 
 alpha_steps[,index := 1:.N]
 alpha_steps <- melt(alpha_steps, id.vars = 'index')

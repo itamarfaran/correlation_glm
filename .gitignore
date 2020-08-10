@@ -1,23 +1,33 @@
-*.pdf
-*.pptx
+# dirs
+.Rproj.user
+.idea
+/archive/
+
+# R
+*.Rproj
 *.Rhistory
 .Rhistory
 *_Rhistory
 *.RData
 *.mat
+
+#docs
 *.lyx#
 *.lyx~
-*.docx
 *.tex
+*.pdf
+*.pptx
+*.docx
+
+#google
+desktop.ini
+*Icon
+
+# misc
 *.csv
 !main_work/code/gee-bootstrapp-app/gee_data.csv
 *.rar
 *.txt
 *.png
-desktop.ini
-*.Rproj
 credentials-2.csv
 connect_to_ssh.txt
-*Icon
-.Rproj.user
-.idea

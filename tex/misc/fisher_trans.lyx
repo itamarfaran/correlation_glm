@@ -1,0 +1,313 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+X=\left\{ r_{12},r_{13},r_{14},r_{23},r_{24},r_{34}\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g:\mathbb{R}^{m}\mapsto\mathbb{R}^{m}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+g_{i}\left(u\right) & =\frac{1}{2}\ln\left(\frac{1+u_{i}}{1-u_{i}}\right)\\
+ & =\frac{1}{2}\left(\ln\left(1+u_{i}\right)-\ln\left(1-u_{i}\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial g_{i}}{\partial u_{i}} & =\frac{1}{2}\left(\frac{\partial}{\partial u_{i}}\ln\left(1+u_{i}\right)-\frac{\partial}{\partial u_{i}}\ln\left(1-u_{i}\right)\right)\\
+ & =\frac{1}{2}\left(\frac{1}{1+u_{i}}+\frac{1}{1-u_{i}}\right)\\
+ & =\frac{1}{2}\frac{1}{1+u_{i}}\left(1+\frac{1+u_{i}}{1-u_{i}}\right)\\
+ & =\frac{1}{2}\frac{1}{1+u_{i}}\left(\frac{1-u_{i}+1+u_{i}}{1-u_{i}}\right)\\
+ & =\frac{1}{2}\frac{1}{1+u_{i}}\left(\frac{2}{1-u_{i}}\right)\\
+ & =\frac{1}{\left(1+u_{i}\right)\left(1-u_{i}\right)}\\
+ & =\frac{1}{1-u_{i}^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial g_{i}}{\partial u_{j}}=\frac{\boldsymbol{1}_{\left\{ i=j\right\} }}{1-u_{i}^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Cov\left(\hat{\rho}_{ij},\hat{\rho}_{kl}\right)=\rho_{ij}^{2}\left(\rho_{ij}^{2}-2\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+C_{ij,kl}\left(\boldsymbol{\rho}\right) & \coloneqq\rho_{ij}^{2}\left(1+\rho_{ij}^{2}\right)+\rho_{ij}^{2}\label{equation-cor-cov}\\
+ & =\rho_{ij}^{2}\left(2+\rho_{ij}^{2}\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(r_{ij},r_{ij}\right) & =\frac{\rho_{ij}\rho_{ij}}{2}\left(\rho_{ii}^{2}+\rho_{ij}^{2}+\rho_{ij}^{2}+\rho_{jj}^{2}\right)-\rho_{ij}\left(\rho_{ii}\rho_{ij}+\rho_{ji}\rho_{jj}\right)-\rho_{ij}\left(\rho_{ii}\cdot\rho_{ij}+\rho_{ij}\cdot\rho_{jj}\right)+\left(\rho_{ii}\rho_{jj}+\rho_{ij}\rho_{ij}\right)\\
+ & =\rho_{ij}^{2}\left(1+\rho_{ij}^{2}\right)-2\rho_{ij}^{2}-2\rho_{ij}^{2}+\left(1+\rho_{ij}^{2}\right)\\
+ & =\left(1+\rho_{ij}^{2}\right)\left(\rho_{ij}^{2}+1\right)-4\rho_{ij}^{2}\\
+ & =\left(1+\rho_{ij}^{2}\right)^{2}-4\rho_{ij}^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(r_{ij},r_{il}\right) & =\frac{\rho_{ij}\rho_{il}}{2}\left(1+\rho_{il}^{2}+\rho_{ji}^{2}+\rho_{jl}^{2}\right)-\rho_{ij}\left(\rho_{il}+\rho_{ji}\rho_{jl}\right)-\rho_{il}\left(\rho_{ji}+\rho_{il}\cdot\rho_{jl}\right)+\left(\rho_{jl}+\rho_{il}\rho_{ji}\right)\\
+ & =\frac{\rho_{ij}\rho_{il}}{2}\left(1+\rho_{il}^{2}+\rho_{ji}^{2}+\rho_{jl}^{2}\right)-\rho_{jl}\left(\rho_{ij}^{2}+\rho_{il}^{2}-1\right)-\rho_{il}\rho_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Cov\left(r_{ij},r_{kl}\right)=\frac{\rho_{ij}\rho_{kl}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)-\rho_{ij}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)-\rho_{kl}\left(\rho_{ik}\cdot\rho_{jk}+\rho_{il}\cdot\rho_{jl}\right)+\left(\rho_{ik}\rho_{jl}+\rho_{il}\rho_{jk}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\rho}g=\nabla_{\rho}g^{t}=\left[\begin{array}{cccccc}
+\frac{1}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)}\\
+ & \frac{1}{\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)}\\
+ &  & \frac{1}{\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)}\\
+ &  &  & \frac{1}{\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)}\\
+ &  &  &  & \frac{1}{\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)}\\
+ &  &  &  &  & \frac{1}{\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(X\right)=Var\left(\left\{ r_{12},r_{13},...,r_{24},r_{34}\right\} \right)=\Sigma=
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\begin{array}{cccccc}
+\left(1+\rho_{12}^{2}\right)^{2}-4\rho_{12}^{2} & \frac{\rho_{12}\rho_{13}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{23}\left(\rho_{12}^{2}+\rho_{13}^{2}-1\right)-\rho_{12}\rho_{13} & \frac{\rho_{12}\rho_{14}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{24}\left(\rho_{12}^{2}+\rho_{14}^{2}-1\right)-\rho_{12}\rho_{14} & \frac{\rho_{12}\rho_{23}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{13}\left(\rho_{12}^{2}+\rho_{23}^{2}-1\right)-\rho_{12}\rho_{23} & \frac{\rho_{12}\rho_{24}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{14}\left(\rho_{12}^{2}+\rho_{24}^{2}-1\right)-\rho_{12}\rho_{24} & \frac{\rho_{12}\rho_{34}}{2}\left(\rho_{13}^{2}+\rho_{14}^{2}+\rho_{23}^{2}+\rho_{24}^{2}\right)-\rho_{12}\left(\rho_{13}\rho_{14}+\rho_{23}\rho_{24}\right)-\rho_{34}\left(\rho_{13}\rho_{23}+\rho_{14}\rho_{24}\right)+\left(\rho_{13}\rho_{24}+\rho_{14}\rho_{23}\right)\\
+ & \left(1+\rho_{13}^{2}\right)^{2}-4\rho_{13}^{2} & \frac{\rho_{13}\rho_{14}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{13}^{2}+\rho_{14}^{2}-1\right)-\rho_{13}\rho_{14} & \frac{\rho_{13}\rho_{23}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{12}\left(\rho_{13}^{2}+\rho_{23}^{2}-1\right)-\rho_{13}\rho_{23} & \frac{\rho_{13}\rho_{24}}{2}\left(\rho_{12}^{2}+\rho_{14}^{2}+\rho_{23}^{2}+\rho_{34}^{2}\right)-\rho_{13}\left(\rho_{12}\rho_{14}+\rho_{23}\rho_{34}\right)-\rho_{24}\left(\rho_{12}\rho_{23}+\rho_{14}\rho_{34}\right)+\left(\rho_{12}\rho_{34}+\rho_{14}\rho_{23}\right) & \frac{\rho_{13}\rho_{34}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{14}\left(\rho_{13}^{2}+\rho_{34}^{2}-1\right)-\rho_{13}\rho_{34}\\
+ &  & \left(1+\rho_{14}^{2}\right)^{2}-4\rho_{14}^{2} & \frac{\rho_{14}\rho_{23}}{2}\left(\rho_{12}^{2}+\rho_{13}^{2}+\rho_{24}^{2}+\rho_{43}^{2}\right)-\rho_{14}\left(\rho_{12}\rho_{13}+\rho_{24}\rho_{43}\right)-\rho_{23}\left(\rho_{12}\cdot\rho_{24}+\rho_{13}\cdot\rho_{43}\right)+\left(\rho_{12}\rho_{34}+\rho_{13}\rho_{24}\right) & \frac{\rho_{14}\rho_{24}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{12}\left(\rho_{14}^{2}+\rho_{24}^{2}-1\right)-\rho_{14}\rho_{24} & \frac{\rho_{14}\rho_{34}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{13}\left(\rho_{14}^{2}+\rho_{34}^{2}-1\right)-\rho_{14}\rho_{34}\\
+ &  &  & \left(1+\rho_{23}^{2}\right)^{2}-4\rho_{23}^{2} & \frac{\rho_{23}\rho_{24}}{2}\left(1+\rho_{23}^{2}+\rho_{24}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{23}^{2}+\rho_{24}^{2}-1\right)-\rho_{23}\rho_{24} & \frac{\rho_{23}\rho_{34}}{2}\left(1+\rho_{23}^{2}+\rho_{24}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{23}^{2}+\rho_{34}^{2}-1\right)-\rho_{23}\rho_{34}\\
+ &  &  &  & \left(1+\rho_{24}^{2}\right)^{2}-4\rho_{24}^{2} & \frac{\rho_{24}\rho_{34}}{2}\left(1+\rho_{34}^{2}+\rho_{24}^{2}+\rho_{23}^{2}\right)-\rho_{23}\left(\rho_{24}^{2}+\rho_{34}^{2}-1\right)-\rho_{24}\rho_{34}\\
+ &  &  &  &  & \left(1+\rho_{34}^{2}\right)^{2}-4\rho_{34}^{2}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\nabla_{\rho}g^{t}\Sigma g\right]_{ij}=\sum_{i}\sum_{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[ABC\right]_{ij}=\left[AB\right]_{i\cdot}C_{\cdot j}=A_{i\cdot}BC_{\cdot j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left[\nabla_{\rho}g^{t}\Sigma\nabla_{\rho}g\right]_{ij} & =\nabla_{\rho}g_{i\cdot}^{t}\Sigma\nabla_{\rho}g_{\cdot j}\\
+ & =\left(\begin{array}{c}
+\nabla_{\rho}g_{i\cdot}^{t}\Sigma_{\cdot1}\\
+\nabla_{\rho}g_{i\cdot}^{t}\Sigma_{\cdot2}\\
+\vdots\\
+\nabla_{\rho}g_{i\cdot}^{t}\Sigma_{\cdot p}
+\end{array}\right)\nabla_{\rho}g_{\cdot j}\\
+ & =\left(\begin{array}{cccc}
+\sum_{k}\nabla_{\rho}g_{ik}\Sigma_{k1} & \sum_{k}\nabla_{\rho}g_{ik}\Sigma_{k2} & \cdots & \sum_{k}\nabla_{\rho}g_{ik}\Sigma_{kp}\end{array}\right)\nabla_{\rho}g_{\cdot j}\\
+ & =\left(\begin{array}{cccc}
+\nabla_{\rho}g_{ii}\Sigma_{i1} & \nabla_{\rho}g_{ii}\Sigma_{i2} & \cdots & \nabla_{\rho}g_{ii}\Sigma_{ip}\end{array}\right)\nabla_{\rho}g_{\cdot j}\\
+ & =\nabla_{\rho}g_{ii}\Sigma_{i1}\nabla_{\rho}g_{1j}+\nabla_{\rho}g_{ii}\Sigma_{i2}\nabla_{\rho}g_{2j}+\cdots+\nabla_{\rho}g_{ii}\Sigma_{ip}\nabla_{\rho}g_{pj}\\
+ & =\sum_{k}\nabla_{\rho}g_{ii}\Sigma_{ik}\nabla_{\rho}g_{kj}\\
+ & =\nabla_{\rho}g_{ii}\Sigma_{ij}\nabla_{\rho}g_{jj}\\
+\left[\nabla_{\rho}g^{t}\Sigma\nabla_{\rho}g\right]_{ij} & =\nabla_{\rho}g_{ii}\Sigma_{ij}\nabla_{\rho}g_{jj}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\begin{array}{cccccc}
+\frac{\left(1+\rho_{12}^{2}\right)^{2}-4\rho_{12}^{2}}{\left(1+\rho_{12}\right)^{2}\left(1-\rho_{12}\right)^{2}} & \frac{\frac{\rho_{12}\rho_{13}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{23}\left(\rho_{12}^{2}+\rho_{13}^{2}-1\right)-\rho_{12}\rho_{13}}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)} & \frac{\frac{\rho_{12}\rho_{14}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{24}\left(\rho_{12}^{2}+\rho_{14}^{2}-1\right)-\rho_{12}\rho_{14}}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)} & \frac{\frac{\rho_{12}\rho_{23}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{13}\left(\rho_{12}^{2}+\rho_{23}^{2}-1\right)-\rho_{12}\rho_{23}}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)} & \frac{\frac{\rho_{12}\rho_{24}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{14}\left(\rho_{12}^{2}+\rho_{24}^{2}-1\right)-\rho_{12}\rho_{24}}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)} & \frac{\frac{\rho_{12}\rho_{34}}{2}\left(\rho_{13}^{2}+\rho_{14}^{2}+\rho_{23}^{2}+\rho_{24}^{2}\right)-\rho_{12}\left(\rho_{13}\rho_{14}+\rho_{23}\rho_{24}\right)-\rho_{34}\left(\rho_{13}\rho_{23}+\rho_{14}\rho_{24}\right)+\left(\rho_{13}\rho_{24}+\rho_{14}\rho_{23}\right)}{\left(1+\rho_{12}\right)\left(1-\rho_{12}\right)\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}\\
+ & \frac{\left(1+\rho_{13}^{2}\right)^{2}-4\rho_{13}^{2}}{\left(1+\rho_{13}\right)^{2}\left(1-\rho_{13}\right)^{2}} & \frac{\frac{\rho_{13}\rho_{14}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{13}^{2}+\rho_{14}^{2}-1\right)-\rho_{13}\rho_{14}}{\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)} & \frac{\frac{\rho_{13}\rho_{23}}{2}\left(1+\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}\right)-\rho_{12}\left(\rho_{13}^{2}+\rho_{23}^{2}-1\right)-\rho_{13}\rho_{23}}{\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)} & \frac{\frac{\rho_{13}\rho_{24}}{2}\left(\rho_{12}^{2}+\rho_{14}^{2}+\rho_{23}^{2}+\rho_{34}^{2}\right)-\rho_{13}\left(\rho_{12}\rho_{14}+\rho_{23}\rho_{34}\right)-\rho_{24}\left(\rho_{12}\rho_{23}+\rho_{14}\rho_{34}\right)+\left(\rho_{12}\rho_{34}+\rho_{14}\rho_{23}\right)}{\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)} & \frac{\frac{\rho_{13}\rho_{34}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{14}\left(\rho_{13}^{2}+\rho_{34}^{2}-1\right)-\rho_{13}\rho_{34}}{\left(1+\rho_{13}\right)\left(1-\rho_{13}\right)\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}\\
+ &  & \frac{\left(1+\rho_{14}^{2}\right)^{2}-4\rho_{14}^{2}}{\left(1+\rho_{14}\right)^{2}\left(1-\rho_{14}\right)^{2}} & \frac{\frac{\rho_{14}\rho_{23}}{2}\left(\rho_{12}^{2}+\rho_{13}^{2}+\rho_{24}^{2}+\rho_{43}^{2}\right)-\rho_{14}\left(\rho_{12}\rho_{13}+\rho_{24}\rho_{43}\right)-\rho_{23}\left(\rho_{12}\cdot\rho_{24}+\rho_{13}\cdot\rho_{43}\right)+\left(\rho_{12}\rho_{34}+\rho_{13}\rho_{24}\right)}{\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)} & \frac{\frac{\rho_{14}\rho_{24}}{2}\left(1+\rho_{12}^{2}+\rho_{14}^{2}+\rho_{24}^{2}\right)-\rho_{12}\left(\rho_{14}^{2}+\rho_{24}^{2}-1\right)-\rho_{14}\rho_{24}}{\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)} & \frac{\frac{\rho_{14}\rho_{34}}{2}\left(1+\rho_{13}^{2}+\rho_{14}^{2}+\rho_{34}^{2}\right)-\rho_{13}\left(\rho_{14}^{2}+\rho_{34}^{2}-1\right)-\rho_{14}\rho_{34}}{\left(1+\rho_{14}\right)\left(1-\rho_{14}\right)\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}\\
+ &  &  & \frac{\left(1+\rho_{23}^{2}\right)^{2}-4\rho_{23}^{2}}{\left(1+\rho_{23}\right)^{2}\left(1-\rho_{23}\right)^{2}} & \frac{\frac{\rho_{23}\rho_{24}}{2}\left(1+\rho_{23}^{2}+\rho_{24}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{23}^{2}+\rho_{24}^{2}-1\right)-\rho_{23}\rho_{24}}{\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)} & \frac{\frac{\rho_{23}\rho_{34}}{2}\left(1+\rho_{23}^{2}+\rho_{24}^{2}+\rho_{34}^{2}\right)-\rho_{34}\left(\rho_{23}^{2}+\rho_{34}^{2}-1\right)-\rho_{23}\rho_{34}}{\left(1+\rho_{23}\right)\left(1-\rho_{23}\right)\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}\\
+ &  &  &  & \frac{\left(1+\rho_{24}^{2}\right)^{2}-4\rho_{24}^{2}}{\left(1+\rho_{24}\right)^{2}\left(1-\rho_{24}\right)^{2}} & \frac{\frac{\rho_{24}\rho_{34}}{2}\left(1+\rho_{34}^{2}+\rho_{24}^{2}+\rho_{23}^{2}\right)-\rho_{23}\left(\rho_{24}^{2}+\rho_{34}^{2}-1\right)-\rho_{24}\rho_{34}}{\left(1+\rho_{24}\right)\left(1-\rho_{24}\right)\left(1+\rho_{34}\right)\left(1-\rho_{34}\right)}\\
+ &  &  &  &  & \frac{\left(1+\rho_{34}^{2}\right)^{2}-4\rho_{34}^{2}}{\left(1+\rho_{34}\right)^{2}\left(1-\rho_{34}\right)^{2}}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

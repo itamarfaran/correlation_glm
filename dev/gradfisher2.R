@@ -34,7 +34,7 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
       
       return(sum(log(D1)) + t(g11) %*% U1 %*% diag(1/D1) %*% t(U1) %*% g11)
     }
-    mclapply(1:length(alpha), function(i) grad(func = forGrad, x = alpha[i], i = i), mc.cores = ncores) %>% unlist()
+    mclapply(seq_along(alpha), function(i) grad(func = forGrad, x = alpha[i], i = i), mc.cores = ncores) %>% unlist()
   }
   kappa <- function(x, theta, alpha, eff_N, linkFun, U1){
     forGrad <- function(A){
@@ -53,13 +53,13 @@ computeFisherByGrad <- function(CovObj, sickDat, linkFun, U1 = TRUE, ncores = 1)
   
   gammares <- gamma(theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N, linkFun = linkFun, U1 = U1)
   kappares <- do.call(rbind, mclapply(
-    1:nrow(sickDat),
+    seq_len(nrow(sickDat)),
     function(i) kappa(x = sickDat[i,], theta = CovObj$theta, alpha = CovObj$alpha, eff_N = CovObj$Est_N,
                       linkFun = linkFun, U1 = U1),
     mc.cores = ncores))
   
   kapgam <- gammares %o% colSums(kappares)
-  kapkap <- mclapply(1:nrow(sickDat), function(i) kappares[i,] %o% kappares[i,], mc.cores = ncores) %>%
+  kapkap <- mclapply(seq_len(nrow(sickDat)), function(i) kappares[i,] %o% kappares[i,], mc.cores = ncores) %>%
     simplify2array() %>% calculate_mean_matrix(do.mean = FALSE)
   
   return(0.25*(nrow(sickDat) * gammares %o% gammares + kapgam + t(kapgam) + kapkap))
@@ -93,7 +93,7 @@ loglikgrad_uni <- function(obs, CovObj, linkFun){
 }
 
 computeBmatr <- function(CovObj, sickDat, silent = FALSE, linkFun, ncores = 1){
-  Bmatr <- mclapply(1:nrow(sickDat), function(j) loglikgrad_uni(sickDat[j,], CovObj, linkFun), mc.cores = ncores)
+  Bmatr <- mclapply(seq_len(nrow(sickDat)), function(j) loglikgrad_uni(sickDat[j,], CovObj, linkFun), mc.cores = ncores)
   Bmatr <- Bmatr %>% (function(list){
     L <- length(list)
     pelet <- matrix(0, nrow = nrow(list[[1]]), ncol = ncol(list[[1]]))

@@ -1,6 +1,7 @@
 library(data.table)
 library(DT)
 library(plotly)
+library(shiny)
 
 # data <- fread('gee_data_boot_.csv')
 data <- fread('gee_data_boot.csv')

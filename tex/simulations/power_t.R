@@ -1,15 +1,15 @@
 source('tex/simulations/aux.R')
 
-n_sim = ncores
-p = 32
+n_sim <- ncores
+p <- 32
 
 create_power_comparison <- function(
   sim, n_sim, n, p, percent_alpha, range_alpha, ARMA = 0,
   method = 'BH', sig_level = .05, linkFun = linkFunctions$multiplicative_identity, ncores = 1){
   fisher_z <- function(x) 0.5*log((1 + x)/(1 - x))
   
-  case = if(percent_alpha == 0) 'No Effect' else "Effect"
-  autocorrelated = if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
+  case <- if(percent_alpha == 0) 'No Effect' else "Effect"
+  autocorrelated <- if(ARMA == 0) 'Not Autocorrelated' else 'Autocorrelated'
   if (ARMA == 0) ARMA <- NULL
   n_s <- ceiling(0.5*n)
   n_h <- n - n_s
@@ -91,7 +91,7 @@ file_loc <- 'main_work/simulations/power_t.RData'
 if(file.exists(file_loc)){
   load(file_loc)
 } else {
-  out <- pblapply(1:nrow(examples), function(i) create_power_comparison(
+  out <- pblapply(seq_len(nrow(examples)), function(i) create_power_comparison(
     sim = i, n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2],
     range_alpha = c(examples[i, 3], 1), ncores = ncores
     ))

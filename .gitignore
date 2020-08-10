@@ -14,7 +14,6 @@
 #docs
 *.lyx#
 *.lyx~
-*.tex
 *.pdf
 *.pptx
 *.docx

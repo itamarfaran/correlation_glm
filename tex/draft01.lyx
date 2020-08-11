@@ -364,7 +364,7 @@ name "figure-delta-method"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/correlation_delta_method.png
+	filename simulations/correlation_delta_method.png
 	scale 50
 
 \end_inset
@@ -864,7 +864,7 @@ name "figure-bias-static"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/bias_small_sample.png
+	filename simulations/bias_small_sample.png
 	scale 50
 
 \end_inset
@@ -1095,7 +1095,7 @@ name "figure-bias-dynamic"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/bias_function_n.png
+	filename simulations/bias_function_n.png
 	scale 50
 
 \end_inset
@@ -1393,7 +1393,7 @@ name "figure-gee-var-consistency-1"
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/variance_emp_theo_nonnull.png
+	filename simulations/variance_emp_theo_nonnull.png
 	scale 50
 
 \end_inset
@@ -1505,7 +1505,7 @@ name "figure-fdr"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/fwer_fdr.png
+	filename simulations/fwer_fdr.png
 	scale 50
 
 \end_inset
@@ -1679,7 +1679,7 @@ name "figure-gee-var-consistency-2"
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/variance_emp_theo_null.png
+	filename simulations/variance_emp_theo_null.png
 	scale 50
 
 \end_inset
@@ -1788,7 +1788,7 @@ name "figure-percent-sick"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/percent_sick_effect.png
+	filename simulations/percent_sick_effect.png
 	scale 50
 
 \end_inset
@@ -1928,7 +1928,7 @@ name "figure-power"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/power_t.png
+	filename simulations/power_t.png
 	scale 50
 
 \end_inset
@@ -2148,14 +2148,14 @@ name "figure-tga-difference"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/difference_explanatory.png
+	filename tga_analysis/difference_explanatory.png
 	scale 50
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/difference_model.png
+	filename tga_analysis/difference_model.png
 	scale 50
 
 \end_inset
@@ -2272,14 +2272,14 @@ name "figure-tga-exploratory"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/control_explanatory.png
+	filename tga_analysis/control_explanatory.png
 	scale 50
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/diagnosed_explanatory.png
+	filename tga_analysis/diagnosed_explanatory.png
 	scale 50
 
 \end_inset
@@ -2382,14 +2382,14 @@ name "figure-tga-model-diff"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/alpha_effect_all.png
+	filename tga_analysis/alpha_effect_all.png
 	scale 50
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/tga_analysis/alpha_sig.png
+	filename tga_analysis/alpha_sig.png
 	scale 50
 
 \end_inset
@@ -2450,14 +2450,14 @@ name "figure-tga-link-estimates"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/estimates_links.png
+	filename simulations/estimates_links.png
 	scale 50
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename C:/Users/itama/Google Drive/Documents/Study/05 Year 2018-2019/74445 Masters Thesis/correlation_glm/main_work/simulations/zscores_links.png
+	filename simulations/zscores_links.png
 	scale 50
 
 \end_inset

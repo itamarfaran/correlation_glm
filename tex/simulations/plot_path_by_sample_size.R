@@ -6,12 +6,10 @@ source("lib/model/estimation_functions.R")
 source("lib/model/inference_functions.R")
 
 
-#  todo: check in high and low sample size in comparison to the REAL alpha
-#  todo: Show path with regularization
 #  todo: estimate OLS, Regularized, and Full on Random/Non Random Effect (total 6)
 #  check best estimators MSE and Bias; Simulate with real TGA Theta
 
-get_par_path <- function(model, par = 'alpha', model_name = NULL){
+get_par_path <- function(model, par = 'alpha', model_name = NULL, real_par = NULL){
   transpose(model$steps)[[par]] %>% 
     lapply(as.vector) %>% do.call(cbind, .) %>%
     data.table() -> dt
@@ -21,6 +19,7 @@ get_par_path <- function(model, par = 'alpha', model_name = NULL){
   dt <- melt(dt, id.vars = 'index', variable.name = 'step', value.name = 'parameter')
   dt[,step := as.numeric(step)]
   dt[,index := factor(index)]
+  if(!is.null(real_par)) dt[,real_par := rep(real_par, times = max(step))]
   if(!is.null(model_name)) dt[,model := model_name]
   return(dt)
 }
@@ -42,7 +41,8 @@ create_plot <- function(dt, hline = NULL, size = 20){
     geom_line() + geom_point(aes(shape = model)) +
     theme_bw() +
     theme(legend.position = 'none')
-  
+  if('real_par' %in% colnames(dt)) p <- p + geom_hline(aes(yintercept = real_par, col = index), linetype = 2)
+
   return(p)
 }
 
@@ -74,7 +74,7 @@ ggsave_batch <- function(l_plots, names, dir = 'temp'){
 }
 
 ##### definitions #####
-p <- 60
+p <- 35
 linkFun <- linkFunctions$multiplicative_identity
 sample_size_plt <- 20
 
@@ -126,6 +126,12 @@ tga_alpha_steps <- get_full_path(
   get_par_path(tga_iid_model, 'alpha', 'iid'),
   get_par_path(tga_cov_model, 'alpha', 'cov')
 )
+
+tga_alpha_steps_reg <- get_full_path(
+  get_par_path(tga_iid_model, 'alpha', 'iid'),
+  get_par_path(tga_cov_model_reg, 'alpha', 'cov')
+)
+
 tga_theta_steps <- get_full_path(
   get_par_path(tga_iid_model, 'theta', 'iid'),
   get_par_path(tga_cov_model, 'theta', 'cov')
@@ -134,6 +140,7 @@ tga_theta_steps <- get_full_path(
 set.seed(847)
 plot_list <- list(
   create_plot(tga_alpha_steps, hline = 1, size = sample_size_plt),
+  create_plot(tga_alpha_steps_reg, hline = 1, size = sample_size_plt),
   create_plot(tga_theta_steps, hline = 0, size = sample_size_plt),
   qplot(x = tga_iid_model$alpha, y = tga_cov_model$alpha) +
     geom_abline(slope = 1, intercept = 0),
@@ -154,8 +161,8 @@ tga_alpha_steps_reg <- get_full_path(
 
 set.seed(847)
 plot_list[[length(plot_list) + 1]] <- create_plot(tga_alpha_steps_reg, hline = 1, size = sample_size_plt)
-ggsave_batch(plot_list, c('tga_alpha', 'tga_theta', 'tga_iid_vs_cov', 'tga_cov_reg',
-                          'tga_cov_start_points', 'tga_alpha_reg'))
+ggsave_batch(plot_list, c('tga_alpha', 'tga_alpha_reg', 'tga_theta', 'tga_iid_vs_cov', 'tga_cov_reg',
+                          'tga_cov_start_points', 'tga_alpha_vs_reg'))
 
 ##### estimate on simulated data, high sample size #####
 ARMAdetails <- list(
@@ -197,8 +204,8 @@ high_cov_model <- estimate_loop(
 ##### plot simulated data #####
 
 high_alpha_steps <- get_full_path(
-  get_par_path(high_iid_model, 'alpha', 'iid'),
-  get_par_path(high_cov_model, 'alpha', 'cov')
+  get_par_path(high_iid_model, 'alpha', 'iid', real_par = high_sample_data$alpha),
+  get_par_path(high_cov_model, 'alpha', 'cov', real_par = high_sample_data$alpha)
 )
 high_theta_steps <- get_full_path(
   get_par_path(high_iid_model, 'theta', 'iid'),
@@ -248,8 +255,8 @@ low_cov_model <- estimate_loop(
 ##### plot simulated data #####
 
 low_alpha_steps <- get_full_path(
-  get_par_path(low_iid_model, 'alpha', 'iid'),
-  get_par_path(low_cov_model, 'alpha', 'cov')
+  get_par_path(low_iid_model, 'alpha', 'iid', real_par = high_sample_data$alpha),
+  get_par_path(low_cov_model, 'alpha', 'cov', real_par = high_sample_data$alpha)
 )
 
 

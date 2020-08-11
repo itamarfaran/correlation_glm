@@ -1,5 +1,7 @@
 source('tex/simulations/aux.R')
 
+#  todo: plot P(At least one rejected) instead of E[How Much Rejected]
+
 n_sim <- ncores
 p <- 32
 
@@ -102,10 +104,10 @@ if(file.exists(file_loc)){
 }
 
 out[,`:=`(
-  t_fdr = t_fp/(t_fp + t_tp + (t_fp + t_tp == 0)),
-  t_power = t_tp/t_true_null,
-  gee_fdr = gee_fp/(gee_fp + gee_tp + (gee_fp + gee_tp == 0)),
-  gee_power = gee_tp/gee_true_null
+  t_fdr = t_fp/pmax(t_fp + t_tp, 1),
+  t_power = t_tp/t_true_alt,
+  gee_fdr = gee_fp/pmax(gee_fp + gee_tp, 1),
+  gee_power = gee_tp/gee_true_alt
 )]
 
 

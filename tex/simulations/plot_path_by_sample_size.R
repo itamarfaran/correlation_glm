@@ -6,6 +6,11 @@ source("lib/model/estimation_functions.R")
 source("lib/model/inference_functions.R")
 
 
+#  todo: check in high and low sample size in comparison to the REAL alpha
+#  todo: Show path with regularization
+#  todo: estimate OLS, Regularized, and Full on Random/Non Random Effect (total 6)
+#  check best estimators MSE and Bias; Simulate with real TGA Theta
+
 get_par_path <- function(model, par = 'alpha', model_name = NULL){
   transpose(model$steps)[[par]] %>% 
     lapply(as.vector) %>% do.call(cbind, .) %>%
@@ -77,7 +82,7 @@ sample_size_plt <- 20
 tga_data <- prepare_corrmat_data(
   subset = 1:p,
   healthy_index_name = 'CONTROLS',
-  link = "main_work/Data/Amnesia_all_AAL.mat",
+  link = "lib/data/Amnesia_all_AAL.mat",
   corr_matrix_name = 'corrmats',
   sick_index_name = 'TGA'
 )
@@ -270,5 +275,3 @@ print(high_mcd_results)
 
 message('low sample mcd')
 print(low_mcd_results)
-
-# todo: rename objects and save image

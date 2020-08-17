@@ -1,5 +1,6 @@
 # dirs
 .Rproj.user
+.Rproj.user/
 .idea
 /archive/
 

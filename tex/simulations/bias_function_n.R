@@ -1,4 +1,4 @@
-source('tex/simulations/aux.R')
+source('tex/simulations/aux_.R')
 
 n_sim <- 1
 percent_alpha <- 0.7

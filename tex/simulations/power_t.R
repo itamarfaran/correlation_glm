@@ -1,4 +1,4 @@
-source('tex/simulations/aux.R')
+source('tex/simulations/aux_.R')
 
 #  todo: plot P(At least one rejected) instead of E[How Much Rejected]
 

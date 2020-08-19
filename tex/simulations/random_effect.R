@@ -1,4 +1,4 @@
-source('tex/simulations/aux.R')
+source('tex/simulations/aux_.R')
 
 corr_mat <- force_symmetry(build_parameters(12, 0, 0:1)$corr_mat)
 

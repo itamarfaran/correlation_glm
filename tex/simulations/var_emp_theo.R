@@ -1,4 +1,4 @@
-source('tex/simulations/aux.R')
+source('tex/simulations/aux_.R')
 
 n_sim <- 100
 range_alpha <- c(0.7, 1.1)

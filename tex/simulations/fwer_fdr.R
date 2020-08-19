@@ -1,4 +1,4 @@
-source('tex/simulations/aux.R')
+source('tex/simulations/aux_.R')
 
 # todo: check on strung null with FWER = P(ANY(alpha_null  <= 1))
 

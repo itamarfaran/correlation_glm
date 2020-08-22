@@ -87,37 +87,36 @@ tga_data <- prepare_corrmat_data(
   sick_index_name = 'TGA'
 )
 
-tga_iid_model <- estimate_loop(
+tga_iid_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$sick),
-  dim_alpha = 1, linkFun = linkFun,
-  cov_method = 'identity'
+  dim_alpha = 1, linkFun = linkFun
 )
 
-tga_cov_model <- estimate_loop(
+tga_cov_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$sick),
   alpha0 = tga_iid_model$alpha, theta0 = tga_iid_model$theta,
   linkFun = tga_iid_model$linkFun,
-  # matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.75),
-  cov_method = 'corrmat'
+  weight_matrix = corrmat_covariance_from_dt(convert_corr_array_to_data_matrix_test(tga_data$samples$sick))
+  # matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.75)
 )
 
-tga_cov_model_reg <- estimate_loop(
+tga_cov_model_reg <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$sick),
   alpha0 = tga_iid_model$alpha, theta0 = tga_iid_model$theta,
   linkFun = tga_iid_model$linkFun,
   matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.25),
-  cov_method = 'corrmat'
+  weight_matrix = corrmat_covariance_from_dt(convert_corr_array_to_data_matrix_test(tga_data$samples$sick))
 )
 
-tga_cov_model_start_null <- estimate_loop(
+tga_cov_model_start_null <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(tga_data$samples$sick),
   linkFun = tga_iid_model$linkFun,
   # matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.25),
-  cov_method = 'corrmat'
+  weight_matrix = corrmat_covariance_from_dt(convert_corr_array_to_data_matrix_test(tga_data$samples$sick))
 )
 
 ##### plot tga data #####
@@ -185,20 +184,19 @@ high_sample_data <- create_samples(
   ncores = ncores
 )
 
-high_iid_model <- estimate_loop(
+high_iid_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(high_sample_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(high_sample_data$samples$sick),
-  dim_alpha = 1, linkFun = linkFun,
-  cov_method = 'identity'
+  dim_alpha = 1, linkFun = linkFun
 )
 
-high_cov_model <- estimate_loop(
+high_cov_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(high_sample_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(high_sample_data$samples$sick),
   alpha0 = high_iid_model$alpha, theta0 = high_iid_model$theta,
   linkFun = high_iid_model$linkFun,
   # matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.75),
-  cov_method = 'corrmat'
+  weight_matrix = corrmat_covariance_from_dt(convert_corr_array_to_data_matrix_test(high_sample_data$samples$sick))
 )
 
 ##### plot simulated data #####
@@ -236,20 +234,19 @@ low_sample_data <- create_samples(
   ncores = ncores
 )
 
-low_iid_model <- estimate_loop(
+low_iid_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(low_sample_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(low_sample_data$samples$sick),
-  dim_alpha = 1, linkFun = linkFun,
-  cov_method = 'identity'
+  dim_alpha = 1, linkFun = linkFun
 )
 
-low_cov_model <- estimate_loop(
+low_cov_model <- inner_optim_loop(
   healthy_dt = convert_corr_array_to_data_matrix_test(low_sample_data$samples$healthy),
   sick_dt = convert_corr_array_to_data_matrix_test(low_sample_data$samples$sick),
   alpha0 = low_iid_model$alpha, theta0 = low_iid_model$theta,
   linkFun = low_iid_model$linkFun,
   # matrix_reg_config = list(do_reg = T, method = 'increase_diag', const = 0.75),
-  cov_method = 'corrmat'
+  weight_matrix = corrmat_covariance_from_dt(convert_corr_array_to_data_matrix_test(low_sample_data$samples$sick))
 )
 
 ##### plot simulated data #####

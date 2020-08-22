@@ -68,7 +68,7 @@ regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase
   
   p <- nrow(matr)
   if(method == "constant"){
-    if(const <= 0) stop("In method 'constant' const must be greater than 0.")
+    if(const < 0) stop("In method 'constant' const must be greater or equal to 0.")
     out <- matr + const*diag(p)
   }
   if(method == "avg_diag"){

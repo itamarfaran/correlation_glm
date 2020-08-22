@@ -120,10 +120,9 @@ sum_of_squares <- function(
 }
 
 
-estimate_loop <- function(
-  healthy_dt, sick_dt, alpha0 = NULL, theta0 = NULL, dim_alpha = 1,
-  linkFun = linkFunctions$multiplicative_identity,
-  cov_method = c('identity', 'corrmat'),
+inner_optim_loop <- function(
+  healthy_dt, sick_dt, alpha0 = NULL, theta0 = NULL, weight_matrix = NULL,
+  dim_alpha = 1, linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   iter_config = list(), optim_config = list(),
   verbose = TRUE){
@@ -132,45 +131,38 @@ estimate_loop <- function(
     stop('can supply only one of reltol or abstol')
   
   model_reg_config <- modifyList(list(lambda = 0, lp = 2), model_reg_config)
-  matrix_reg_config <- modifyList(list(do_reg = FALSE, method = 'constant', const = 1), matrix_reg_config)
+  matrix_reg_config <- modifyList(list(method = 'constant', const = 0), matrix_reg_config)
   iter_config <- modifyList(list(max_loop = 50, reltol = 1e-06, min_loop = 3), iter_config)
   optim_config <- modifyList(list(method = "BFGS", reltol = 1e-06, log_optim = FALSE), optim_config)
-  cov_method <- match.arg(cov_method, c('identity', 'corrmat'))
 
   p <- 0.5 + sqrt(1 + 8*ncol(sick_dt))/2
   m <- 0.5*p*(p-1)
   
   if(is.null(theta0)) theta0 <- colMeans(healthy_dt)
   if(is.null(alpha0)) alpha0 <- matrix(linkFun$NULL_VAL, nr = p, nc = dim_alpha)
+
+  if(!is.positive.semi.definite(vector2triangle(theta0, diag_value = 1))
+    || !is.positive.semi.definite(linkFun$FUN(t = theta0, a = alpha0, d = dim_alpha)))
+    warning("Initial parameters dont result with positive-definite matrices")
+
   dim_alpha <- length(alpha0)/p
   if(dim_alpha %% 1 != 0) stop("alpha0 not multiplicative of p")
-  
-  if(!(
-    is.positive.definite(vector2triangle(theta0, diag_value = 1)) &
-    is.positive.definite(linkFun$FUN(t = theta0, a = alpha0, d = dim_alpha))
-  )) warning("Initial parameters dont result with positive-definite matrices")
-    
-  g12 <- switch(
-    cov_method,
-    'identity' = diag(m),
-    'corrmat' = corrmat_covariance_from_dt(sick_dt),
-    NA
-    )
-  
-  g12_reg <- if(matrix_reg_config$do_reg) {
-    if(cov_method == 'identity') stop('cannot set do_reg=TRUE with cov_method=\'identity\'')
-    regularize_matrix(
-      g12,
+
+  if(is.null(weight_matrix)) {
+    weight_matrix <- weight_matrix_reg <- weight_matrix_reg_inv <- diag(m)
+  } else {
+    weight_matrix_reg <- regularize_matrix(
+      weight_matrix,
       method = matrix_reg_config$method,
-      const = matrix_reg_config$const
-      )
-    } else g12
-  
-  solve_g12_reg <- if(cov_method == 'identity') diag(m) else solve(g12_reg)
-  
+      const = matrix_reg_config$const)
+      weight_matrix_reg_inv <- solve(weight_matrix_reg)
+  }
+
   temp_theta <- theta0
   temp_alpha <- alpha0
+  log_optim_out <- list()
   steps <- list()
+  convergence <- NA_integer_
   steps[[1]] <- list(
     theta = temp_theta,
     alpha = temp_alpha,
@@ -178,18 +170,14 @@ estimate_loop <- function(
       theta = temp_theta,
       alpha = temp_alpha,
       sick_dt = sick_dt,
-      inv_sigma = solve_g12_reg,
+      inv_sigma = weight_matrix_reg_inv,
       linkFun = linkFun,
       dim_alpha = dim_alpha,
       reg_lambda = model_reg_config$lambda,
       reg_p = model_reg_config$lp,
     )
   )
-  log_optim_out <- list()
 
-  #Convergence is a matrix wich tells us if the convergence in each iteration is completed
-  convergence <- rep(-1, iter_config$max_loop)
-  convergence[1] <- 0
 
   tt <- Sys.time()
   if(verbose) message(paste0("Time of intialization: ", tt, "; Progress: 'Loop, (Time, Convergence, Distance)'"))
@@ -207,7 +195,7 @@ estimate_loop <- function(
       fn = sum_of_squares,
       theta = temp_theta,
       sick_dt = sick_dt,
-      inv_sigma = solve_g12_reg,
+      inv_sigma = weight_matrix_reg_inv,
       linkFun = linkFun,
       dim_alpha = dim_alpha,
       reg_lambda = model_reg_config$lambda,
@@ -219,32 +207,30 @@ estimate_loop <- function(
         )
       )
     
-    convergence[i] <- optim_alpha$convergence
     temp_alpha <- optim_alpha$par
     steps[[i]] <- list(
       theta = temp_theta,
       alpha = temp_alpha,
       value = optim_alpha$value,
-      convergence = convergence[i]
+      convergence = optim_alpha$convergence
       )
+    convergence <- c(convergence, optim_alpha$convergence)
     log_optim_out[[i]] <- if(optim_config$log_optim) optim_alpha else NA
-    
+
     # Stopping rule
     if('abstol' %in% names(iter_config)){
       distance <- sqrt(mean((steps[[i]]$alpha - steps[[i-1]]$alpha)^2))
-      distance_lower_than_threshold <-
-        distance < iter_config$abstol
+      distance_lower_than_threshold <-  distance < iter_config$abstol
     } else {
       distance <- abs(steps[[i-1]]$value - steps[[i]]$value)
-      distance_lower_than_threshold <-
-        distance < (iter_config$reltol * (abs(steps[[i]]$value) + iter_config$reltol))
+      distance_lower_than_threshold <- distance < (iter_config$reltol * (abs(steps[[i]]$value) + iter_config$reltol))
     }
-    
+
     if(verbose) cat(paste0(
       i, " (", round(as.double.difftime(Sys.time() - tt, units = "secs")), "s, ",
-      convergence[i], ", ", round(distance, 5), "); "
-      ))
-    
+      steps[[i]]$convergence, ", ", round(distance, 5), "); "
+    ))
+
     condition0 <- FALSE
     if(i > iter_config$min_loop){
       look_back <- iter_config$min_loop - 1
@@ -260,20 +246,13 @@ estimate_loop <- function(
     tt <- as.numeric(tt)
     message(paste0("\nTotal time: ", floor(tt/60), " minutes and ", round(tt %% 60, 1), " seconds."))
   }
-  
-  suppressWarnings({
-    max_convergence <- min(
-      (min(which(convergence == -1)) - 1),
-      iter_config$max_loop
-    )
-  })
-  
+
   output <- list(
     theta = temp_theta,
     alpha = temp_alpha,
     linkFun = linkFun,
-    vcov = solve_g12_reg,
-    convergence = convergence[1:max_convergence],
+    vcov = weight_matrix_reg_inv,
+    convergence = convergence,
     steps = steps, log_optim = log_optim_out
     )
   
@@ -285,41 +264,45 @@ estimate_alpha <- function(
   healthy_dt, sick_dt, dim_alpha = 1,
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
-  iid_config = list(), cov_config = list(),
-  verbose = TRUE){
+  raw_start = TRUE, iid_config = list(), cov_config = list(),
+  bias_correction = TRUE, verbose = TRUE){
   
   for(name in c('iter_config', 'optim_config')){
     if(!name %in% names(iid_config)) iid_config[[name]] <- list()
     if(!name %in% names(cov_config)) cov_config[[name]] <- list()
   }
-  
   if(length(verbose) == 1) verbose <- rep(verbose, 2)
   
   healthy_dt <- convert_corr_array_to_data_matrix_test(healthy_dt)
   sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
-  iid_model <- estimate_loop(
-    healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
-    linkFun = linkFun,
-    cov_method = 'identity',
-    model_reg_config = model_reg_config,
-    matrix_reg_config = matrix_reg_config,
-    iter_config = iid_config$iter_config,
-    optim_config = iid_config$optim_config,
-    verbose = verbose[1]
+  alpha0 <- theta0 <- NULL
+  if(!raw_start){
+    iid_model <- inner_optim_loop(
+      healthy_dt = healthy_dt, sick_dt = sick_dt,
+      alpha0 = NULL, theta0 = NULL,
+      weight_matrix = NULL, dim_alpha = dim_alpha,
+      linkFun = linkFun,
+      model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
+      iter_config = iid_config$iter_config, optim_config = iid_config$optim_config,
+      verbose = verbose[1]
     )
-  
-  cov_model <- estimate_loop(
+    alpha0 <- iid_model$alpha
+    theta0 <- iid_model$theta
+  }
+
+  weight_matrix <- corrmat_covariance_from_dt(sick_dt)
+
+  cov_model <- inner_optim_loop(
     healthy_dt = healthy_dt, sick_dt = sick_dt,
-    alpha0 = iid_model$alpha, theta0 = iid_model$theta,
-    linkFun = linkFun,
-    cov_method = 'corrmat',
-    model_reg_config = model_reg_config,
-    matrix_reg_config = matrix_reg_config,
-    iter_config = cov_config$iter_config,
-    optim_config = cov_config$optim_config,
+    alpha0 = alpha0, theta0 = theta0,
+    weight_matrix = weight_matrix, linkFun = linkFun,
+    model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
+    iter_config = cov_config$iter_config, optim_config = cov_config$optim_config,
     verbose = verbose[2]
   )
+  
+  if(bias_correction) cov_model$alpha <- cov_model$alpha - median(cov_model$alpha) + linkFun$NULL_VAL
   
   return(cov_model)
 }
@@ -345,7 +328,7 @@ estimate_alpha_jacknife <- function(
       healthy_dt_ <- healthy_dt[-i,]
     }
     
-    out <- estimate_loop(
+    out <- inner_optim_loop(
       healthy_dt = healthy_dt_, sick_dt = sick_dt_,
       alpha0 = alpha0, theta0 = theta0,
       linkFun = linkFunctions$multiplicative_identity,
@@ -385,7 +368,7 @@ estimate_alpha_jacknife <- function(
   sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
   if(is.null(alpha0) | is.null(theta0)){
-    iid_model <- estimate_loop(
+    iid_model <- inner_optim_loop(
       healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
       alpha0 = alpha0, theta0 = theta0,
       linkFun = linkFunctions$multiplicative_identity,

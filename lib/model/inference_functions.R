@@ -89,7 +89,7 @@ compute_gee_variance <- function(
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% list_$jacobian
     } else if (type == 'I1'){
       residuals <- list_$data - rep(1, nrow(list_$data)) %o% list_$expected_value
-      cov_mat <- t(residuals) %*% residuals / list_$df # todo: add compute_estimated_n here
+      cov_mat <- t(residuals) %*% residuals / list_$df
       out <- t(list_$jacobian) %*% list_$solve_Sigma %*% cov_mat %*% list_$solve_Sigma %*% list_$jacobian
     }
     out <- out*nrow(list_$data)

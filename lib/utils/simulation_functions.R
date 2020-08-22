@@ -1,4 +1,4 @@
-### todo: need methodology for simulating alphas
+### todo: need methodology for simulating alphas with dim>1
 
 linkFunctions <- list(
   "multiplicative_identity" = list(

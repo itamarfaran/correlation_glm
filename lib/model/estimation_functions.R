@@ -124,7 +124,7 @@ inner_optim_loop <- function(
   healthy_dt, sick_dt, alpha0 = NULL, theta0 = NULL, weight_matrix = NULL,
   dim_alpha = 1, linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
-  iter_config = list(), optim_config = list(),
+  iter_config = list(), optim_config = list(), early_stop = FALSE,
   verbose = TRUE){
   
   if('reltol' %in% names(iter_config) & 'abstol' %in% names(iter_config))
@@ -237,6 +237,24 @@ inner_optim_loop <- function(
       index <- if(look_back > 0) i - 0:look_back else i
       condition0 <- distance_lower_than_threshold & (sum(convergence[index]) == 0)
     }
+    
+    # Early Stop
+    if(early_stop){
+      did_converge <- convergence[length(convergence)] == 0
+      did_minimize <- steps[[i]]$value <= steps[[i-1]]$value
+      
+      if(did_converge & !did_minimize){
+        steps[[i]] <- NULL
+        i <- i - 1
+        
+        temp_theta <- steps[[i]]$theta
+        temp_alpha <- steps[[i]]$alpha
+        convergence[length(convergence)] <- -1
+        condition0 <- TRUE
+        warning('early stopping used; last iteration didn\'t minimize target')
+      }
+    }
+      
     if(condition0) break()
   }
   if(i == iter_config$max_loop) warning('optimization reached maximum iterations')
@@ -265,7 +283,7 @@ estimate_alpha <- function(
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   raw_start = TRUE, iid_config = list(), cov_config = list(),
-  bias_correction = TRUE, verbose = TRUE){
+  bias_correction = TRUE, early_stop = FALSE, verbose = TRUE){
   
   for(name in c('iter_config', 'optim_config')){
     if(!name %in% names(iid_config)) iid_config[[name]] <- list()
@@ -285,7 +303,7 @@ estimate_alpha <- function(
       linkFun = linkFun,
       model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
       iter_config = iid_config$iter_config, optim_config = iid_config$optim_config,
-      verbose = verbose[1]
+      early_stop = early_stop, verbose = verbose[1]
     )
     alpha0 <- iid_model$alpha
     theta0 <- iid_model$theta
@@ -299,7 +317,7 @@ estimate_alpha <- function(
     weight_matrix = weight_matrix, linkFun = linkFun,
     model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
     iter_config = cov_config$iter_config, optim_config = cov_config$optim_config,
-    verbose = verbose[2]
+    early_stop = early_stop, verbose = verbose[2]
   )
   
   if(bias_correction) cov_model$alpha <- cov_model$alpha - median(cov_model$alpha) + linkFun$NULL_VAL
@@ -314,7 +332,8 @@ estimate_alpha_jacknife <- function(
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   iid_config = list(iter_config = list(min_loop = 0)), cov_config = list(),
-  return_gee = FALSE, jack_healthy = TRUE, verbose = TRUE, ncores = 1
+  return_gee = FALSE, jack_healthy = TRUE, early_stop = FALSE,
+  verbose = TRUE, ncores = 1
   ){
   
   mclapply_ <- if(verbose) pbmcapply::pbmclapply else parallel::mclapply
@@ -336,7 +355,7 @@ estimate_alpha_jacknife <- function(
       weight_matrix = weight_matrix, linkFun = linkFun,
       model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
       iter_config = cov_config$iter_config, optim_config = cov_config$optim_config,
-      verbose = FALSE
+      early_stop = early_stop, verbose = FALSE
     )
 
     gee_out <- if(return_gee){
@@ -375,8 +394,10 @@ estimate_alpha_jacknife <- function(
       linkFun = linkFun,
       model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
       iter_config = iid_config$iter_config, optim_config = iid_config$optim_config,
-      verbose = FALSE
+      early_stop = early_stop, verbose = FALSE
     )
+    if(is.null(alpha0)) alpha0 <- iid_model$alpha
+    if(is.null(theta0)) theta0 <- iid_model$theta
   }
   
   if(verbose) cat('\njacknifing Sick Observations...\n')

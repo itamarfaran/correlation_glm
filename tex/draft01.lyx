@@ -459,6 +459,19 @@ In this manuscript, we propose estimation procedures for both
  model.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Refer to repo
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Preliminaries
 \end_layout
@@ -2520,6 +2533,29 @@ Plotting of the differences between diagnosed and control subjects.
 \end_layout
 
 \begin_layout Standard
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Why did we choose the example, elaborate more
+\end_layout
+
+\end_inset
+
+
+\begin_inset Flex TODO Note (inline)
+status open
+
+\begin_layout Plain Layout
+Maybe Michael and Shahar want to elaborate?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 We inspect the data gathered by 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2807,11 +2843,40 @@ name "figure-tga-link-estimates"
 \end_layout
 
 \begin_layout Section
-Supplementaries
+Appendix
 \end_layout
 
 \begin_layout Subsection
 Full Results on TGA Data
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "table-tga-results"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -3270,35 +3335,6 @@ LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "bib"
 options "plain"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "table-tga-results"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
 
 \end_inset
 

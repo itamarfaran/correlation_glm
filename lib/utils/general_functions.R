@@ -58,11 +58,11 @@ matrix_pow <- function(x, pow){
 
 
 regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase_diag"),
-                             const = 1, only_if_singular = TRUE){
+                             const = 1, only_if_singular = TRUE, verbose = FALSE){
   method <- match.arg(method, c("constant", "avg_diag", "increase_diag"))
   if(!is.square.matrix(matr)) stop("Matrix is not square.")
   if(only_if_singular & !is.singular.matrix(matr)) {
-    message("Matrix is invertible and was not changed.")
+    if(verbose) message("Matrix is invertible and was not changed.")
     return(matr)
   }
   
@@ -81,9 +81,9 @@ regularize_matrix <- function(matr, method = c("constant", "avg_diag", "increase
   }
   
   if(is.singular.matrix(out)){
-    warning("Matrix still not invertible.")
+    if(verbose) warning("Matrix still not invertible.")
   } else{
-    if(only_if_singular) message("Matrix is singular and was regularized.")
+    if(only_if_singular & verbose) message("Matrix is singular and was regularized.")
   }
   return(out)
 }

@@ -69,10 +69,11 @@ compute_gee_variance <- function(
       )
       } else colMeans(data)
     solve_Sigma <- solve(corrmat_covariance_from_dt(data, est_n = T))
-    df <- efrons_effective_sample_size(
-      n = nrow(data),
-      efrons_rms(vector2triangle(colMeans(data), diag_value = 1))
-      )
+    df <- nrow(data) - 1
+      # efrons_effective_sample_size(
+      # n = nrow(data),
+      # efrons_rms(vector2triangle(colMeans(data), diag_value = 1))
+      # )
     
     out <- list(
       data = data,
@@ -105,6 +106,28 @@ compute_gee_variance <- function(
   res <- solve_I0 %*% I1 %*% solve_I0
   return(res)
 }
+
+
+infer_bootstrap <- function(results){
+  sick_ind <- as.logical(results$is_sick)
+  estimate_d <- colMeans(results$alpha[sick_ind,])
+  const_d <- (sum(sick_ind) - 1)^2/sum(sick_ind)
+  var_d <- var(results$alpha[sick_ind,])*const_d
+
+  
+  estimate_h <- colMeans(results$alpha[!sick_ind,])
+  const_h <- (sum(!sick_ind) - 1)^2/sum(!sick_ind)
+  var_h <- var(results$alpha[!sick_ind,])*const_h
+  
+  estimate <- (estimate_d + estimate_h)/2
+  var_out <- var_d + var_h
+  
+  return(list(
+    estimate = estimate,
+    variance = var_out
+  ))
+}
+
 
 
 compute_fisher_by_grad <- function(cov_obj, sick_dt, linkFun = linkFunctions$multiplicative_identity,

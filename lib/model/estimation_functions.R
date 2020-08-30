@@ -328,21 +328,21 @@ estimate_alpha_jacknife <- function(
       healthy_dt_ <- healthy_dt[-i,]
     }
     
-    out <- inner_optim_loop(
+    weight_matrix <- corrmat_covariance_from_dt(sick_dt_)
+    
+    cov_model <- inner_optim_loop(
       healthy_dt = healthy_dt_, sick_dt = sick_dt_,
       alpha0 = alpha0, theta0 = theta0,
-      linkFun = linkFunctions$multiplicative_identity,
-      cov_method = 'corrmat',
-      model_reg_config = model_reg_config,
-      matrix_reg_config = matrix_reg_config,
-      iter_config = iid_config$iter_config,
-      optim_config = iid_config$optim_config,
+      weight_matrix = weight_matrix, linkFun = linkFun,
+      model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
+      iter_config = cov_config$iter_config, optim_config = cov_config$optim_config,
       verbose = FALSE
     )
+
     gee_out <- if(return_gee){
       triangle2vector(
         compute_gee_variance(
-          cov_obj = out,
+          cov_obj = cov_model,
           healthy_dt = healthy_dt_,
           sick_dt = sick_dt_,
           est_mu = TRUE
@@ -352,9 +352,9 @@ estimate_alpha_jacknife <- function(
     } else NA
     
     return(list(
-      theta = out$theta,
-      alpha = out$alpha,
-      convergence = tail(out$convergence, 1), 
+      theta = cov_model$theta,
+      alpha = cov_model$alpha,
+      convergence = tail(cov_model$convergence, 1), 
       gee_var = gee_out
     ))
   }
@@ -369,14 +369,12 @@ estimate_alpha_jacknife <- function(
   
   if(is.null(alpha0) | is.null(theta0)){
     iid_model <- inner_optim_loop(
-      healthy_dt = healthy_dt, sick_dt = sick_dt, dim_alpha = dim_alpha,
+      healthy_dt = healthy_dt, sick_dt = sick_dt,
       alpha0 = alpha0, theta0 = theta0,
-      linkFun = linkFunctions$multiplicative_identity,
-      cov_method = 'identity',
-      model_reg_config = model_reg_config,
-      matrix_reg_config = matrix_reg_config,
-      iter_config = iid_config$iter_config,
-      optim_config = iid_config$optim_config,
+      weight_matrix = NULL, dim_alpha = dim_alpha,
+      linkFun = linkFun,
+      model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
+      iter_config = iid_config$iter_config, optim_config = iid_config$optim_config,
       verbose = FALSE
     )
   }

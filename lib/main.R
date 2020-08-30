@@ -50,57 +50,8 @@ gee_var <- with(sample_data$samples, compute_gee_variance(
 
 results_jacknife <- estimate_alpha_jacknife(
   healthy_dt = sample_data$samples$healthy, sick_dt = sample_data$samples$sick,
-  linkFun = linkFun, jack_healthy = TRUE, return_gee = TRUE, ncores = ncores)
+  linkFun = linkFun, jack_healthy = TRUE, return_gee = F, ncores = ncores)
+jacknife_inference <- infer_bootstrap(results_jacknife)
 
-alpha_jk_estimate <- with(results_jacknife, colMeans(alpha))
-alpha_jk_variance <- with(results_jacknife, var(alpha)*(nrow(alpha) - 1)^2/nrow(alpha)) 
-alpha_jk_sd_estimate <- t(apply(
-  X = results_jacknife$gee_var, MARGIN = 1,
-  FUN = function(x) sqrt(diag(vector2triangle(x, diag = TRUE)))
-  ))
-
-# (n_h + n_s - 1)*sqrt_diag(gee_var) - colMeans(alpha_jk_sd_estimate)
-
-
-out <- data.table(
-  alpha = as.vector(sample_data$alpha),
-  null = as.vector(sample_data$alpha == linkFun$NULL_VAL),
-  gee_estimate = as.vector(results$alpha),
-  gee_sd = sqrt_diag(gee_var),
-  jk_estimate = alpha_jk_estimate,
-  jk_sd = sqrt_diag(alpha_jk_variance)
-)
-
-out[,.(
-  gee_estimate_sd = sd(gee_estimate),
-  gee_sd_estimate = mean(gee_sd),
-  jk_estimate_sd = sd(jk_estimate),
-  jk_sd_estimate = sd(jk_estimate)
-  ),
-  by = null]
-
-out[,.(
-  alpha, null,
-  z_gee = (gee_estimate - linkFun$NULL_VAL)/gee_sd,
-  z_jk = (jk_estimate - linkFun$NULL_VAL)/jk_sd
-)][,.(
-  alpha, null,
-  p_gee = 2*pnorm(abs(z_gee), lower.tail = F),
-  p_jk = 2*pnorm(abs(z_jk), lower.tail = F)
-)][,.(
-  gee_sig_01 = mean(p_gee < 0.1),
-  gee_sig_005 = mean(p_gee < 0.05),
-  gee_sig_001 = mean(p_jk < 0.01),
-  jk_sig_01 = mean(p_jk < 0.1),
-  jk_sig_005 = mean(p_jk < 0.05),
-  gee_sig_001 = mean(p_gee < 0.01)
-), keyby = null]
-
-
-
-mean_sqrt_diag(alpha_jk_variance)
-sd(results$alpha)
-mean_sqrt_diag(gee_var)
-
-# save.image('main_work/data/enviroments/full_run_jacknife_simulated_data_multiplicative_link.RData')
+save.image('main_work/data/enviroments/full_run_jacknife_simulated_data_multiplicative_link.RData')
 

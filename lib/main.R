@@ -4,7 +4,7 @@ source("lib/model/estimation_functions.R")
 source("lib/model/inference_functions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
-p <- 22
+p <- 200
 n_h <- 10
 n_s <- 10
 T_thresh <- Tlength <- 115
@@ -24,7 +24,7 @@ sapply(ARMAdetails, check_invertability_arma)
 #  )
 
  sample_data <- prepare_corrmat_data(
-   #subset = 1:p,
+   subset = 1:p,
    healthy_index_name = 'CONTROLS',
 
 #  link = "lib/data/Amnesia_all_AAL.mat",

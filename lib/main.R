@@ -52,7 +52,7 @@ gee_var <- with(sample_data$samples, compute_gee_variance(
 results_jacknife <- estimate_alpha_jacknife(
   healthy_dt = sample_data$samples$healthy, sick_dt = sample_data$samples$sick,
   linkFun = linkFun, jack_healthy = TRUE, return_gee = F, ncores = ncores)
-jacknife_inference <- infer_bootstrap(results_jacknife)
+jacknife_inference <- infer_jacknife(results_jacknife)
 
 save.image('main_work/data/enviroments/full_run_jacknife_simulated_data_multiplicative_link.RData')
 

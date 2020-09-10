@@ -108,7 +108,7 @@ compute_gee_variance <- function(
 }
 
 
-infer_bootstrap <- function(results){
+infer_jacknife <- function(results){
   sick_ind <- as.logical(results$is_sick)
   estimate_d <- colMeans(results$alpha[sick_ind,])
   const_d <- (sum(sick_ind) - 1)^2/sum(sick_ind)

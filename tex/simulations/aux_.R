@@ -5,7 +5,7 @@ source("lib/model/inference_functions.R")
 ipak('gridExtra', 'latex2exp')
 
 theme_user <- theme_bw
-plot_files_path <- 'main_work/simulations/'
+plot_files_path <- 'tex/simulations/' 
 dpi <- 100
 
 custom_ggsave <- function(filename, plot, width = 1, height = 1, ...){

@@ -192,7 +192,7 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, random_effect 
 
 create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
                            percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1),
-                           linkFun = linkFunctions$multiplicative_identity,
+                           linkFun = linkFunctions$multiplicative_identity, real_theta = NULL,
                            ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, random_effect = NULL,
                            seed = NULL, ncores = 1){
   
@@ -200,9 +200,7 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
     p = p, percent_alpha = percent_alpha, range_alpha = range_alpha, dim_alpha = dim_alpha,
     loc_scale = loc_scale, seed = seed
     )
-  
-  real_theta <- parameters$corr_mat
-  real_sigma <- parameters$cov_mat
+  if(is.null(real_theta)) real_theta <- parameters$corr_mat
   alpha <- parameters$alpha
   g11 <- linkFun$FUN(t = triangle2vector(real_theta), a = alpha, d = dim_alpha)
   
@@ -219,7 +217,7 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
     )
   }
   
-  output <- list(real_theta = real_theta, real_sigma = real_sigma, alpha = alpha, samples = list())
+  output <- list(real_theta = real_theta, alpha = alpha, samples = list())
   
   output$samples <- if(n_sim == 1) rawFun(1) else mclapply(1:n_sim, rawFun, mc.cores = ncores)
   

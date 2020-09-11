@@ -25,7 +25,7 @@ desktop.ini
 
 # misc
 *.csv
-!main_work/code/gee-bootstrapp-app/gee_data.csv
+!dev/apps/gee-bootstrapp-app/gee_data.csv
 *.rar
 *.txt
 *.png

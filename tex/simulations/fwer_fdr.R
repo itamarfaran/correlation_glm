@@ -57,7 +57,7 @@ out <- rbind(
             , by = .(autocorrelated, p_s, case, sim)]
 )
 
-save(samples, out, file = 'main_work/simulations/fwer_fdr.RData')
+save(samples, out, file = 'tex/simulations/fwer_fdr.RData')
 
 pl <- ggplot(out, aes(x = type, y = value)) + 
   geom_boxplot(fill = 'lightgrey') +

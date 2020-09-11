@@ -24,7 +24,7 @@ conf <- list(
   )
 )
 desease_data <- 'TGA'
-file <- paste0('main_work/tga_analysis/analysis_', tolower(desease_data), '_', linkFun$NAME, '.RData')
+file <- paste0('tex/tga_analysis/analysis_', tolower(desease_data), '_', linkFun$NAME, '.RData')
 
 if (file.exists(file)){
   load(file)

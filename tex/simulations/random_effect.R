@@ -41,7 +41,7 @@ if(ncores > 1){
   )]
 }
 examples[random_effect < 0, random_effect := 0]
-save(examples, file='main_work/simulations/random_effect.RData')
+save(examples, file='tex/simulations/random_effect.RData')
 
 plot_fun <- function(col){
   p <- ggplot(examples[sample(.N, 2500)], aes_string(x = col, y = 'rms')) + 

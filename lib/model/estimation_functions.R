@@ -37,7 +37,7 @@ corrmat_covariance <- function(matr, nonpositive = c("stop", "force", "ignore"),
   
   if(use_cpp){
     cppFunction(paste0(scan(
-        "main_work/Code/corcalc_c.cpp",
+        "lib/model/corcalc_c.cpp",
         what = "character",
         sep = "\n",
         quiet = TRUE),

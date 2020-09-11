@@ -57,5 +57,5 @@ gee_var <- compute_gee_variance(
 #   linkFun = linkFun, jack_healthy = TRUE, return_gee = F, ncores = ncores)
 # jacknife_inference <- infer_jacknife(results_jacknife)
 
-save.image('main_work/data/enviroments/full_run_jacknife_simulated_data_multiplicative_link.RData')
+save.image('lib/data/envs/full_run_jacknife_simulated_data_multiplicative_link.RData')
 

@@ -43,7 +43,7 @@ results <- out[,.(
   max = sapply(.SD, max)
   ), .SDcols = cols, by = p]
 
-save(out, results, file = 'main_work/simulations/performance_data.RData')
+save(out, results, file = 'tex/simulations/performance_data.RData')
 
 # results[,.(p, Type, Median = median, Max = max)] %>% 
 #   melt(id.vars = c('p', 'Type'), variable.name = 'Measure', value.name = 'Value') %>%

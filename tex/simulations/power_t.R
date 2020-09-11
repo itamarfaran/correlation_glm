@@ -89,7 +89,7 @@ examples <- expand.grid(
   min_alpha = c(0.8, 0.85, 0.9, 0.95)
   )
 
-file_loc <- 'main_work/simulations/power_t.RData'
+file_loc <- 'tex/simulations/power_t.RData'
 if(file.exists(file_loc)){
   load(file_loc)
 } else {

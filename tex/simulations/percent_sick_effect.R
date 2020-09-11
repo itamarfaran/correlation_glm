@@ -26,5 +26,5 @@ p <- ggplot(toplot, aes(x = p_s, y = ratio, group = p_s)) +
     x = TeX('$n_{d}/\\left(n_{d}+n_{h}\\right)$'), y = 'Ratio Between Estimated & Empirical\nStandard Deviations'
   )
 
-save(toplot, file='main_work/simulations/percent_sick_effect.RData')
+save(toplot, file='tex/simulations/percent_sick_effect.RData')
 custom_ggsave('percent_sick_effect.png', p, width=2)

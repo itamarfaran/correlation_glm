@@ -41,7 +41,19 @@ variances_dt <- data.table(
   empiric = triangle2vector(var(estimates)),
   theoretical = triangle2vector(calculate_mean_matrix(variances))
 )
+variances_diag_dt <- data.table(
+  empiric = diag(var(estimates)),
+  theoretical = diag(calculate_mean_matrix(variances))
+)
+
+
+z_values <- (estimates - linkFun$NULL_VAL)/do.call(rbind, lapply(bootstrap_results_t$alpha_variance, sqrt_diag))
+p_values <- 2*pnorm(abs(z_values), lower.tail = F)
+hist(z_values[,sample_data$alpha == 1])
+hist(p_values[,sample_data$alpha == 1])
 
 qplot(variances_dt$theoretical, variances_dt$empiric) + geom_smooth(method = 'lm')
+qplot(variances_diag_dt$theoretical, variances_diag_dt$empiric) + geom_smooth(method = 'lm')
+
 summary(lm(empiric ~ theoretical, variances_dt))
 save.image('dev/simulations/check_jacknife.RData')

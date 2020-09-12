@@ -27,6 +27,7 @@ desktop.ini
 *.csv
 !dev/apps/gee-bootstrapp-app/gee_data.csv
 *.rar
+*.zip
 *.txt
 *.png
 credentials-2.csv

@@ -670,5 +670,113 @@ suppose that
 
 \end_layout
 
+\begin_layout Standard
+Con
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{ccc}
+1 & 1 & 1\\
+ & 1 & 1\\
+ &  & 1
+\end{array}\right)\circ\left(\begin{array}{ccc}
+1 & 1 & 0\\
+1 & 1 & 1\\
+0 & 1 & 1
+\end{array}\right)=\left(\begin{array}{ccc}
+1 & \frac{1}{2}\cdot2 & 2\cdot2\\
+ & 1 & \frac{1}{2}\cdot2\\
+ &  & 1
+\end{array}\right)\left(\begin{array}{ccc}
+1 & 1 & 0\\
+1 & 1 & 1\\
+0 & 1 & 1
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\alpha_{1}}{\beta_{1}} & =\frac{\beta_{2}}{\alpha_{2}}\\
+\frac{\alpha_{2}}{\beta_{2}} & =\frac{\beta_{3}}{\alpha_{3}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\alpha_{1}}{\beta_{1}} & =\frac{\alpha_{3}}{\beta_{3}}\\
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{1}{0.5} & =\frac{2}{1}\\
+\frac{1}{2} & =\frac{0.5}{1}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\alpha_{1}}{\beta_{1}} & =\frac{\alpha_{3}}{\beta_{3}}\\
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccc}
+1 & 1 & 1 & 1\\
+ & 1 & 1 & 1\\
+ &  & 1 & 1\\
+ &  &  & 1
+\end{array}\right)\circ\left(\begin{array}{cccc}
+1 & \Theta_{12} & 0 & 0\\
+ & 1 & \Theta_{23} & 0\\
+ &  & 1 & \Theta_{34}\\
+ &  &  & 1
+\end{array}\right)=\left(\begin{array}{cccc}
+1 & \frac{1}{2}\cdot2 & 2\cdot\frac{1}{2} & \frac{1}{2}\cdot2\\
+ & 1 & 2\cdot\frac{1}{2} & \frac{1}{2}\cdot2\\
+ &  & 1 & \frac{1}{2}\cdot2\\
+ &  &  & 1
+\end{array}\right)\circ\left(\begin{array}{cccc}
+1 & \Theta_{12} & 0 & 0\\
+ & 1 & \Theta_{23} & 0\\
+ &  & 1 & \Theta_{34}\\
+ &  &  & 1
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document

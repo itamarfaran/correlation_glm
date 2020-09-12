@@ -713,7 +713,7 @@ name "figure-delta-method"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/correlation_delta_method.png
+	filename ../simulations/correlation_delta_method.png
 	scale 50
 
 \end_inset
@@ -1213,7 +1213,7 @@ name "figure-bias-static"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/bias_small_sample.png
+	filename ../simulations/bias_small_sample.png
 	scale 50
 
 \end_inset
@@ -1444,7 +1444,7 @@ name "figure-bias-dynamic"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/bias_function_n.png
+	filename ../simulations/bias_function_n.png
 	scale 50
 
 \end_inset
@@ -1742,7 +1742,7 @@ name "figure-gee-var-consistency-1"
 
 
 \begin_inset Graphics
-	filename simulations/variance_emp_theo_nonnull.png
+	filename ../simulations/variance_emp_theo_nonnull.png
 	scale 50
 
 \end_inset
@@ -1854,7 +1854,7 @@ name "figure-fdr"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/fwer_fdr.png
+	filename ../simulations/fwer_fdr.png
 	scale 50
 
 \end_inset
@@ -2028,7 +2028,7 @@ name "figure-gee-var-consistency-2"
 
 
 \begin_inset Graphics
-	filename simulations/variance_emp_theo_null.png
+	filename ../simulations/variance_emp_theo_null.png
 	scale 50
 
 \end_inset
@@ -2137,7 +2137,7 @@ name "figure-percent-sick"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/percent_sick_effect.png
+	filename ../simulations/percent_sick_effect.png
 	scale 50
 
 \end_inset
@@ -2277,7 +2277,7 @@ name "figure-power"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/power_t.png
+	filename ../simulations/power_t.png
 	scale 50
 
 \end_inset
@@ -2319,7 +2319,7 @@ Computation Times
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/performance_sim.png
+	filename ../simulations/performance_sim.png
 	scale 50
 
 \end_inset
@@ -2822,14 +2822,14 @@ name "figure-tga-link-estimates"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename simulations/estimates_links.png
+	filename ../simulations/estimates_links.png
 	scale 50
 
 \end_inset
 
 
 \begin_inset Graphics
-	filename simulations/zscores_links.png
+	filename ../simulations/zscores_links.png
 	scale 50
 
 \end_inset

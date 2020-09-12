@@ -4,7 +4,7 @@ source('lib/model/estimation_functions.R')
 source('lib/model/inference_functions.R')
 
 linkFun <- linkFunctions$multiplicative_identity
-p <- 200
+p <- 240
 n_h <- 10
 n_s <- 10
 T_thresh <- Tlength <- 115

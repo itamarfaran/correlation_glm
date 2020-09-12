@@ -1,0 +1,674 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Recall that a model is said to be identifiable iff 
+\begin_inset Formula $\theta_{1}\neq\theta_{2}\Rightarrow\mathbb{P}_{\theta_{1}}\neq\mathbb{P}_{\theta_{2}}$
+\end_inset
+
+.
+ Our paramaters, 
+\begin_inset Formula $\left\{ \Theta,\alpha\right\} $
+\end_inset
+
+, lay in the parameter space 
+\begin_inset Formula $\mathcal{C}_{p}\times\mathbb{R}^{p}$
+\end_inset
+
+ and parameterize the difference between diagnosed and control subjects.
+ In this section, we will prove the model's identifiablity on the multiplicative
+ (Hadamard) link function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Lambda_{d}-\Lambda_{h}=\Theta\circ\alpha\alpha^{t}-\Theta=\Theta\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A sufficient condition to prove identifiablity is to find a statistic 
+\begin_inset Formula $T\left(Y\right)$
+\end_inset
+
+ such that the function 
+\begin_inset Formula $\theta\mapsto E\left[T\left(Y\right)\right]$
+\end_inset
+
+ is one-to-one.
+ Denote 
+\begin_inset Formula $T\left(Y\right)=\left\{ \bar{R}_{h},\bar{R}_{d}\right\} $
+\end_inset
+
+ with 
+\begin_inset Formula 
+\[
+E\left[T\left(Y\right)\right]=\left\{ \Theta,\Theta\circ\alpha\alpha^{t}\right\} .
+\]
+
+\end_inset
+
+Note that 
+\begin_inset Formula $E\left[T_{1}\left(Y\right)\right]=E\left[\bar{R}_{h}\right]=\Theta$
+\end_inset
+
+ is injective with respect to 
+\begin_inset Formula $\Theta$
+\end_inset
+
+.
+ Annotate 
+\begin_inset Formula $\Gamma,\beta$
+\end_inset
+
+ as alternative parameters.
+ Assume that two sets of parameters yield the same expectation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta,\Theta\circ\alpha\alpha^{t}=\Gamma,\Gamma\circ\beta\beta^{t}
+\]
+
+\end_inset
+
+Since 
+\begin_inset Formula $\Theta=\Gamma$
+\end_inset
+
+, we are left to prove that 
+\begin_inset Formula $\Theta\circ\alpha\alpha^{t}=\Theta\circ\beta\beta^{t}$
+\end_inset
+
+, or equivalently 
+\begin_inset Formula $\Theta\circ\left(\alpha\alpha^{t}-\beta\beta^{t}\right)=0$
+\end_inset
+
+.
+ Define the following constraints on 
+\begin_inset Formula $\Theta$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+1) For every 
+\begin_inset Formula $i\in\left\{ 1,...,p\right\} $
+\end_inset
+
+ there exists at least one 
+\begin_inset Formula $j_{i}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\Theta_{ij_{i}}\neq0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+2) For every 
+\begin_inset Formula $i,k\in\left\{ 1,...,p\right\} $
+\end_inset
+
+ there exists at least one pair 
+\begin_inset Formula $j_{i},l_{k}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\Theta_{ij_{i}}\neq\Theta_{kl_{k}}$
+\end_inset
+
+, and both are non-zero.
+\end_layout
+
+\begin_layout Standard
+Under this constraints, 
+\begin_inset Formula $\Theta=\Gamma\Rightarrow\alpha=\beta$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Proof:
+\end_layout
+
+\begin_layout Standard
+Suppose 
+\begin_inset Formula $\Theta=I+\lambda^{\left(k,l\right)}$
+\end_inset
+
+ where 
+\begin_inset Formula $\lambda^{\left(k,l\right)}$
+\end_inset
+
+ is a matrix with 1 in indices 
+\begin_inset Formula $\left\{ k,l\right\} ,\left\{ l,k\right\} $
+\end_inset
+
+ and 0 elsewhere.
+ Then it implies that 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\alpha_{k}}{\beta_{k}}=\frac{\beta_{l}}{\alpha_{l}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\begin{array}{ccc}
+1 & x_{1}x_{2} & x_{1}x_{3}\\
+ & 1 & x_{2}x_{3}\\
+ &  & 1
+\end{array}\right]=\left[\begin{array}{ccc}
+1 & 1 & 1\\
+ & 1 & 1\\
+ &  & 1
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\begin{array}{ccc}
+1 & 0.5*2 & 0.5*x_{3}\\
+ & 1 & 2*x_{3}\\
+ &  & 1
+\end{array}\right]=\left[\begin{array}{ccc}
+1 & 1 & 1\\
+ & 1 & 1\\
+ &  & 1
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\Theta,\Theta\circ\alpha\alpha^{t}=\Gamma,\Gamma\circ\alpha\alpha^{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Denote 
+\begin_inset Formula $T\left(Y\right)=\bar{R}_{d}-\bar{R}_{h}$
+\end_inset
+
+ with 
+\begin_inset Formula $E\left[T\left(Y\right)\right]=\Theta\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)$
+\end_inset
+
+.
+ We will annotate 
+\begin_inset Formula $\Gamma,\beta$
+\end_inset
+
+ as alternative parameters.
+ Assume that two sets of parameters yield the same expectation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+ & \Theta\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=\Gamma\circ\left(\beta\beta^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)\\
+ & \Rightarrow\Theta\circ\alpha\alpha^{t}-\Gamma\circ\beta\beta^{t}=\Theta-\Gamma
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1) Suppose that 
+\begin_inset Formula $\alpha=\beta$
+\end_inset
+
+.
+ This yields that 
+\begin_inset Formula $\left(\Theta-\Gamma\right)\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=0$
+\end_inset
+
+, or 
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $\alpha=\beta$
+\end_inset
+
+, it implies that 
+\begin_inset Formula $\left(\Theta-\Gamma\right)\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=0$
+\end_inset
+
+, or 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\Theta_{ij}-\Gamma_{ij}\right)\left(\alpha_{i}\alpha_{j}-1\right)=0\forall i,j
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This in turn yields that for any 
+\begin_inset Formula $i,j$
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Theta_{ij}\neq\Gamma_{ij} & \Rightarrow\alpha_{i}=\frac{1}{\alpha_{j}}\\
+\alpha_{i}\neq\frac{1}{\alpha_{j}} & \Rightarrow\Theta_{ij}=\Gamma_{ij}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $\alpha_{i}=\alpha_{j}=1$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccc}
+ & \Theta_{12}-\Gamma_{12} & \Theta_{13}-\Gamma_{13} & \Theta_{14}-\Gamma_{14}\\
+ &  & \Theta_{23}-\Gamma_{23} & \Theta_{24}-\Gamma_{24}\\
+ &  &  & \Theta_{34}-\Gamma_{34}\\
+\\
+\end{array}\right)\left(\begin{array}{cccc}
+ & \alpha_{1}\alpha_{2}-1 & \alpha_{1}\alpha_{3}-1 & \alpha_{1}\alpha_{4}-1\\
+ &  & \alpha_{2}\alpha_{3}-1 & \alpha_{2}\alpha_{4}-1\\
+ &  &  & \alpha_{3}\alpha_{4}-1\\
+\\
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+0=\Lambda_{d}-\Lambda_{h}=\Theta\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If constraint (1) is complied, it implies that 
+\begin_inset Formula $\alpha_{i}/\beta_{i}=\beta_{j}/\alpha_{j}\forall i,j$
+\end_inset
+
+, which in turn implies that 
+\begin_inset Formula $\alpha\propto\beta$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If constraint (2) is complied, it yields a set of linear equations 
+\begin_inset Formula $\alpha_{i}/\beta_{i}=c_{ij}\cdot\beta_{j}/\alpha_{j}\forall i,j$
+\end_inset
+
+ which imply 
+\begin_inset Formula $\alpha=\beta$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta\circ\alpha\alpha^{t}-\Gamma\circ\alpha\alpha^{t}=\Theta-\Gamma
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\Theta-\Gamma\right)\circ\left(\alpha\alpha^{t}\right)=\left(\Theta-\Gamma\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left(\Theta-\Gamma\right)\circ\left(\alpha\alpha^{t}\right)-\left(\Theta-\Gamma\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\Theta-\Gamma\right)\circ\left(\alpha\alpha^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+12, 13, 14
+\end_layout
+
+\begin_layout Standard
+12, 23, 14
+\end_layout
+
+\begin_layout Standard
+12, 23, 34
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccc}
+ & 0 & 1 & 1\\
+ &  & 0 & 0\\
+ &  &  & 0\\
+\\
+\end{array}\right)\left(\left(\begin{array}{cccc}
+ & \alpha_{1}\alpha_{2} & \alpha_{1}\alpha_{3} & \alpha_{1}\alpha_{4}\\
+ &  & \alpha_{2}\alpha_{3} & \alpha_{2}\alpha_{4}\\
+ &  &  & \alpha_{3}\alpha_{4}\\
+\\
+\end{array}\right)-\left(\begin{array}{cccc}
+ & \beta_{1}\beta_{2} & \beta_{1}\beta_{3} & \beta_{1}\beta_{4}\\
+ &  & \beta_{2}\beta_{3} & \beta_{2}\beta_{4}\\
+ &  &  & \beta_{3}\beta_{4}\\
+\\
+\end{array}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccc}
+ & 0 & 1 & 1\\
+ &  & 0 & 0\\
+ &  &  & 0\\
+\\
+\end{array}\right)\left(\begin{array}{cccc}
+ & 0 & \alpha_{1}\alpha_{3}-\beta_{1}\beta_{3} & \alpha_{1}\alpha_{4}-\beta_{1}\beta_{4}\\
+ &  & 0 & 0\\
+ &  &  & 0\\
+\\
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\alpha_{1}}{\beta_{1}} & =\frac{\beta_{2}}{\alpha_{2}}\\
+\frac{\alpha_{2}}{\beta_{2}} & =\frac{\beta_{3}}{\alpha_{3}}\\
+\frac{\alpha_{3}}{\beta_{3}} & =\frac{\beta_{4}}{\alpha_{4}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\alpha_{1}}{\beta_{1}} & =\frac{\alpha_{3}}{\beta_{3}}\\
+\frac{\alpha_{2}}{\beta_{2}} & =\frac{\alpha_{4}}{\beta_{4}}\\
+\frac{\alpha_{3}}{\beta_{3}} & =\frac{\alpha_{2}}{\beta_{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{1}\circ\left(\alpha_{1}\alpha_{1}^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=\Theta_{2}\circ\left(\alpha_{2}\alpha_{2}^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{1}\circ\left(\alpha_{1}\alpha_{1}^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)-\Theta_{2}\circ\left(\alpha_{2}\alpha_{2}^{t}-\boldsymbol{1}\boldsymbol{1}^{t}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{1}\circ\alpha_{1}\alpha_{1}^{t}-\Theta_{1}\circ\boldsymbol{1}\boldsymbol{1}^{t}-\Theta_{2}\circ\alpha_{2}\alpha_{2}^{t}+\Theta_{2}\circ\boldsymbol{1}\boldsymbol{1}^{t}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\Theta_{1}\circ\alpha_{1}\alpha_{1}^{t}-\Theta_{2}\circ\alpha_{2}\alpha_{2}^{t}\right)-\left(\Theta_{1}\circ\boldsymbol{1}\boldsymbol{1}^{t}-\Theta_{2}\circ\boldsymbol{1}\boldsymbol{1}^{t}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{1}\circ\alpha_{1}\alpha_{1}^{t}-\Theta_{2}\circ\alpha_{2}\alpha_{2}^{t}=\Theta_{1}-\Theta_{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+suppose that 
+\begin_inset Formula $\Theta_{1}=\Theta_{2}$
+\end_inset
+
+ then 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{1}\circ\left(\alpha_{1}\alpha_{1}^{t}-\circ\alpha_{2}\alpha_{2}^{t}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

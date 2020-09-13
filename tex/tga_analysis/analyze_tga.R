@@ -17,7 +17,7 @@ quotent_load <- list(
 )
 
 
-
+# todo: manhattan plot
 ##### plot explanatory #####
 png('tex/tga_analysis/control_explanatory.png', w, h)
 corrplot(

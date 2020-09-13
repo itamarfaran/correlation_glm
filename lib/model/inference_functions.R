@@ -119,7 +119,8 @@ infer_jacknife <- function(results){
   const_h <- (sum(!sick_ind) - 1)^2/sum(!sick_ind)
   var_h <- var(results$alpha[!sick_ind,])*const_h
   
-  estimate <- (estimate_d + estimate_h)/2
+  estimate <- colMeans(results$alpha)
+  # estimate <- (estimate_d + estimate_h)/2
   var_out <- var_d + var_h
   
   return(list(

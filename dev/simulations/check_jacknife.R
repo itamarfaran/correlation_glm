@@ -5,8 +5,8 @@ source("lib/model/inference_functions.R")
 
 linkFun <- linkFunctions$multiplicative_identity
 p <- 32
-n_h <- 12
-n_s <- 19
+n_h <- 19
+n_s <- 12
 T_thresh <- Tlength <- 115
 n_sim <- 70
 

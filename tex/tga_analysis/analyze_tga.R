@@ -1,5 +1,5 @@
 ##### source and load #####
-source("tex/simulations/aux.R")
+source("tex/simulations/aux_.R")
 ipak('ggExtra')
 
 w <- 300
@@ -17,7 +17,6 @@ quotent_load <- list(
 )
 
 
-# todo: manhattan plot
 ##### plot explanatory #####
 png('tex/tga_analysis/control_explanatory.png', w, h)
 corrplot(
@@ -55,13 +54,56 @@ dev.off()
 
 ##### analyze t-tests #####
 fisher_z <- function(r) 0.5*log((1 + r)/(1 - r))
-t_test_results <- matrix(0, sample_data$p, sample_data$p)
+
+t_test_results <- t_test_results_corrected <- matrix(0, sample_data$p, sample_data$p)
+
 for(i in 1:(sample_data$p - 1)) for(j in (i + 1):sample_data$p) t_test_results[i,j] <- with(
   sample_data$samples, t.test(fisher_z(healthy[i,j,]), fisher_z(sick[i,j,]))$p.value)
-t_test_results[upper.tri(t_test_results)] <- p.adjust(t_test_results[upper.tri(t_test_results)], 'BH')
+
+t_test_results_corrected[upper.tri(t_test_results_corrected)] <- p.adjust(t_test_results[upper.tri(t_test_results)], 'BH')
+
 t_test_results <- t_test_results + t(t_test_results)
-diag(t_test_results) <- 1
+t_test_results_corrected <- t_test_results_corrected + t(t_test_results_corrected)
+
+diag(t_test_results_corrected) <- diag(t_test_results) <- 1
 print(range(t_test_results))
+
+create_mannahtan_plot <- function(mat, upper_lim = 0){
+  reverselog_trans <- function(base = 10) {
+    trans <- function(x) -log(x, base)
+    inv <- function(x) base^(-x)
+    scales::trans_new(
+      paste0("reverselog-", format(base)), trans, inv,
+      scales::log_breaks(base = base),
+      domain = c(1e-100, Inf))
+  }
+  
+  mat_dt <- data.table(mat)
+  colnames(mat_dt) <- as.character(1:ncol(mat_dt))
+  mat_dt[,j := 1:.N]
+  mat_dt_long <- melt(mat_dt, id.vars = 'j', variable.name = 'i', value.name = 'p_value')
+  mat_dt_long[,i:=as.integer(i)]
+  
+  out <- ggplot(mat_dt_long, aes(x = i, y = p_value)) + 
+    geom_point(alpha = .1)
+  if(upper_lim > 0){
+    out <- out + scale_y_continuous(trans = reverselog_trans(), limits = c(1, upper_lim)) 
+  } else {
+    out <- out + scale_y_continuous(trans = reverselog_trans())
+  }
+    
+  return(out)
+}
+mannahtan_plot <- create_mannahtan_plot(t_test_results_corrected, upper_lim = .1) +
+  labs(title = 'P-values From Mass Univariate T-Tests',
+       x = '', y = 'P-values (-log10 Scale)') +
+  theme_user() + 
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+    )
+custom_ggsave('mannahtan_plot.png', mannahtan_plot, width = 2)
 
 
 ##### organize gee results #####

@@ -52,8 +52,8 @@ data_configs <- list(
 
 ##### data analysis pars #####
 
-data_conf <- NULL
-data_subset <- NULL
+data_conf <- data_configs$amnesia_aicha
+data_subset <- 240
 
 if(is.null(data_conf)){
   sample_data <- create_samples(

@@ -1,5 +1,3 @@
-library(R.matlab)
-
 
 calculate_na_mat <- function(array_){
   na_mat <- matrix(0, nr=dim(array_)[1], nc=dim(array_)[2])
@@ -62,7 +60,7 @@ drop_na_by_percent <- function(array_, threshold=NULL){
 }
 
 
-prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sick_index_name, subset){
+prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sick_index_name, subset=NULL, threshold=NULL){
   real_dta <- R.matlab::readMat(link)
   corr_mats <- real_dta[[corr_matrix_name]]
   
@@ -72,7 +70,7 @@ prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sic
     if(try == 10) stop('corr_mats could not be simplified to array')
   }
   
-  data_and_list <- drop_na_by_percent(corr_mats)
+  data_and_list <- drop_na_by_percent(corr_mats, threshold=threshold)
   reduced_data <- data_and_list
   which_cols_na <- unique(which(is.na(reduced_data), T)[,3])
   
@@ -86,7 +84,7 @@ prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sic
   healthy_dta <- reduced_data[,,healthy_index]
   sick_dta <- reduced_data[,,sick_index]
   
-  if(!missing(subset)){
+  if(!is.null(subset)){
     healthy_dta <- healthy_dta[subset, subset, ]
     sick_dta <- sick_dta[subset, subset, ]
   }

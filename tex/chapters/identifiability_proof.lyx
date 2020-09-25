@@ -497,7 +497,7 @@ If constraint (2) is complied, it yields a set of linear equations
 \begin_inset Formula 
 \[
 \left(\begin{array}{cccc}
- & 0 & 1 & 1\\
+ & 0 & 0 & 1\\
  &  & 0 & 0\\
  &  &  & 0\\
 \\
@@ -523,16 +523,57 @@ If constraint (2) is complied, it yields a set of linear equations
 \begin_inset Formula 
 \[
 \left(\begin{array}{cccc}
- & 0 & 1 & 1\\
+ & 0 & 0 & 1\\
  &  & 0 & 0\\
  &  &  & 0\\
 \\
 \end{array}\right)\left(\begin{array}{cccc}
- & 0 & \alpha_{1}\alpha_{3}-\beta_{1}\beta_{3} & \alpha_{1}\alpha_{4}-\beta_{1}\beta_{4}\\
+ & 0 & 0 & \alpha_{1}\alpha_{4}-\beta_{1}\beta_{4}\\
  &  & 0 & 0\\
  &  &  & 0\\
 \\
-\end{array}\right)
+\end{array}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\alpha_{i}\alpha_{j}=\beta_{i}\beta_{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\tilde{\alpha_{i}}+\tilde{\alpha_{j}}=c_{ij}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\tilde{\alpha}\mathbf{1}^{t}+\mathbf{1}\tilde{\alpha}^{t}=C
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\alpha_{i}}{\beta_{i}}=\frac{\beta_{j}}{\alpha_{j}}
 \]
 
 \end_inset
@@ -677,22 +718,37 @@ Con
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\left(\begin{array}{ccc}
-1 & 1 & 1\\
- & 1 & 1\\
- &  & 1
-\end{array}\right)\circ\left(\begin{array}{ccc}
-1 & 1 & 0\\
-1 & 1 & 1\\
-0 & 1 & 1
-\end{array}\right)=\left(\begin{array}{ccc}
-1 & \frac{1}{2}\cdot2 & 2\cdot2\\
- & 1 & \frac{1}{2}\cdot2\\
- &  & 1
-\end{array}\right)\left(\begin{array}{ccc}
-1 & 1 & 0\\
-1 & 1 & 1\\
-0 & 1 & 1
+\alpha_{1}=
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\begin{array}{cccc}
+1 & 1 & 1 & 1\\
+ & 1 & 1 & 1\\
+ &  & 1 & 1\\
+ &  &  & 1
+\end{array}\right)\circ\left(\begin{array}{cccc}
+1 & 1 & 1 & 0\\
+ & 1 & 1 & 1\\
+ &  & 1 & 1\\
+ &  &  & 1
+\end{array}\right)=\left(\begin{array}{cccc}
+1 & \frac{1}{2}2 & \frac{1}{2}2 & \frac{1}{2}2\\
+ & 1 & 22 & 22\\
+ &  & 1 & 22\\
+ &  &  & 1
+\end{array}\right)\left(\begin{array}{cccc}
+1 & 1 & 1 & 1\\
+ & 1 & 1 & 0\\
+ &  & 1 & 0\\
+ &  &  & 1
 \end{array}\right)
 \]
 
@@ -776,6 +832,183 @@ Con
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Annotate 
+\begin_inset Formula $\Gamma,\beta$
+\end_inset
+
+ as alternative parameters and assume that two sets of parameters yield
+ the same expectation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta,\Theta\circ\alpha\alpha^{t}=\Gamma,\Gamma\circ\beta\beta^{t}.
+\]
+
+\end_inset
+
+ Since it is an immediate conclusion that 
+\begin_inset Formula $\Theta=\Gamma$
+\end_inset
+
+, we are left to prove that 
+\begin_inset Formula $\Theta\circ\alpha\alpha^{t}=\Theta\circ\beta\beta^{t}$
+\end_inset
+
+, or equivalently 
+\begin_inset Formula $\Theta\circ\left(\alpha\alpha^{t}-\beta\beta^{t}\right)=0$
+\end_inset
+
+.
+ Recall that 
+\begin_inset Formula $\Theta\circ\alpha\alpha^{t}=\Lambda_{d}$
+\end_inset
+
+.
+ Call 
+\begin_inset Formula $c_{ij}\coloneqq\ln\Lambda_{d,ij}-\ln\Theta_{ih}$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{\alpha}_{i}=\ln\alpha_{i}$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $\Theta_{ij}\neq0$
+\end_inset
+
+, then 
+\begin_inset Formula $\tilde{\alpha}_{i}+\tilde{\alpha}_{j}=c_{ij}$
+\end_inset
+
+, which creates a set of linear equations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{m'\times p}{\left[\begin{array}{ccccccc}
+1 & 1 & 0 &  & \cdots &  & 0\\
+\vdots &  &  &  &  &  & \vdots\\
+1 & 0 &  & \cdots &  & 0 & 1\\
+0 & 1 & 1 & 0 & \cdots &  & 0\\
+\vdots &  &  &  &  &  & \vdots\\
+0 & 1 & 0 & \cdots & 0 & 1 & 0\\
+\vdots &  &  &  &  &  & \vdots\\
+0 & \cdots &  & 0 & 1 & 1 & 0
+\end{array}\right]}\cdot\underset{p\times1}{\left[\begin{array}{c}
+\tilde{\alpha}_{1}\\
+\vdots\\
+\tilde{\alpha}_{p}
+\end{array}\right]}=\underset{m'\times1}{\left[\begin{array}{c}
+c_{12}\\
+\vdots\\
+c_{p-1,p}
+\end{array}\right]}
+\]
+
+\end_inset
+
+ for all 
+\begin_inset Formula $1\leq i<j\leq p$
+\end_inset
+
+ with 
+\begin_inset Formula $\Theta_{ij}\neq0$
+\end_inset
+
+, 
+\begin_inset Formula $m'$
+\end_inset
+
+ counting the number of non-zero 
+\begin_inset Formula $\Theta_{ij}$
+\end_inset
+
+s.
+ This can be written in matrix form as well, with 
+\begin_inset Formula $A\tilde{\alpha}=\vec{c}$
+\end_inset
+
+, respectively.
+ The model will be identifiable for all 
+\begin_inset Formula $\Theta$
+\end_inset
+
+ yielding a single solution for the linear system above.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y=X\beta
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\beta=\left(X^{t}X\right)^{-1}XY
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+A=\left[\begin{array}{c}
+\tilde{\alpha}_{1}+\tilde{\alpha}_{2}-c_{12}\\
+\vdots\\
+\tilde{\alpha}_{p-1}+\tilde{\alpha}_{p}-c_{p-1,p}
+\end{array}\right]=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\sum_{i<j}\boldsymbol{1}_{\left\{ \Theta_{ij}\neq0\right\} }>p\right)
+\]
+
+\end_inset
+
+for all 
+\begin_inset Formula $0\leq i<j\leq p$
+\end_inset
+
+ with 
+\begin_inset Formula $\Theta_{ij}\neq0$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $A$
+\end_inset
+
+ is a linear 
 \end_layout
 
 \end_body

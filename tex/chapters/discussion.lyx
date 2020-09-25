@@ -76,7 +76,41 @@
 \begin_body
 
 \begin_layout Standard
+In this paper, we suggest a parsimounous model for detecting differences
+ between correlation-matrix populations.
+ In contrast to mass-univariate approaches, we model the cross-dependencies
+ that are present in correlation matrices, using Wishart and asymptotic
+ theories.
+ This allows us to control and reduce the number of parameters in our model,
+ and to avoid the mass loss of power as a result of post-??? multiple-comparison
+s corrections.
+ We demonstarte the use of our model using an assumption of multiplicaltive
+ relation between diagnosed and control populations (as opposed to additive
+ relations), using a link function between both populations.
+ We demonstrate our model on data gathered by ??? 
+\backslash
+citep{} on TGA diagnosed patients, and we were able to find significant
+ effects on previously null finding, due to the reductment in parameters
+ and comparisons.
+\end_layout
 
+\begin_layout Standard
+This model is a framework for further generalization and development, by
+ experimenting with different link functions or increasing the dimension
+ of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ to allow more complex relations between populations.
+ One of the current limitations of the model is it's assumption of comparing
+ two populations (diagnosed and control), while most fMRI studies concentrate
+ on inter-subject comparison - comparing the functional connectivity of
+ the patient before and after an event.
+ These comparisons further complicate the covariance structure between and
+ in observations, and require further research and development.
+ Another direction is an implimentation of the model on inverse correlation
+ matrices.
+ as used by many [cite].
 \end_layout
 
 \end_body

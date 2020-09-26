@@ -282,8 +282,8 @@ estimate_alpha <- function(
   healthy_dt, sick_dt, dim_alpha = 1,
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
-  raw_start = TRUE, iid_config = list(), cov_config = list(),
-  bias_correction = TRUE, early_stop = TRUE, verbose = TRUE){
+  raw_start = FALSE, iid_config = list(), cov_config = list(),
+  bias_correction = FALSE, early_stop = FALSE, verbose = TRUE){
   
   for(name in c('iter_config', 'optim_config')){
     if(!name %in% names(iid_config)) iid_config[[name]] <- list()
@@ -332,7 +332,7 @@ estimate_alpha_jacknife <- function(
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   iid_config = list(iter_config = list(min_loop = 0)), cov_config = list(),
-  return_gee = FALSE, jack_healthy = TRUE, early_stop = TRUE,
+  return_gee = FALSE, jack_healthy = TRUE, early_stop = FALSE,
   verbose = TRUE, ncores = 1
   ){
   

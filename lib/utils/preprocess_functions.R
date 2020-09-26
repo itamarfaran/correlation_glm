@@ -41,7 +41,7 @@ who_to_drop <- function(array_){
 }
 
 
-drop_na_by_percent <- function(array_, threshold=NULL){
+drop_na_by_percent <- function(array_, threshold=NULL, verbose=FALSE){
   if(is.null(threshold)){
     na_mat <- calculate_na_mat(array_)
     threshold_tbl <- get_count_na_by_threshold(na_mat)
@@ -49,13 +49,12 @@ drop_na_by_percent <- function(array_, threshold=NULL){
     
     threshold_vect <- threshold_tbl[,1]
     threshold <- min(threshold_vect[threshold_vect > 0])
-    print(data.frame(threshold_tbl))
-    message(paste0('taking ', threshold, ' as threshold'))
+    if(verbose) print(data.frame(threshold_tbl))
+    message(paste0('taking ', round(threshold, 5), ' as threshold'))
   }
   orig_dim <- dim(array_)
   array_new_ <- filter_columns_by_na_threshold(array_, threshold)
-  message(paste0('got dimensions (', paste0(dim(array_new_)[1:2], collapse = ', '), '), ',
-                 'orig dimensions (', paste0(dim(array_)[1:2], collapse = ', '), ')'))
+  message(paste0('orig p = ', dim(array_)[1], ', return p = ', dim(array_new_)[1]))
   return(array_new_)
 }
 

@@ -124,7 +124,7 @@ inner_optim_loop <- function(
   healthy_dt, sick_dt, alpha0 = NULL, theta0 = NULL, weight_matrix = NULL,
   dim_alpha = 1, linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
-  iter_config = list(), optim_config = list(), early_stop = TRUE,
+  iter_config = list(), optim_config = list(), early_stop = FALSE,
   verbose = TRUE){
   
   if('reltol' %in% names(iter_config) & 'abstol' %in% names(iter_config))
@@ -138,7 +138,8 @@ inner_optim_loop <- function(
   p <- 0.5 + sqrt(1 + 8*ncol(sick_dt))/2
   m <- 0.5*p*(p-1)
   
-  if(is.null(theta0)) theta0 <- colMeans(healthy_dt)
+  # if(is.null(theta0)) theta0 <- colMeans(healthy_dt)
+  if(is.null(theta0)) theta0 <- colMeans(rbind(healthy_dt, sick_dt))
   if(is.null(alpha0)) alpha0 <- matrix(linkFun$NULL_VAL, nr = p, nc = dim_alpha)
 
   if(!is.positive.semi.definite(vector2triangle(theta0, diag_value = 1))
@@ -154,8 +155,9 @@ inner_optim_loop <- function(
     weight_matrix_reg <- regularize_matrix(
       weight_matrix,
       method = matrix_reg_config$method,
-      const = matrix_reg_config$const)
-      weight_matrix_reg_inv <- solve(weight_matrix_reg)
+      const = matrix_reg_config$const
+      )
+    weight_matrix_reg_inv <- solve(weight_matrix_reg)
   }
 
   temp_theta <- theta0

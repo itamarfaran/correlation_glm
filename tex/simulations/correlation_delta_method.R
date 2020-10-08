@@ -29,14 +29,15 @@ p1 <- ggplot(toplot_samp, aes(x = theo, y = emp)) +
     y='Parametric Bootstrap Estimates'
     ) + theme_user()
 
-p2 <- ggplot(toplot_samp, aes(x = theo, y = diff)) + 
-  geom_point(shape=21, alpha=0.5, fill='darkgrey') + 
-  geom_hline(yintercept = 0) + 
-  labs(
-    # title='Empirical and Theoretical Covariance of the Correlation Matrix',
-    x='Delta Method Derived Estimates',
-    y='Difference Between Bootstrap & Delta Estimates'
-  ) + theme_user()
-
-out <- arrangeGrob(p1, p2, ncol=1)
-custom_ggsave('correlation_delta_method.png', out, width = .75, height = 1.5)
+# p2 <- ggplot(toplot_samp, aes(x = theo, y = diff)) + 
+#   geom_point(shape=21, alpha=0.5, fill='darkgrey') + 
+#   geom_hline(yintercept = 0) + 
+#   labs(
+#     # title='Empirical and Theoretical Covariance of the Correlation Matrix',
+#     x='Delta Method Derived Estimates',
+#     y='Difference Between Bootstrap & Delta Estimates'
+#   ) + theme_user()
+# 
+# out <- arrangeGrob(p1, p2, ncol=1)
+out <- p1
+custom_ggsave('correlation_delta_method.png', out, width = .75, height = .75)

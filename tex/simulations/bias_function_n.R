@@ -1,7 +1,7 @@
 source('tex/simulations/aux_.R')
 
 n_sim <- 1
-percent_alpha <- 0.7
+percent_alpha <- 0.8
 range_alpha <- c(0.7, 1.1)
 
 examples <- expand.grid(n = c(20, 40, 60, 80, 100), p = c(15, 30, 45, 60))
@@ -9,7 +9,7 @@ examples <- expand.grid(n = c(20, 40, 60, 80, 100), p = c(15, 30, 45, 60))
 examples <- rbind(examples, examples, examples)
 
 toplot <- do.call(rbind, lapply(seq_len(nrow(examples)), function(i) create_estimates(
-  n_sim = n_sim, n = examples[i, 1], p = examples[i, 2], percent_alpha = 0, range_alpha = range_alpha, ARMA = 0,
+  n_sim = n_sim, n = examples[i, 1], p = examples[i, 2], percent_alpha = percent_alpha, range_alpha = range_alpha, ARMA = 0,
   verbose = FALSE
   )))
 

@@ -1,9 +1,19 @@
 ##### source and load #####
 source("tex/simulations/aux_.R")
 ipak('ggExtra')
+sig_level = .05
 
 w <- 300
 h <- 300
+
+reverselog_trans <- function(base = 10) {
+  trans <- function(x) -log(x, base)
+  inv <- function(x) base^(-x)
+  scales::trans_new(
+    paste0("reverselog-", format(base)), trans, inv,
+    scales::log_breaks(base = base),
+    domain = c(1e-100, Inf))
+}
 
 load('tex/tga_analysis/analysis_tga_multiplicative_identity.RData')
 multiplicative_load <- list(
@@ -69,15 +79,6 @@ diag(t_test_results_corrected) <- diag(t_test_results) <- 1
 print(range(t_test_results))
 
 create_mannahtan_plot <- function(mat, upper_lim = 0){
-  reverselog_trans <- function(base = 10) {
-    trans <- function(x) -log(x, base)
-    inv <- function(x) base^(-x)
-    scales::trans_new(
-      paste0("reverselog-", format(base)), trans, inv,
-      scales::log_breaks(base = base),
-      domain = c(1e-100, Inf))
-  }
-  
   mat_dt <- data.table(mat)
   colnames(mat_dt) <- as.character(1:ncol(mat_dt))
   mat_dt[,j := 1:.N]
@@ -194,7 +195,9 @@ zscores_plt <- ggMarginal(zscores_plt, type = "histogram", fill = 'grey', col = 
 custom_ggsave('estimates_links.png', estimates_plt)
 custom_ggsave('zscores_links.png', zscores_plt)
 
-mod <- quotent_load
+mod_name <- c('multiplicative', 'quotent')[1]
+mod <- switch(mod_name, 'multiplicative' = multiplicative_load, 'quotent' = quotent_load, NA)
+
 estimate_difference_corrmat_quot <- with(mod$estimates, linkFun$FUN(theta, alpha, 1) -
                                            vector2triangle(theta, diag_value = 1))
 
@@ -214,15 +217,93 @@ for(i in 1:sample_data$p) for (j in i:sample_data$p)
 png('tex/tga_analysis/alpha_effect_all.png', w, h)
 corrplot(corr = alpha_effect - 1, 
          method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35),
-         p.mat = alpha_effect_pmat, insig = "n", bg = 'lightgrey')
+         p.mat = alpha_effect_pmat, insig = "n", bg = 'lightgrey', sig.level = sig_level)
 dev.off()
+
 png('tex/tga_analysis/alpha_sig.png', w, h)
 corrplot(corr = alpha_effect - 1, 
          method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35),
-         p.mat = alpha_effect_pmat, insig = "blank", bg = 'lightgrey')
+         p.mat = alpha_effect_pmat, insig = "blank", bg = 'white', sig.level = sig_level)
 dev.off()
 
+alpha_effect_pmat_toplot <- alpha_effect_pmat
+temp_j <- 1
+for(j in seq_len(nrow(alpha_effect_pmat_toplot)))
+  if(any(alpha_effect_pmat_toplot[temp_j,] > .05))
+    break()
 
+is_sig <- alpha_effect_pmat_toplot[temp_j,] < .05
+alpha_effect_pmat_toplot[,!is_sig] <- 1
+png('tex/tga_analysis/alpha_sig_var.png', w, h)
+corrplot(corr = alpha_effect - 1, 
+         method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35),
+         p.mat = alpha_effect_pmat_toplot, insig = "blank", bg = 'white', sig.level = sig_level)
+dev.off()
+
+find_bh_threshold <- function(pvalues, sig_level = .05){
+  pvalues <- sort(pvalues)
+  tresholds <- sig_level*seq_along(pvalues)/length(pvalues)
+  threshold <- tresholds[max(which(pvalues <= tresholds))]
+  return(threshold)
+}
+
+find_holmes_threshold <- function(pvalues, sig_level = .05){
+  pvalues <- sort(pvalues)
+  tresholds <- sig_level/(length(pvalues) + 1 - seq_along(pvalues))
+  s <- tresholds[min(which(pvalues > tresholds)) - 1]
+  return(threshold)
+}
+
+find_bonferroni_threshold <- function(pvalues, sig_level = .05){
+  return(sig_level/length(pvalues))
+}
+
+toplot_manhattan <- end_results_long[method == mod_name]
+
+sum_rejected <- toplot_manhattan[,sum(p_adjusted <= sig_level)]
+toplot_manhattan[,`:=`(
+  ci_low = est - qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
+  ci_upp = est + qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
+  is_significant = ifelse(p_adjusted <= sig_level, 'Significant', 'Insignificant'),
+  difference = sign(z_value*(p_adjusted <= sig_level))
+)]
+toplot_manhattan[,difference := case_when(
+  difference == 1 ~ 'Increase',
+  difference == -1 ~ 'Decay',
+  difference == 0 ~ 'Insignificant',
+  TRUE ~ NA_character_
+)]
+
+alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, ymin = ci_low, ymax = ci_upp, color = difference), toplot_manhattan) + 
+  geom_hline(yintercept = mod$estimates$linkFun$NULL_VAL, linetype = 2, color = 'darkgrey') + 
+  geom_point() + 
+  labs(x = '', y = 'Estimate', color = '') +
+  theme_user() + 
+  theme(legend.position = 'none') +
+  scale_color_manual(values = c('Increase' = '#2ECC71', 'Decay' = '#E74C3C', 'Insignificant' = '#707B7C'))
+
+labels_dt <- data.table(
+  x = max(toplot_manhattan$index) - 10,
+  y = c(
+    find_bh_threshold(toplot_manhattan$p_value),
+    find_holmes_threshold(toplot_manhattan$p_value)
+    )
+  )
+labels_dt[,label := paste0(c('BH', 'Bonferroni'))]
+
+alpha_manhattan_plot <- ggplot(toplot_manhattan, aes(x = index, y = p_value, color = difference)) + 
+  geom_hline(yintercept = find_bh_threshold(toplot_manhattan$p_value)) + 
+  geom_hline(yintercept = find_bonferroni_threshold(toplot_manhattan$p_value)) + 
+  geom_point() + 
+  scale_y_continuous(trans = reverselog_trans(), labels = scales::number) + 
+  geom_label(aes(x = x, y = y, label = label), data = labels_dt, color = 'black') + 
+  labs(x = 'Index', y = 'P-value', color = '') +
+  theme_user() + 
+  theme(legend.position = 'none') + 
+  scale_color_manual(values = c('Increase' = '#2ECC71', 'Decay' = '#E74C3C', 'Insignificant' = '#707B7C'))
+
+out <- arrangeGrob(alpha_estimate_plot, alpha_manhattan_plot, nrow = 2)
+custom_ggsave('alpha_manhattan.png', out, width = 1.5)
 
 # diagnosed_diffence <- calculate_mean_matrix(sample_data$samples$sick) - 
 #   with(mod$estimates, linkFun$FUN(theta, alpha, 1))

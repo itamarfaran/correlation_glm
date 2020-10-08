@@ -158,6 +158,54 @@ plot_by <- function(x, title, scales, width = NULL, type = 'power'){
   return(p_out)
 }
 
+plot_by <- function(x, title, scales, width = NULL, type = 'power'){
+  toplot %>%
+    filter(rate == type) %>% 
+    group_by(.dots = c('method', x)) %>% 
+    summarise(value = median(value)) %>%
+    as.data.table() ->
+    labels
+  
+  interactions_all <- list(
+    x = toplot[rate == type, get(x)],
+    y = toplot[rate == type, method]
+  )
+  interactions_lab <- list(
+    x = labels[, get(x)],
+    y = labels[, method]
+  )
+  
+  toplot_grouped <- toplot[rate == type]
+  toplot_grouped <- toplot_grouped[
+    ,.(
+    mean = 10000*mean(value),
+    lower = 10000*quantile(value, .05),
+    upper = 10000*quantile(value, .95)
+    ), 
+    by = .(
+      get(x),
+      method
+    )]
+  colnames(toplot_grouped)[colnames(toplot_grouped) == 'get'] <- x
+  p_out <-
+    ggplot(toplot_grouped, aes_string(x = x, y = 'mean', fill = 'method')) +
+    geom_bar(stat = 'identity', position = 'dodge') +
+    # geom_crossbar(aes(ymin = lower, ymax = upper, color = method), fill = NA) + 
+    labs(title = title) + 
+    scale_x_continuous(labels = scales) +
+    scale_y_log10(labels = function(x) x/10000, limits = c(1, 10000)) +
+    # geom_hline(yintercept = 0) +
+    scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
+    scale_color_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
+    theme_user() + theme(
+    legend.position = 'none',
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank()
+  )
+  return(p_out)
+}
+
+
 out3 <- arrangeGrob(
   plot_by('percent_alpha', '% Non-Null Parameters', scales::percent, width = .04),
   plot_by('min_alpha', 'Minimal Value of Alpha', scales::number, width = .02),

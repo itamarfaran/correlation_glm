@@ -1,5 +1,5 @@
-#LyX 2.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 508
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
 \begin_document
 \begin_header
 \save_transient_properties true
@@ -21,6 +21,8 @@
 \font_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -50,6 +52,7 @@
 \suppress_date false
 \justification true
 \use_refstyle 1
+\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
@@ -58,7 +61,10 @@
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation 0cm
-\quotes_language english
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -554,6 +560,548 @@ g\left(\begin{array}{c}
 \[
 \widehat{Var}\left(\hat{\rho}_{n}\right)\bot Var\left(X_{i}\right),Var\left(Y_{i}\right)
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+proof
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $X\sim\mathcal{MN}_{N\times4}\left(\boldsymbol{0},\boldsymbol{I}_{N},\Sigma\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $\Sigma_{ij}=\rho_{ij}\cdot\sigma_{i}\cdot\sigma_{j}$
+\end_inset
+
+.
+ Denote 
+\begin_inset Formula $ $
+\end_inset
+
+.
+ Then from Wishart thoery we have:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\backslash
+left(X_{n1}
+\backslash
+cdot X_{n1},X_{n1}
+\backslash
+cdot X_{n2},
+\backslash
+cdots,X_{n1}
+\backslash
+cdot X_{n4},X_{n2}
+\backslash
+cdot X_{n2},
+\backslash
+cdots,X_{n4}
+\backslash
+cdot X_{n4}
+\backslash
+right)
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+N^{-1}
+\backslash
+stackrel[n=1]{N}{
+\backslash
+sum}
+\backslash
+left(X_{n1}
+\backslash
+cdot X_{n1},X_{n1}
+\backslash
+cdot X_{n2},
+\backslash
+cdots,X_{n1}
+\backslash
+cdot X_{n4},X_{n2}
+\backslash
+cdot X_{n2},
+\backslash
+cdots,X_{n4}
+\backslash
+cdot X_{n4}
+\backslash
+right)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\xi_{N}\left(X\right)=N^{-1}\stackrel[n=1]{N}{\sum}\left(X_{n1}\cdot X_{n1},X_{n1}\cdot X_{n2},\cdots,X_{n1}\cdot X_{n4},X_{n2}\cdot X_{n2},\cdots,X_{n4}\cdot X_{n4}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+E\left[X_{ni}\cdot X_{nj}\right]=\stackrel[n=1]{N}{\sum}Cov\left(X_{ni},X_{nj}\right)=\rho_{ij}\cdot\sigma_{i}\cdot\sigma_{j},
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Cov\left(X_{ni}X_{nj},X_{nk}X_{nl}\right)=\Sigma_{ik}\Sigma_{jl}+\Sigma_{il}\Sigma_{jk}=\left(\rho_{ik}\rho_{jl}+\rho_{jk}\rho_{il}\right)\cdot\sigma_{i}\sigma_{j}\sigma_{k}\sigma_{l}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that the Delta method implies that if 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{array}{c}
+\sqrt{N}\left(\xi_{N}-\theta\right)\overset{d}{\rightarrow}N\left(0,\Omega\right)\\
+\Downarrow\\
+\sqrt{N}\left(g\left(\xi_{N}\right)-g\left(\theta\right)\right)\overset{d}{\rightarrow}N\left(0,\nabla g^{t}\cdot\Omega\cdot\nabla g\right)
+\end{array}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Define the following function 
+\begin_inset Formula $g$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g\left(\begin{array}{c}
+x_{11}\\
+x_{12}\\
+\vdots\\
+x_{14}\\
+x_{22}\\
+\vdots\\
+x_{44}
+\end{array}\right)=\left(\begin{array}{c}
+\frac{x_{12}}{\sqrt{x_{11}x_{22}}}\\
+\frac{x_{13}}{\sqrt{x_{11}x_{33}}}\\
+\frac{x_{14}}{\sqrt{x_{11}x_{44}}}\\
+\frac{x_{23}}{\sqrt{x_{22}x_{33}}}\\
+\frac{x_{24}}{\sqrt{x_{22}x_{44}}}\\
+\frac{x_{34}}{\sqrt{x_{33}x_{44}}}
+\end{array}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial x_{ij}}\left(\frac{x_{kl}}{\sqrt{x_{kk}x_{ll}}}\right)=\begin{cases}
+\frac{1}{\sqrt{x_{kk}x_{ll}}} & \left(i,j\right)=\left(k,l\right)\lor\left(l,k\right)\\
+-\frac{x_{kl}}{2\sqrt{x_{kk}^{3}x_{ll}}} & i=j=k\\
+0 & else
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and 
+\begin_inset Formula $\psi=\nabla g\in\mathbb{M}_{10\times6}\left(\mathbb{R}\right).$
+\end_inset
+
+ By plugging in 
+\begin_inset Formula $x_{ij}=\rho_{ij}\sigma_{i}\sigma_{j}$
+\end_inset
+
+ one gets 
+\begin_inset Formula $g=\left(\rho_{12},\rho_{13},\rho_{14},\rho_{23},\rho_{24},\rho_{34}\right)^{t}$
+\end_inset
+
+ and
+\begin_inset Formula 
+\[
+\psi=\left(\begin{array}{cccccc}
+-\frac{\rho_{12}}{2\sigma_{1}^{2}} & -\frac{\rho_{13}}{2\sigma_{1}^{2}} & -\frac{\rho_{14}}{2\sigma_{1}^{2}} & \cdot & \cdot & \cdot\\
+\frac{1}{\sigma_{1}\sigma_{2}} & \cdot & \cdot & \cdot & \cdot & \cdot\\
+\cdot & \frac{1}{\sigma_{1}\sigma_{3}} & \cdot & \cdot & \cdot & \cdot\\
+\cdot & \cdot & \frac{1}{\sigma_{1}\sigma_{4}} & \cdot & \cdot & \cdot\\
+-\frac{\rho_{12}}{2\sigma_{2}^{2}} & \cdot & \cdot & -\frac{\rho_{23}}{2\sigma_{2}^{2}} & -\frac{\rho_{24}}{2\sigma_{2}^{2}} & \cdot\\
+\cdot & \cdot & \cdot & \frac{1}{\sigma_{2}\sigma_{3}} & \cdot & \cdot\\
+\cdot & \cdot & \cdot & \cdot & \frac{1}{\sigma_{2}\sigma_{4}} & \cdot\\
+\cdot & -\frac{\rho_{13}}{2\sigma_{3}^{2}} & \cdot & -\frac{\rho_{23}}{2\sigma_{3}^{2}} & \cdot & -\frac{\rho_{34}}{2\sigma_{3}^{2}}\\
+\cdot & \cdot & \cdot & \cdot & \cdot & \frac{1}{\sigma_{3}\sigma_{4}}\\
+\cdot & \cdot & -\frac{\rho_{14}}{2\sigma_{4}^{2}} & \cdot & -\frac{\rho_{24}}{2\sigma_{4}^{2}} & -\frac{\rho_{34}}{2\sigma_{4}^{2}}
+\end{array}\right).
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Call 
+\begin_inset Formula $\Omega^{\star}=\psi^{t}\cdot\Omega\cdot\psi$
+\end_inset
+
+, and we want to find the 
+\begin_inset Formula $u,v$
+\end_inset
+
+ element of 
+\begin_inset Formula $\Omega^{\star}$
+\end_inset
+
+.
+ Due to the length of the full calculation, we will show the results only
+ for the first row of 
+\begin_inset Formula $\Omega^{\star}$
+\end_inset
+
+.
+ We have that:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\psi^{t}\cdot\Omega\cdot\psi\right)_{uv}=\left(\psi^{t}\cdot\Omega\right)_{u\cdot}\cdot\psi_{\cdot v}=\left(\psi_{\cdot u}^{t}\cdot\Omega\right)\cdot\psi_{\cdot v}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will start by calculating 
+\begin_inset Formula $\psi_{1\cdot}^{t}\cdot\Omega$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\psi_{\cdot1}^{t}\cdot\Omega=\left(\begin{array}{c}
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}\cdot\sigma_{1}^{2}\\
+\left(1-\rho_{12}^{2}\right)\cdot\sigma_{1}\cdot\sigma_{2}\\
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{23}\cdot\sigma_{1}\cdot\sigma_{3}\\
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{24}\cdot\sigma_{1}\cdot\sigma_{4}\\
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}\cdot\sigma_{2}^{2}\\
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{13}\cdot\sigma_{2}\cdot\sigma_{3}\\
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{14}\cdot\sigma_{2}\cdot\sigma_{4}\\
+-\left(\rho_{13}\left(\rho_{12}\cdot\rho_{13}-\rho_{23}\right)+\rho_{23}\left(\rho_{12}\cdot\rho_{23}-\rho_{13}\right)\right)\cdot\sigma_{3}^{2}\\
+-\left(\rho_{13}\left(\rho_{12}\rho_{14}-\rho_{24}\right)+\rho_{23}\left(\rho_{12}\cdot\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{3}\cdot\sigma_{4}\\
+-\left(\rho_{14}\left(\rho_{12}\cdot\rho_{14}-\rho_{24}\right)+\rho_{24}\left(\rho_{12}\cdot\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{4}^{2}
+\end{array}\right)^{t}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The diagnoal element is equal to 
+\begin_inset Formula $\psi_{\cdot1}^{t}\cdot\Omega\cdot\psi_{\cdot1}$
+\end_inset
+
+ and is equal to 
+\begin_inset Formula $Cov\left(\hat{\rho}_{12},\hat{\rho}_{12}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Var\left(\hat{\rho}_{12}\right) & =\left(\begin{array}{c}
+\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}\cdot\sigma_{1}^{2}\\
+\left(1-\rho_{12}^{2}\right)\cdot\sigma_{1}\cdot\sigma_{2}\\
+\cdots\\
+\cdots\\
+\left(1-\rho_{12}^{2}\right)\rho_{12}\cdot\sigma_{2}^{2}\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots
+\end{array}\right)^{t}\cdot\left(\begin{array}{c}
+-\frac{\rho_{12}}{2\sigma_{1}^{2}}\\
+\frac{1}{\sigma_{1}\sigma_{2}}\\
+\cdot\\
+\cdot\\
+-\frac{\rho_{12}}{2\sigma_{2}^{2}}\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot
+\end{array}\right)\\
+ & =-\frac{\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}^{2}\cdot\sigma_{1}^{2}}{2\sigma_{1}^{2}}+\frac{\left(1-\rho_{12}^{2}\right)\cdot\sigma_{1}\cdot\sigma_{2}}{\sigma_{1}\cdot\sigma_{2}}-\frac{\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}^{2}\cdot\sigma_{2}^{2}}{2\sigma_{2}^{2}}\\
+ & =\left(1-\rho_{12}^{2}\right)-\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}^{2}=\left(1-\rho_{12}^{2}\right)^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first off-diagnoal element is equal to 
+\begin_inset Formula $\psi_{\cdot1}^{t}\cdot\Omega\cdot\psi_{\cdot2}$
+\end_inset
+
+ and is equal to 
+\begin_inset Formula $Cov\left(\hat{\rho}_{12},\hat{\rho}_{13}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\hat{\rho}_{12},\hat{\rho}_{13}\right) & =\left(\begin{array}{c}
+\left(1-\rho_{12}^{2}\right)\rho_{12}\sigma_{1}^{2}\\
+\cdots\\
+\left(1-\rho_{12}^{2}\right)\rho_{23}\cdot\sigma_{1}\cdot\sigma_{3}\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+-\left(\rho_{13}\left(\rho_{12}\cdot\rho_{13}-\rho_{23}\right)+\rho_{23}\left(\rho_{12}\rho_{23}-\rho_{13}\right)\right)\cdot\sigma_{3}^{2}\\
+\cdots\\
+\cdots
+\end{array}\right)^{t}\cdot\left(\begin{array}{c}
+-\frac{\rho_{13}}{2\sigma_{1}^{2}}\\
+\cdot\\
+\frac{1}{\sigma_{1}\sigma_{3}}\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+-\frac{\rho_{13}}{2\sigma_{3}^{2}}\\
+\cdot\\
+\cdot
+\end{array}\right)\\
+ & =-\frac{\left(1-\rho_{12}^{2}\right)\cdot\rho_{12}\cdot\rho_{13}\cdot\sigma_{1}^{2}}{2\sigma_{1}^{2}}+\frac{\left(1-\rho_{12}^{2}\right)\cdot\rho_{23}\cdot\sigma_{1}\cdot\sigma_{3}}{\sigma_{1}\cdot\sigma_{3}}+\frac{\left(\rho_{13}\left(\rho_{12}\cdot\rho_{13}-\rho_{23}\right)+\rho_{23}\left(\rho_{12}\rho_{23}-\rho_{13}\right)\right)\cdot\rho_{13}\cdot\sigma_{3}^{2}}{2\sigma_{3}^{2}}\\
+ & =\frac{1}{2}\left[\rho_{12}^{3}\cdot\rho_{13}+\rho_{12}\cdot\rho_{13}^{3}+\rho_{12}\cdot\rho_{23}^{2}\cdot\rho_{13}-\rho_{12}\cdot\rho_{13}+2\cdot\rho_{23}-2\rho_{12}^{2}\cdot\rho_{23}-2\rho_{13}^{2}\cdot\rho_{23}\right]\\
+ & =\frac{\rho_{12}\rho_{13}}{2}\left(\rho_{12}^{2}+\rho_{13}^{2}+\rho_{23}^{2}-1\right)-\rho_{23}\left(\rho_{12}^{2}+\rho_{13}^{2}-1\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The last off-diagnoal element is equal to 
+\begin_inset Formula $\psi_{\cdot1}^{t}\cdot\Omega\cdot\psi_{\cdot6}$
+\end_inset
+
+ and is equal to 
+\begin_inset Formula $Cov\left(\hat{\rho}_{12},\hat{\rho}_{34}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\hat{\rho}_{12},\hat{\rho}_{34}\right) & =\left(\begin{array}{c}
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+\cdots\\
+-\left(\rho_{13}\left(\rho_{12}\cdot\rho_{13}-\rho_{23}\right)+\rho_{23}\left(\rho_{12}\cdot\rho_{23}-\rho_{13}\right)\right)\cdot\sigma_{3}^{2}\\
+-\left(\rho_{13}\left(\rho_{12}\cdot\rho_{14}-\rho_{24}\right)+\rho_{23}\left(\rho_{12}\cdot\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{3}\cdot\sigma_{4}\\
+-\left(\rho_{14}\left(\rho_{12}\cdot\rho_{14}-\rho_{24}\right)+\rho_{24}\left(\rho_{12}\cdot\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{4}^{2}
+\end{array}\right)^{t}\left(\begin{array}{c}
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+\cdot\\
+-\frac{\rho_{34}}{2\sigma_{3}^{2}}\\
+\frac{1}{\sigma_{3}\sigma_{4}}\\
+-\frac{\rho_{34}}{2\sigma_{4}^{2}}
+\end{array}\right)\\
+ & =\frac{1}{2}\left[\rho_{13}\rho_{34}\left(\rho_{12}\rho_{13}-\rho_{23}\right)+\rho_{23}\rho_{34}\left(\rho_{12}\rho_{23}-\rho_{13}\right)-2\rho_{13}\left(\rho_{12}\rho_{14}-\rho_{24}\right)-2\rho_{23}\left(\rho_{12}\rho_{24}-\rho_{14}\right)+\rho_{14}\rho_{34}\left(\rho_{12}\rho_{14}-\rho_{24}\right)+\rho_{24}\rho_{34}\left(\rho_{12}\rho_{24}-\rho_{14}\right)\right]\\
+ & =\frac{1}{2}\left[\rho_{12}\rho_{13}^{2}\rho_{34}+\rho_{12}\rho_{14}^{2}\rho_{34}+\rho_{12}\rho_{23}^{2}\rho_{34}+\rho_{12}\rho_{24}^{2}\rho_{34}-2\rho_{12}\rho_{13}\rho_{14}-2\rho_{12}\rho_{23}\rho_{24}-2\rho_{14}\rho_{24}\rho_{34}-2\rho_{13}\rho_{23}\rho_{34}+2\rho_{13}\rho_{24}+2\rho_{14}\rho_{23}\right]\\
+ & =\frac{\rho_{12}\rho_{34}}{2}\left(\rho_{13}^{2}+\rho_{14}^{2}+\rho_{23}^{2}+\rho_{24}^{2}\right)-\rho_{12}\left(\rho_{13}\rho_{14}+\rho_{23}\rho_{24}\right)-\rho_{34}\left(\rho_{14}\rho_{24}+\rho_{13}\rho_{23}\right)+\left(\rho_{13}\rho_{24}+\rho_{14}\rho_{23}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and by generalization:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Var\left(\hat{\rho}_{ij}\right)=\left(1-\rho_{ij}^{2}\right)^{2},
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Cov\left(\hat{\rho}_{ij},\hat{\rho}_{il}\right)=\frac{\rho_{ij}\rho_{ij}}{2}\left(\rho_{ij}^{2}+\rho_{il}^{2}+\rho_{jl}^{2}-1\right)-\rho_{jl}\left(\rho_{ij}^{2}+\rho_{il}^{2}-1\right),
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+Cov\left(\hat{\rho}_{ij},\hat{\rho}_{kl}\right)= & \frac{\boldsymbol{\rho_{ij}}\boldsymbol{\rho_{kl}}}{2}\left(\rho_{ik}^{2}+\rho_{il}^{2}+\rho_{jk}^{2}+\rho_{jl}^{2}\right)\\
+ & -\boldsymbol{\rho_{ij}}\left(\rho_{ik}\rho_{il}+\rho_{jk}\rho_{jl}\right)\\
+\quad & -\boldsymbol{\rho_{kl}}\left(\rho_{il}\rho_{jl}+\rho_{ik}\rho_{jk}\right)\\
+ & +\left(\rho_{ik}\rho_{jl}+\rho_{il}\rho_{jk}\right).
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Equations [ref] can also be computed by substituting the right indexes in
+ equation [ref].
+ The results repeat themselves in every row and column of 
+\begin_inset Formula $\Omega^{\star}$
+\end_inset
+
+, and aren't in this paper due to their long calculations.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{align*}
+\nabla g\cdot\nabla g^{t} & =\left(\begin{array}{cccccc}
+-\frac{\rho_{12}}{2\sigma_{1}^{2}} & -\frac{\rho_{13}}{2\sigma_{1}^{2}} & -\frac{\rho_{14}}{2\sigma_{1}^{2}}\\
+\frac{1}{\sigma_{1}\sigma_{2}}\\
+ & \frac{1}{\sigma_{1}\sigma_{3}}\\
+ &  & \frac{1}{\sigma_{1}\sigma_{4}}\\
+-\frac{\rho_{12}}{2\sigma_{2}^{2}} &  &  & -\frac{\rho_{23}}{2\sigma_{2}^{2}} & -\frac{\rho_{24}}{2\sigma_{2}^{2}}\\
+ &  &  & \frac{1}{\sigma_{2}\sigma_{3}}\\
+ &  &  &  & \frac{1}{\sigma_{2}\sigma_{4}}\\
+ & -\frac{\rho_{13}}{2\sigma_{3}^{2}} &  & -\frac{\rho_{23}}{2\sigma_{3}^{2}} &  & -\frac{\rho_{34}}{2\sigma_{3}^{2}}\\
+ &  &  &  &  & \frac{1}{\sigma_{3}\sigma_{4}}\\
+ &  & -\frac{\rho_{14}}{2\sigma_{4}^{2}} &  & -\frac{\rho_{24}}{2\sigma_{4}^{2}} & -\frac{\rho_{34}}{2\sigma_{4}^{2}}
+\end{array}\right)\left(\begin{array}{cccccccccc}
+-\frac{\rho_{12}}{2\sigma_{1}^{2}} & \frac{1}{\sigma_{1}\sigma_{2}} &  &  & -\frac{\rho_{12}}{2\sigma_{2}^{2}}\\
+-\frac{\rho_{13}}{2\sigma_{1}^{2}} &  & \frac{1}{\sigma_{1}\sigma_{3}} &  &  &  &  & -\frac{\rho_{13}}{2\sigma_{3}^{2}}\\
+-\frac{\rho_{14}}{2\sigma_{1}^{2}} &  &  & \frac{1}{\sigma_{1}\sigma_{4}} &  &  &  &  &  & -\frac{\rho_{14}}{2\sigma_{4}^{2}}\\
+ &  &  &  & -\frac{\rho_{23}}{2\sigma_{2}^{2}} & \frac{1}{\sigma_{2}\sigma_{3}} &  & -\frac{\rho_{23}}{2\sigma_{3}^{2}}\\
+ &  &  &  & -\frac{\rho_{24}}{2\sigma_{2}^{2}} &  & \frac{1}{\sigma_{2}\sigma_{4}} &  &  & -\frac{\rho_{24}}{2\sigma_{4}^{2}}\\
+ &  &  &  &  &  &  & -\frac{\rho_{34}}{2\sigma_{3}^{2}} & \frac{1}{\sigma_{3}\sigma_{4}} & -\frac{\rho_{34}}{2\sigma_{4}^{2}}
+\end{array}\right)\\
+ & =\begin{array}{cccccccccc}
+\frac{\rho_{12}^{2}+\rho_{13}^{2}+\rho_{14}^{2}}{4\sigma_{1}^{4}} & -\frac{\rho_{12}}{2\sigma_{1}^{3}\sigma_{2}} & -\frac{\rho_{13}}{2\sigma_{1}^{3}\sigma_{3}} & -\frac{\rho_{14}}{2\sigma_{1}^{3}\sigma_{4}} & \frac{\rho_{12}^{2}}{4\sigma_{1}^{2}\sigma_{2}^{2}} & 0 & 0 & \frac{\rho_{13}^{2}}{4\sigma_{1}^{2}\sigma_{3}^{2}} & 0 & \frac{\rho_{14}^{2}}{4\sigma_{1}^{2}\sigma_{4}^{2}}\\
+-\frac{\rho_{12}}{2\sigma_{1}^{3}\sigma_{2}} & \frac{1}{\sigma_{1}^{2}\sigma_{2}^{2}} & 0 & 0 & -\frac{\rho_{12}}{2\sigma_{1}\sigma_{2}^{3}} & 0 & 0 & 0 & 0 & 0\\
+-\frac{\rho_{13}}{2\sigma_{1}^{3}\sigma_{3}} & 0 & \frac{1}{\sigma_{1}^{2}\sigma_{3}^{2}} & 0 & 0 & 0 & 0 & -\frac{\rho_{13}}{2\sigma_{1}\sigma_{3}^{3}} & 0 & 0\\
+-\frac{\rho_{14}}{2\sigma_{1}^{3}\sigma_{4}} & 0 & 0 & \frac{1}{\sigma_{1}^{2}\sigma_{4}^{2}} & 0 & 0 & 0 & 0 & 0 & -\frac{\rho_{14}}{2\sigma_{1}\sigma_{4}^{3}}\\
+\frac{\rho_{12}^{2}}{4\sigma_{1}^{2}\sigma_{2}^{2}} & -\frac{\rho_{12}}{2\sigma_{1}\sigma_{2}^{3}} & 0 & 0 & \frac{\rho_{12}^{2}+\rho_{23}^{2}+\rho_{24}^{2}}{4\sigma_{2}^{4}} & -\frac{\rho_{23}}{2\sigma_{2}^{3}\sigma_{3}} & -\frac{\rho_{24}}{2\sigma_{2}^{3}\sigma_{4}} & \frac{\rho_{23}^{2}}{4\sigma_{2}^{2}\sigma_{3}^{2}} & 0 & \frac{\rho_{24}^{2}}{4\sigma_{2}^{2}\sigma_{4}^{2}}\\
+0 & 0 & 0 & 0 & -\frac{\rho_{23}}{2\sigma_{2}^{3}\sigma_{3}} & \frac{1}{\sigma_{2}^{2}\sigma_{3}^{2}} & 0 & -\frac{\rho_{23}}{2\sigma_{2}\sigma_{3}^{.}} & 0 & 0\\
+0 & 0 & 0 & 0 & -\frac{\rho_{24}}{2\sigma_{2}^{3}\sigma_{4}} & 0 & \frac{1}{\sigma_{2}^{2}\sigma_{4}^{2}} & 0 & 0 & -\frac{\rho_{24}}{2\sigma_{2}\sigma_{4}^{3}}\\
+\frac{\rho_{13}^{2}}{4\sigma_{1}^{2}\sigma_{3}^{2}} & 0 & -\frac{\rho_{13}}{2\sigma_{1}\sigma_{3}^{3}} & 0 & \frac{\rho_{23}^{2}}{4\sigma_{2}^{2}\sigma_{3}^{2}} & -\frac{\rho_{23}}{2\sigma_{2}\sigma_{3}^{.}} & 0 & \frac{\rho_{13}^{2}+\rho_{23}^{2}+\rho_{34}^{2}}{4\sigma_{3}^{4}} & -\frac{\rho_{34}}{2\sigma_{3}^{3}\sigma_{4}} & \frac{\rho_{34}}{4\sigma_{3}^{2}\sigma_{4}^{2}}\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & -\frac{\rho_{34}}{2\sigma_{3}^{3}\sigma_{4}} & \frac{1}{\sigma_{3}^{2}\sigma_{4}^{2}} & -\frac{\rho_{34}}{2\sigma_{3}\sigma_{4}^{3}}\\
+\frac{\rho_{14}^{2}}{4\sigma_{1}^{2}\sigma_{4}^{2}} & 0 & 0 & -\frac{\rho_{14}}{2\sigma_{1}\sigma_{4}^{3}} & \frac{\rho_{24}^{2}}{4\sigma_{2}^{2}\sigma_{4}^{2}} & 0 & -\frac{\rho_{24}}{2\sigma_{2}\sigma_{4}^{3}} & \frac{\rho_{34}}{4\sigma_{3}^{2}\sigma_{4}^{2}} & -\frac{\rho_{34}}{2\sigma_{3}\sigma_{4}^{3}} & \frac{\rho_{14}^{2}+\rho_{24}^{2}+\rho_{34}^{2}}{4\sigma_{4}^{4}}
+\end{array}
+\end{align*}
 
 \end_inset
 
@@ -1560,7 +2108,7 @@ Denote
 \left(1-\rho_{12}^{2}\right)\rho_{14}\cdot\sigma_{2}\cdot\sigma_{4}\\
 -\left(\rho_{13}\left(\rho_{12}\cdot\rho_{13}-\rho_{23}\right)+\rho_{23}\left(\rho_{12}\rho_{23}-\rho_{13}\right)\right)\cdot\sigma_{3}^{2}\\
 -\left(\rho_{13}\left(\rho_{12}\rho_{14}-\rho_{24}\right)+\rho_{23}\left(\rho_{12}\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{3}\cdot\sigma_{4}\\
--\left(\rho_{13}\left(\rho_{12}\rho_{14}-\rho_{24}\right)+\rho_{23}\left(\rho_{12}\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{3}\cdot\sigma_{4}
+-\left(\rho_{14}\left(\rho_{12}\cdot\rho_{14}-\rho_{24}\right)+\rho_{24}\left(\rho_{12}\cdot\rho_{24}-\rho_{14}\right)\right)\cdot\sigma_{4}^{2}
 \end{array}\right]
 \]
 

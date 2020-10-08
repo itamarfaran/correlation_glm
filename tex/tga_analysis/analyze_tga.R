@@ -6,15 +6,6 @@ sig_level = .05
 w <- 300
 h <- 300
 
-reverselog_trans <- function(base = 10) {
-  trans <- function(x) -log(x, base)
-  inv <- function(x) base^(-x)
-  scales::trans_new(
-    paste0("reverselog-", format(base)), trans, inv,
-    scales::log_breaks(base = base),
-    domain = c(1e-100, Inf))
-}
-
 load('tex/tga_analysis/analysis_tga_multiplicative_identity.RData')
 multiplicative_load <- list(
   estimates = results,

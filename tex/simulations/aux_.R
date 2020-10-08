@@ -9,6 +9,15 @@ theme_user <- theme_bw
 plot_files_path <- 'tex/simulations/' 
 dpi <- 100
 
+reverselog_trans <- function(base = 10) {
+  trans <- function(x) -log(x, base)
+  inv <- function(x) base^(-x)
+  scales::trans_new(
+    paste0("reverselog-", format(base)), trans, inv,
+    scales::log_breaks(base = base),
+    domain = c(1e-100, Inf))
+}
+
 custom_ggsave <- function(filename, plot, width = 1, height = 1, ...){
   ggsave(filename = filename, plot = plot, path = plot_files_path,
          width = width*10, height = height*10, units = 'cm', dpi = dpi, ...)

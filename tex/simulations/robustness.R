@@ -1,10 +1,10 @@
 source('tex/simulations/aux_.R')
 
 n <- 50
-p <- 12
+p <- 24
 ARMA <- 0.5
-percent_alpha <- 0.4
-range_alpha <- c(0.6, 1)
+percent_alpha <- 0.8
+range_alpha <- c(0.6, 0.95)
 
 create_variance_estimates_different_link <- function(n_sim, simulate_link, name_sim, estimate_link, name_est){
   if (ARMA == 0) ARMA <- NULL
@@ -58,15 +58,41 @@ res[,`:=`(
   is_null_char = ifelse(is_null, 'Null Value', 'Non Null Value')
 )]
 
-ggplot(res, aes(x = z_value, y = ..density..)) + 
-  geom_histogram(bins = 8*sqrt(length(res)), fill = 'lightgrey', col = 'white') +
-  facet_grid(is_null_char~.) + 
-  geom_hline(yintercept = 0) + 
-  theme_user()
+r_squared <- round(summary(lm(estimate ~ 0 + factor(real), res))$r.squared, 3)
 
-ggplot(mapping = aes(x = real, y = estimate)) + 
-  geom_point(data = res[is_null == FALSE], shape = 17, position = 'jitter') + 
-  geom_boxplot(data = res[is_null == TRUE], width = 0.1, outlier.shape = 1) + 
-  ggtitle('Bias of Alpha Estimate', 'Showing Box Plot for Null Values (\u03B1 = 1)') + 
+estimates_plot <- ggplot(res, aes(x = real, y = estimate)) + 
+  geom_point(shape = 17, position = 'jitter') + 
+  annotate('label', x = min(res$real)*1.1, y = 0, label = TeX(paste0('$R^2$: ', r_squared), 'expression')) + 
+  labs(
+    # title = 'Bias of Alpha Estimate',
+    # subtitle = 'Showing Box Plot for Null Values (\u03B1 = 1)',
+    x = 'Real Value (Multiplicative)',
+    y = 'Estimate (Quotent)'
+    ) + 
   theme_bw()
 
+inference_plot <- ggplot(res, aes(x = z_value, y = ..density.., fill = is_null_char)) + 
+  geom_histogram(bins = 8*sqrt(length(res)), alpha = .5, position = 'identity', col = 'white') +
+  # facet_grid(is_null_char~.) + 
+  geom_hline(yintercept = 0) + 
+  labs(
+    x = 'Z scores \n of misspecified link function',
+    y = 'Density',
+    fill = ''
+  ) +
+  theme_user() + 
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = c(.8,.75),
+    legend.background = element_blank(),
+    legend.title = element_blank(),
+    legend.box.background = element_rect(colour = "black")
+  ) + 
+  scale_fill_manual(
+    values = c('Null Value' = '#A6ACAF', 'Non Null Value' = '#212F3D')
+  )
+
+out <- arrangeGrob(estimates_plot, inference_plot, nrow = 2)
+
+custom_ggsave('robustness_link.png', out, width = 2, height = 1.1)

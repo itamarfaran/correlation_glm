@@ -190,9 +190,9 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, random_effect 
 }
 
 
-create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
-                           percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1),
-                           linkFun = linkFunctions$multiplicative_identity, real_theta = NULL,
+create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength = 100,
+                           percent_alpha = 0, range_alpha = 0:1, dim_alpha = 1, loc_scale = c(0,1),
+                           linkFun = linkFunctions$multiplicative_identity, real_theta = NULL, real_sick = NULL,
                            ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, random_effect = NULL,
                            seed = NULL, ncores = 1){
   
@@ -201,8 +201,13 @@ create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength,
     loc_scale = loc_scale, seed = seed
     )
   if(is.null(real_theta)) real_theta <- parameters$corr_mat
-  alpha <- parameters$alpha
-  g11 <- linkFun$FUN(t = triangle2vector(real_theta), a = alpha, d = dim_alpha)
+  if(is.null(real_sick)){
+    alpha <- parameters$alpha
+    g11 <- linkFun$FUN(t = triangle2vector(real_theta), a = alpha, d = dim_alpha)
+  } else {
+    alpha <- NULL
+    g11 <- real_sick
+  }
   
   rawFun <- function(b){
     list(

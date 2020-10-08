@@ -334,7 +334,8 @@ estimate_alpha_jacknife <- function(
   linkFun = linkFunctions$multiplicative_identity,
   model_reg_config = list(), matrix_reg_config = list(),
   iid_config = list(iter_config = list(min_loop = 0)), cov_config = list(),
-  return_gee = FALSE, jack_healthy = TRUE, early_stop = FALSE,
+  return_gee = FALSE, jack_healthy = TRUE,
+  bias_correction = FALSE, early_stop = FALSE,
   verbose = TRUE, ncores = 1
   ){
   
@@ -353,12 +354,14 @@ estimate_alpha_jacknife <- function(
     
     cov_model <- inner_optim_loop(
       healthy_dt = healthy_dt_, sick_dt = sick_dt_,
-      alpha0 = alpha0, theta0 = theta0,
+      alpha0 = alpha0, theta0 = theta0, dim_alpha = dim_alpha,
       weight_matrix = weight_matrix, linkFun = linkFun,
       model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
       iter_config = cov_config$iter_config, optim_config = cov_config$optim_config,
       early_stop = early_stop, verbose = FALSE
     )
+    
+    if(bias_correction) cov_model$alpha <- cov_model$alpha - median(cov_model$alpha) + linkFun$NULL_VAL
 
     gee_out <- if(return_gee){
       triangle2vector(
@@ -389,17 +392,24 @@ estimate_alpha_jacknife <- function(
   sick_dt <- convert_corr_array_to_data_matrix_test(sick_dt)
   
   if(is.null(alpha0) | is.null(theta0)){
-    iid_model <- inner_optim_loop(
-      healthy_dt = healthy_dt, sick_dt = sick_dt,
-      alpha0 = alpha0, theta0 = theta0,
-      weight_matrix = NULL, dim_alpha = dim_alpha,
+    ini_model <- estimate_alpha(
+      healthy_dt = healthy_dt,
+      sick_dt = sick_dt,
+      dim_alpha = dim_alpha,
       linkFun = linkFun,
-      model_reg_config = model_reg_config, matrix_reg_config = matrix_reg_config,
-      iter_config = iid_config$iter_config, optim_config = iid_config$optim_config,
-      early_stop = early_stop, verbose = FALSE
-    )
-    if(is.null(alpha0)) alpha0 <- iid_model$alpha
-    if(is.null(theta0)) theta0 <- iid_model$theta
+      model_reg_config = model_reg_config,
+      matrix_reg_config = matrix_reg_config,
+      raw_start = TRUE,
+      iid_config = iid_config,
+      cov_config = cov_config,
+      bias_correction = bias_correction,
+      early_stop = early_stop,
+      verbose = FALSE
+      )
+    index <- if(length(ini_model$steps) > 3) (length(ini_model$steps) - 3) else (length(ini_model$steps) - 1)
+    ini_model <- ini_model$steps[[index]]
+    if(is.null(alpha0)) alpha0 <- as.vector(ini_model$alpha)
+    if(is.null(theta0)) theta0 <- ini_model$theta
   }
   
   if(verbose) cat('\njacknifing Sick Observations...\n')

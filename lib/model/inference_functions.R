@@ -110,18 +110,19 @@ compute_gee_variance <- function(
 
 infer_jacknife <- function(results){
   sick_ind <- as.logical(results$is_sick)
+  
   estimate_d <- colMeans(results$alpha[sick_ind,])
-  const_d <- (sum(sick_ind) - 1)^2/sum(sick_ind)
+  const_d <- (sum(sick_ind) - 1)^2#/sum(sick_ind)
   var_d <- var(results$alpha[sick_ind,])*const_d
 
-  
   estimate_h <- colMeans(results$alpha[!sick_ind,])
-  const_h <- (sum(!sick_ind) - 1)^2/sum(!sick_ind)
+  const_h <- (sum(!sick_ind) - 1)^2#/sum(!sick_ind)
   var_h <- var(results$alpha[!sick_ind,])*const_h
   
   estimate <- colMeans(results$alpha)
   # estimate <- (estimate_d + estimate_h)/2
-  var_out <- var_d + var_h
+  # var_out <- var_d + var_h
+  var_out <- (var_d + var_h)/length(sick_ind)
   
   return(list(
     estimate = estimate,

@@ -18,6 +18,14 @@ reverselog_trans <- function(base = 10) {
     domain = c(1e-100, Inf))
 }
 
+square_plot <- function(plt){
+  r <- max(abs(layer_scales(plt)$x$range$range))
+  s <- max(abs(layer_scales(plt)$y$range$range))
+  t <- round(max(r, s), 1)
+  plt <- plt + coord_equal(xlim = c(0, t), ylim = c(0, t))
+  return(plt)
+}
+
 custom_ggsave <- function(filename, plot, width = 1, height = 1, ...){
   ggsave(filename = filename, plot = plot, path = plot_files_path,
          width = width*10, height = height*10, units = 'cm', dpi = dpi, ...)

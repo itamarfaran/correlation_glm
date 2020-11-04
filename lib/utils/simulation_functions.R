@@ -60,7 +60,7 @@ linkFunctions <- list(
 )
 
 
-build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), seed = NULL){
+build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_scale = c(0,1), enforce_min_alpha=FALSE, seed = NULL){
   #Build Real Sigma and Theta
   if(!is.null(seed)) set.seed(seed[1])
   tmp_theta <- rnorm(2*p^2, loc_scale[1], loc_scale[2])
@@ -76,7 +76,10 @@ build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_s
   #Build Real Alpha
   sum_alpha <- rep(1, p)
   n_alpha <- floor(percent_alpha * p)
-  sum_alpha[sample(p, n_alpha)] <- runif(n_alpha, range_alpha[1], range_alpha[2])
+  non_null_alphas <- sample(p, n_alpha)
+  
+  sum_alpha[non_null_alphas] <- runif(n_alpha, range_alpha[1], range_alpha[2])
+  if(enforce_min_alpha) sum_alpha[sample(non_null_alphas, 1)] <- range_alpha[1]
   
   alpha <- matrix(runif(p*dim_alpha), nr = p)
   alpha <- apply(alpha, 1, function(x) x/sum(x))
@@ -191,14 +194,14 @@ rWishart_ARMA <- function(n = 1, df, Sigma, AR = NULL, MA = NULL, random_effect 
 
 
 create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength = 100,
-                           percent_alpha = 0, range_alpha = 0:1, dim_alpha = 1, loc_scale = c(0,1),
+                           percent_alpha = 0, range_alpha = 0:1, enforce_min_alpha=FALSE, dim_alpha = 1, loc_scale = c(0,1),
                            linkFun = linkFunctions$multiplicative_identity, real_theta = NULL, real_sick = NULL,
                            ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, random_effect = NULL,
                            seed = NULL, ncores = 1){
   
   parameters <- build_parameters(
     p = p, percent_alpha = percent_alpha, range_alpha = range_alpha, dim_alpha = dim_alpha,
-    loc_scale = loc_scale, seed = seed
+    loc_scale = loc_scale, enforce_min_alpha = enforce_min_alpha, seed = seed
     )
   if(is.null(real_theta)) real_theta <- parameters$corr_mat
   if(is.null(real_sick)){

@@ -1,8 +1,6 @@
 source('tex/simulations/aux_.R')
 
-#  todo: plot P(At least one rejected) instead of E[How Much Rejected]
-
-n_sim <- ncores
+n_sim <- 2*ncores
 p <- 32
 
 create_power_comparison <- function(
@@ -19,7 +17,7 @@ create_power_comparison <- function(
   samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
-                            linkFun = linkFun, ncores = ncores)
+                            linkFun = linkFun, enforce_min_alpha = TRUE, ncores = ncores)
   results <- mclapply(
     1:n_sim, function(i) estimate_alpha(
       healthy_dt = samples$samples[[i]]$healthy,
@@ -83,11 +81,21 @@ create_power_comparison <- function(
 }
 
 
-examples <- expand.grid(
-  n = c(60, 80, 100, 120),
-  percent_alpha = c(0.05, 0.1, 0.15, 0.2),
-  min_alpha = c(0.8, 0.85, 0.9, 0.95)
+min_alpha <- c(0.8, 0.85, 0.9, 0.95) 
+examples <- unique(
+  rbind(
+    expand.grid(
+      min_alpha = min_alpha,
+      n = 100,
+      percent_alpha = c(.05, .1, .15, .2)
+    ),
+    expand.grid(
+      min_alpha = min_alpha,
+      n = c(60, 80, 100, 120),
+      percent_alpha = .1
+    )
   )
+)
 
 file_loc <- 'tex/simulations/power_t.RData'
 if(file.exists(file_loc)){
@@ -106,13 +114,15 @@ if(file.exists(file_loc)){
 out[,`:=`(
   t_fdr = t_fp/pmax(t_fp + t_tp, 1),
   t_power = t_tp/t_true_alt,
+  t_1rejected = 1*(t_tp > 0),
   gee_fdr = gee_fp/pmax(gee_fp + gee_tp, 1),
-  gee_power = gee_tp/gee_true_alt
+  gee_power = gee_tp/gee_true_alt,
+  gee_1rejected = 1*(gee_tp > 0)
 )]
 
 
 id_cols <- c('sim_num', 'n', 'p', 'percent_alpha', 'min_alpha', 'autocorrelated', 'case')
-value_cols <- c('t_fdr', 't_power', 'gee_fdr', 'gee_power')
+value_cols <- c('t_fdr', 't_power', 't_1rejected', 'gee_fdr', 'gee_power', 'gee_1rejected')
 cols <- c(id_cols, value_cols)
 toplot <- melt(out[,..cols], id.vars = id_cols)
 
@@ -121,95 +131,53 @@ toplot[,(cols) := asplit(do.call(rbind, str_split(toplot[,variable], '_')), 2)]
 toplot[,variable := NULL]
 toplot[,method := ifelse(method == 't', 'T Test', 'GEE')]
 
+toplot_groupby <- toplot[,.(value = mean(value), lower = quantile(value, .025), upper = quantile(value, .975), .N),
+                         by = .(n = factor(n), p, min_alpha, percent_alpha = factor(percent_alpha), method, rate)]
+toplot_groupby[,se := sqrt(value*(1 - value)/N)]
+toplot_groupby[,`:=`(lower = pmax(value - qnorm(.975) * se, 0), upper = pmin(value + qnorm(.975) * se, 1))]
 
-plot_by <- function(x, title, scales, width = NULL, type = 'power'){
-  toplot %>%
-    filter(rate == type) %>% 
-    group_by(.dots = c('method', x)) %>% 
-    summarise(value = median(value)) %>%
-    as.data.table() ->
-    labels
-  
-  interactions_all <- list(
-    x = toplot[rate == type, get(x)],
-    y = toplot[rate == type, method]
-  )
-  interactions_lab <- list(
-    x = labels[, get(x)],
-    y = labels[, method]
-  )
-  
-  p_out <-
-    ggplot(toplot[rate == type], aes_string(x = x, y = 'value', fill = 'method')) +
-    geom_boxplot(
-      aes(group = interaction(interactions_all$x, interactions_all$y)),
-      position = position_dodge(width = width), alpha = .6) +
-    # geom_label(aes(label = method, group = NULL), labels, position = position_dodge(width = width), fill = 'white')  +
-    labs(title = title) +
-    scale_x_continuous(labels = scales) + 
-    scale_y_log10(limits = c(.001, 1)) +
-    # geom_hline(yintercept = 0) +
-    scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
-    theme_user() + theme(
-      legend.position = 'none',
-      axis.title.y = element_blank(),
-      axis.title.x = element_blank()
-    )
-  return(p_out)
-}
+plt1 <- toplot_groupby %>%
+  filter(rate %in% c('power', '1rejected'), percent_alpha == .1) %>% 
+  mutate(rate = ifelse(rate == 'power', '% Correct Rejections', 'Prob. to Reject Global Null')) %>%
+  # mutate(value = ifelse(value == 0, 10^-5, value),
+  #        lower = ifelse(lower == 0, 10^-5, lower),
+  #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
+  ggplot(aes(x = min_alpha, y = value, ymin = lower, ymax = upper, linetype = method, color = n)) + 
+  geom_point(size = 3) + 
+  geom_line(size = 1) + 
+  # geom_errorbar(width = .01) + 
+  scale_x_reverse() + 
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) + 
+  scale_linetype(guide=FALSE) + 
+  facet_grid(rate ~ .) + 
+  labs(x = TeX('Minimal Value of $\\alpha$'), y = 'Rate', col = 'Sample Size', linetype = 'Method') +
+  theme_user() +
+  theme(legend.position = 'bottom')
 
-plot_by <- function(x, title, scales, width = NULL, type = 'power'){
-  toplot %>%
-    filter(rate == type) %>% 
-    group_by(.dots = c('method', x)) %>% 
-    summarise(value = median(value)) %>%
-    as.data.table() ->
-    labels
-  
-  interactions_all <- list(
-    x = toplot[rate == type, get(x)],
-    y = toplot[rate == type, method]
-  )
-  interactions_lab <- list(
-    x = labels[, get(x)],
-    y = labels[, method]
-  )
-  
-  toplot_grouped <- toplot[rate == type]
-  toplot_grouped <- toplot_grouped[
-    ,.(
-    mean = mean(value),
-    lower = quantile(value, .05),
-    upper = quantile(value, .95)
-    ), 
-    by = .(
-      get(x),
-      method
-    )]
-  colnames(toplot_grouped)[colnames(toplot_grouped) == 'get'] <- x
-  p_out <-
-    ggplot(toplot_grouped, aes_string(x = x, y = 'mean', fill = 'method')) +
-    geom_bar(stat = 'identity', position = 'dodge') +
-    # geom_crossbar(aes(ymin = lower, ymax = upper, color = method), fill = NA) + 
-    labs(title = title) + 
-    scale_x_continuous(labels = scales) +
-    # geom_hline(yintercept = 0) +
-    scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
-    scale_color_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
-    theme_user() + theme(
-    legend.position = 'none',
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank()
-  )
-  return(p_out)
-}
+plt2 <- toplot_groupby %>%
+  filter(rate %in% c('power', '1rejected'), n == 100) %>% 
+  mutate(rate = ifelse(rate == 'power', '% Correct Rejections', 'Prob. to Reject Global Null')) %>%
+  # mutate(value = ifelse(value == 0, 10^-5, value),
+  #        lower = ifelse(lower == 0, 10^-5, lower),
+  #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
+  ggplot(aes(x = min_alpha, y = value, ymin = lower, ymax = upper, linetype = method, color = percent_alpha)) + 
+  geom_point(size = 3) + 
+  geom_line(size = 1) + 
+  # geom_errorbar(width = .01) + 
+  scale_x_reverse() + 
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) + 
+  scale_linetype(guide=FALSE) + 
+  facet_grid(rate ~ .) + 
+  labs(x = TeX('Minimal Value of $\\alpha$'), y = 'Rate', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method') +
+  theme_user() +
+  theme(legend.position = 'bottom')
 
 
-out3 <- arrangeGrob(
-  plot_by('percent_alpha', '% Non-Null Parameters', scales::percent, width = .04),
-  plot_by('min_alpha', 'Minimal Value of Alpha', scales::number, width = .02),
-  plot_by('n', '# Subjects', scales::number, width = 9),
-  nrow=3)
-plot(out3)
-
-custom_ggsave('power_t.png', out3, width = 2, height = 1.5)
+custom_ggsave('power_t1.png', plt1, width = 1.2, height = 1.2)
+custom_ggsave('power_t2.png', plt2, width = 1.2, height = 1.2)

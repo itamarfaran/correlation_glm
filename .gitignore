@@ -18,6 +18,7 @@
 *.pdf
 *.pptx
 *.docx
+*.gdoc
 
 #google
 desktop.ini

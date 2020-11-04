@@ -178,9 +178,9 @@ plot_by <- function(x, title, scales, width = NULL, type = 'power'){
   toplot_grouped <- toplot[rate == type]
   toplot_grouped <- toplot_grouped[
     ,.(
-    mean = 10000*mean(value),
-    lower = 10000*quantile(value, .05),
-    upper = 10000*quantile(value, .95)
+    mean = mean(value),
+    lower = quantile(value, .05),
+    upper = quantile(value, .95)
     ), 
     by = .(
       get(x),
@@ -193,7 +193,6 @@ plot_by <- function(x, title, scales, width = NULL, type = 'power'){
     # geom_crossbar(aes(ymin = lower, ymax = upper, color = method), fill = NA) + 
     labs(title = title) + 
     scale_x_continuous(labels = scales) +
-    scale_y_log10(labels = function(x) x/10000, limits = c(1, 10000)) +
     # geom_hline(yintercept = 0) +
     scale_fill_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 
     scale_color_manual(values = c('GEE' = '#505050', 'T Test' = '#DCDCDC')) + 

@@ -15,8 +15,9 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
   )
 }
 
-efrons_rms_sample <- function(array_, p = NULL){
-  rms_vec <- sapply(seq_len(dim(array_)[3]), function(i) efrons_rms(array_[,,i], p))
+efrons_rms_sample <- function(df, p = NULL){
+  df <- convert_corr_array_to_data_matrix_test(df)
+  rms_vec <- sqrt(rowMeans(df^2))
   rms_mean <- mean(rms_vec)
   return(rms_mean)
 }
@@ -76,7 +77,7 @@ compute_gee_variance <- function(
     df <- nrow(data) - 1
       # efrons_effective_sample_size(
       # n = nrow(data),
-      # efrons_rms(vector2triangle(colMeans(data), diag_value = 1))
+      # efrons_rms_sample(data)
       # )
     
     out <- list(

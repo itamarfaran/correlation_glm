@@ -15,6 +15,12 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
   )
 }
 
+efrons_rms_sample <- function(array_, p = NULL){
+  rms_vec <- sapply(seq_len(dim(array_)[3]), function(i) efrons_rms(array_[,,i], p))
+  rms_mean <- mean(rms_vec)
+  return(rms_mean)
+}
+
 efrons_rms <- function(m, p = NULL){
   if(class(m) != 'matrix')
     m <- vector2triangle(m, diag_value = 1)

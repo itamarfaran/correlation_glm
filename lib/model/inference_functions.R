@@ -17,8 +17,7 @@ compute_mu_alpha_jacobian <- function(type, alpha, healthy_dt, sick_dt, d = 1, l
 
 efrons_rms_sample <- function(df, p = NULL){
   df <- convert_corr_array_to_data_matrix_test(df)
-  rms_vec <- sqrt(rowMeans(df^2))
-  rms_mean <- mean(rms_vec)
+  rms_mean <- mean(sqrt(rowMeans(df^2)))
   return(rms_mean)
 }
 

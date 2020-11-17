@@ -6,6 +6,7 @@ p <- 32
 create_power_comparison <- function(
   sim, n_sim, n, p, percent_alpha, range_alpha, ARMA = 0,
   method = 'BH', sig_level = .05, linkFun = linkFunctions$multiplicative_identity, ncores = 1){
+  
   fisher_z <- function(x) 0.5*log((1 + x)/(1 - x))
   
   case <- if(percent_alpha == 0) 'No Effect' else "Effect"
@@ -14,35 +15,34 @@ create_power_comparison <- function(
   n_s <- ceiling(0.5*n)
   n_h <- n - n_s
   
-  samples <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
-                            percent_alpha = percent_alpha, range_alpha = range_alpha,
-                            ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
-                            linkFun = linkFun, enforce_min_alpha = TRUE, ncores = ncores)
-  results <- mclapply(
-    1:n_sim, function(i) estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
-      linkFun = linkFun, verbose = FALSE), mc.cores = ncores
-  )
-  
-  gee_vars <- mclapply(1:n_sim, function(i) compute_gee_variance(
-    cov_obj = results[[i]],
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick), mc.cores = ncores)
-  
-  compare <- function(i){
-    z_ <- (as.vector(results[[i]]$alpha) - 1)/sqrt_diag(gee_vars[[i]])
+  analyze_sample <- function(i){
+    sample_ <- create_samples(n_sim = 1, n_h = n_h, n_s = n_s, p = p, Tlength = 115,
+                              percent_alpha = percent_alpha, range_alpha = range_alpha,
+                              ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
+                              linkFun = linkFun, enforce_min_alpha = TRUE, ncores = ncores)
+    
+    results <- estimate_alpha(
+        healthy_dt = sample_$samples$healthy,
+        sick_dt = sample_$samples$sick,
+        linkFun = linkFun, verbose = FALSE)
+    
+    gee_vars <- compute_gee_variance(
+      cov_obj = results,
+      healthy_dt = sample_$samples$healthy,
+      sick_dt = sample_$samples$sick)
+    
+    z_ <- (as.vector(results$alpha) - 1)/sqrt_diag(gee_vars)
     p_ <- 2*pnorm(abs(z_), lower.tail = F)
     p_adj <- p.adjust(p_, method)
     
-    to_reject_gee <- samples$alpha != linkFun$NULL_VAL
+    to_reject_gee <- sample_$alpha != linkFun$NULL_VAL
     power_gee <- p_adj[to_reject_gee] < sig_level
     error_gee <- p_adj[!to_reject_gee] < sig_level
     
     t_test_mat <- matrix(0, p, p)
     for(i_ in 1:(p-1)) for(j_ in (i_+1):p)
       t_test_mat[i_,j_] <- with(
-        samples$samples[[i]],
+        sample_$samples,
         t.test(fisher_z(healthy[i_,j_,]), fisher_z(sick[i_,j_,]))$p.value
       )
     t_test_mat[upper.tri(t_test_mat)] <- p.adjust(t_test_mat[upper.tri(t_test_mat)], method)
@@ -50,7 +50,7 @@ create_power_comparison <- function(
     diag(t_test_mat) <- 1
     
     pvals_t <- t_test_mat[lower.tri(t_test_mat)]
-    to_reject_t <- with(samples, linkFun$FUN(triangle2vector(real_theta), alpha, d=1) != real_theta)
+    to_reject_t <- with(sample_, linkFun$FUN(triangle2vector(real_theta), alpha, d=1) != real_theta)
     to_reject_t <- to_reject_t[lower.tri(to_reject_t)]
     
     power_t <- pvals_t[to_reject_t] < sig_level
@@ -71,7 +71,7 @@ create_power_comparison <- function(
     return(out)
   }
   
-  out <- do.call(rbind, lapply(1:n_sim, compare))
+  out <- do.call(rbind, mclapply(1:n_sim, analyze_sample, mc.cores = ncores))
   out[,`:=`(
     sim = sim, n = n, p = p, percent_alpha = percent_alpha, min_alpha = min(range_alpha),
     autocorrelated = autocorrelated, case = case
@@ -102,8 +102,8 @@ if(file.exists(file_loc)){
   load(file_loc)
 } else {
   out <- pblapply(seq_len(nrow(examples)), function(i) create_power_comparison(
-    sim = i, n_sim = n_sim, n = examples[i, 1], p = p, percent_alpha = examples[i, 2],
-    range_alpha = c(examples[i, 3], 1), ncores = ncores
+    sim = i, n_sim = n_sim, n = examples[i, 2], p = p, percent_alpha = examples[i, 3],
+    range_alpha = c(examples[i, 1], 1), ncores = ncores
     ))
   
   out <- do.call(rbind, out)
@@ -135,27 +135,25 @@ toplot_groupby <- toplot[,.(value = mean(value), lower = quantile(value, .025), 
                          by = .(n = factor(n), p, min_alpha, percent_alpha = factor(percent_alpha), method, rate)]
 toplot_groupby[,se := sqrt(value*(1 - value)/N)]
 toplot_groupby[,`:=`(lower = pmax(value - qnorm(.975) * se, 0), upper = pmin(value + qnorm(.975) * se, 1))]
+toplot_groupby[,alpha_inv := 1 - min_alpha]
 
+# todo: minimal decay (1-alpha) in axis
 plt1 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), percent_alpha == .1) %>% 
   mutate(rate = ifelse(rate == 'power', '% Correct Rejections', 'Prob. to Reject Global Null')) %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
-  ggplot(aes(x = min_alpha, y = value, ymin = lower, ymax = upper, linetype = method, color = n)) + 
+  ggplot(aes(x = alpha_inv, y = value, ymin = lower, ymax = upper, shape = method, linetype = method, color = n)) + 
   geom_point(size = 3) + 
   geom_line(size = 1) + 
   # geom_errorbar(width = .01) + 
-  scale_x_reverse() + 
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) + 
-  scale_linetype(guide=FALSE) + 
   facet_grid(rate ~ .) + 
-  labs(x = TeX('Minimal Value of $\\alpha$'), y = 'Rate', col = 'Sample Size', linetype = 'Method') +
+  labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'),
+       y = 'Rate', col = 'Sample Size', linetype = 'Method', shape = 'Method') +
   theme_user() +
   theme(legend.position = 'bottom')
+
 
 plt2 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), n == 100) %>% 
@@ -163,18 +161,13 @@ plt2 <- toplot_groupby %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
-  ggplot(aes(x = min_alpha, y = value, ymin = lower, ymax = upper, linetype = method, color = percent_alpha)) + 
+  ggplot(aes(x = alpha_inv, y = value, ymin = lower, ymax = upper, shape = method, linetype = method, color = percent_alpha)) + 
   geom_point(size = 3) + 
   geom_line(size = 1) + 
   # geom_errorbar(width = .01) + 
-  scale_x_reverse() + 
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) + 
-  scale_linetype(guide=FALSE) + 
   facet_grid(rate ~ .) + 
-  labs(x = TeX('Minimal Value of $\\alpha$'), y = 'Rate', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method') +
+  labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'), 
+       y = 'Rate', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method', shape = 'Method') +
   theme_user() +
   theme(legend.position = 'bottom')
 

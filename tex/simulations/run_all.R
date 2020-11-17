@@ -4,9 +4,9 @@ all_files <- list.files(dir, '*.R$')
 all_files <- all_files[!all_files %in% c('aux.R', 'aux_.R', 'run_all.R')]
 
 for(file in all_files){
+  message('=================================')
+  message(paste0('source ', file, '...'))
   tryCatch({
-    message('=================================')
-    message(paste0('source ', file, '...'))
     source(paste0(dir, '/', file))
     message('success.')
   },

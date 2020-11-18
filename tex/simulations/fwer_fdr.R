@@ -51,7 +51,7 @@ out <- rbind(
             ,.(type = 'FWER\n(Holm)', value = mean(value))
             , by = .(autocorrelated, p_s, case, sim)],
   
-  samples[,.(value = sum(bh_p < sig_level & real_alpha == 1)/(sum(bh_p < sig_level) + 1*(sum(bh_p < sig_level) == 0))),
+  samples[,.(value = sum(bh_p < sig_level & real_alpha == 1)/remove_zeros(sum(bh_p < sig_level))),
           by = .(autocorrelated, p_s, case, sim_num, sim)][
             ,.(type = 'FDR\n(BH)', value = mean(value))
             , by = .(autocorrelated, p_s, case, sim)]

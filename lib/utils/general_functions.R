@@ -51,6 +51,12 @@ ncores <- ifelse(tolower(.Platform$OS.type) == "windows", 1, detectCores() - 2)
 promptForCores()
 
 
+remove_zeros <- function(x, val_to_remove = 0, val_to_replace = 1){
+  x[x == val_to_remove] <- val_to_replace
+  return(x)
+}
+
+
 matrix_pow <- function(x, pow){
   out <- with(eigen(x), vectors %*% diag(values ^ pow) %*% t(vectors))
   return(out)

@@ -46,12 +46,12 @@ out <- rbind(
             ,.(type = 'No Correction\n(False Positive Rate\nper Sample)', value = mean(value))
             , by = .(autocorrelated, p_s, case, sim)],
   
-  samples[real_alpha == 1,.(value = sum(holm_p < sig_level)/.N),
+  samples[real_alpha == 1,.(value = sum(holm_p < sig_level) > 0),
           by = .(autocorrelated, p_s, case, sim_num, sim)][
             ,.(type = 'FWER\n(Holm)', value = mean(value))
             , by = .(autocorrelated, p_s, case, sim)],
   
-  samples[,.(value = sum(bh_p < sig_level & real_alpha == 1)/sum(bh_p < sig_level)),
+  samples[,.(value = sum(bh_p < sig_level & real_alpha == 1)/(sum(bh_p < sig_level) + 1*(sum(bh_p < sig_level) == 0))),
           by = .(autocorrelated, p_s, case, sim_num, sim)][
             ,.(type = 'FDR\n(BH)', value = mean(value))
             , by = .(autocorrelated, p_s, case, sim)]

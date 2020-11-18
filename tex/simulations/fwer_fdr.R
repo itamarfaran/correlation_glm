@@ -41,21 +41,29 @@ samples[,`:=`(
 ), by = .(autocorrelated, p_s, case, sim_num, sim)]
 
 out <- rbind(
-  samples[real_alpha == 1,.(value = sum(p_value < sig_level)/.N),
-          by = .(autocorrelated, p_s, case, sim_num, sim)][
-            ,.(type = 'No Correction\n(False Positive Rate\nper Sample)', value = mean(value))
-            , by = .(autocorrelated, p_s, case, sim)],
+  samples %>%
+    filter(real_alpha == 1) %>%
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(value = mean(p_value < sig_level)) %>% 
+    group_by(autocorrelated, p_s, case, sim) %>% 
+    summarise(type = 'No Correction\n(False Positive Rate\nper Sample)', value = mean(value)),
+
+  samples %>%
+    filter(real_alpha == 1) %>%
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(value = any(holm_p < sig_level)) %>% 
+    group_by(autocorrelated, p_s, case, sim) %>%
+    summarise(type = 'FWER\n(Holm)', value = mean(value)),
   
-  samples[real_alpha == 1,.(value = sum(holm_p < sig_level) > 0),
-          by = .(autocorrelated, p_s, case, sim_num, sim)][
-            ,.(type = 'FWER\n(Holm)', value = mean(value))
-            , by = .(autocorrelated, p_s, case, sim)],
-  
-  samples[,.(value = sum(bh_p < sig_level & real_alpha == 1)/remove_zeros(sum(bh_p < sig_level))),
-          by = .(autocorrelated, p_s, case, sim_num, sim)][
-            ,.(type = 'FDR\n(BH)', value = mean(value))
-            , by = .(autocorrelated, p_s, case, sim)]
-)
+  samples %>% 
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(V = sum(bh_p < sig_level & real_alpha == 1),
+              R = sum(bh_p < sig_level)) %>% 
+    mutate(value = V/remove_zeros(R)) %>%
+    group_by(autocorrelated, p_s, case, sim) %>% 
+    summarise(type = 'FDR\n(BH)', value = mean(value))
+  )
+
 
 save(samples, out, file = 'tex/simulations/fwer_fdr.RData')
 

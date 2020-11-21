@@ -129,7 +129,7 @@ infer_jacknife <- function(results){
   estimate <- colMeans(results$alpha)
   # estimate <- (estimate_d + estimate_h)/2
   # var_out <- var_d + var_h
-  var_out <- var_d/ns + var_h/nh
+  var_out <- var_d/n_s + var_h/n_h
   
   return(list(
     estimate = estimate,

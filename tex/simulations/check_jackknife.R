@@ -33,7 +33,7 @@ infer_jacknife_testing <- function(results, version_){
 }
 
 
-n_sim <- 100
+n_sim <- 2*ncores
 n <- 50
 p <- 24
 range_alpha <- c(0.7, 1.1)

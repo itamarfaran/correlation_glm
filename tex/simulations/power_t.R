@@ -152,7 +152,7 @@ plt1 <- toplot_groupby %>%
   labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'),
        y = 'Rate', col = 'Sample Size', linetype = 'Method', shape = 'Method') +
   theme_user() +
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin())
 
 
 plt2 <- toplot_groupby %>%
@@ -169,7 +169,7 @@ plt2 <- toplot_groupby %>%
   labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'), 
        y = 'Rate', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method', shape = 'Method') +
   theme_user() +
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin())
 
 
 custom_ggsave('power_t1.png', plt1, width = 1.2, height = 1.2)

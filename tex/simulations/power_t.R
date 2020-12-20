@@ -87,11 +87,11 @@ examples <- unique(
     expand.grid(
       min_alpha = min_alpha,
       n = 100,
-      percent_alpha = c(.05, .1, .15, .2)
+      percent_alpha = c(.05, .2)
     ),
     expand.grid(
       min_alpha = min_alpha,
-      n = c(60, 80, 100, 120),
+      n = c(60, 120),
       percent_alpha = .1
     )
   )
@@ -110,6 +110,8 @@ if(file.exists(file_loc)){
   
   save(out, file = file_loc)
 }
+
+# out <- out[(percent_alpha %in% c(.05, .2)) | (n %in% c(60, 120))]
 
 out[,`:=`(
   t_fdr = t_fp/pmax(t_fp + t_tp, 1),
@@ -140,13 +142,14 @@ toplot_groupby[,alpha_inv := 1 - min_alpha]
 # todo: minimal decay (1-alpha) in axis
 plt1 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), percent_alpha == .1) %>% 
-  mutate(rate = ifelse(rate == 'power', '% Correct Rejections', 'Prob. to Reject Global Null')) %>%
+  mutate(rate = ifelse(rate == 'power', 'Statistical Power', 'Prob. to Reject Global Null')) %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
   ggplot(aes(x = alpha_inv, y = value, ymin = lower, ymax = upper, shape = method, linetype = method, color = n)) + 
   geom_point(size = 3) + 
   geom_line(size = 1) + 
+  scale_color_manual(values = c('darkgrey', 'black')) + 
   # geom_errorbar(width = .01) + 
   facet_grid(rate ~ .) + 
   labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'),
@@ -157,13 +160,14 @@ plt1 <- toplot_groupby %>%
 
 plt2 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), n == 100) %>% 
-  mutate(rate = ifelse(rate == 'power', '% Correct Rejections', 'Prob. to Reject Global Null')) %>%
+  mutate(rate = ifelse(rate == 'power', 'Statistical Power', 'Prob. to Reject Global Null')) %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
   ggplot(aes(x = alpha_inv, y = value, ymin = lower, ymax = upper, shape = method, linetype = method, color = percent_alpha)) + 
   geom_point(size = 3) + 
   geom_line(size = 1) + 
+  scale_color_manual(values = c('darkgrey', 'black')) + 
   # geom_errorbar(width = .01) + 
   facet_grid(rate ~ .) + 
   labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'), 

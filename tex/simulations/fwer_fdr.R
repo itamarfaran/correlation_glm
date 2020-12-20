@@ -36,7 +36,7 @@ samples <- rbind(
 samples[,z_value := (estimated_alpha - 1)/sd]
 samples[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 samples[,`:=`(
-  holm_p = p.adjust(p_value, 'holm'),
+  holm_p = p.adjust(p_value, 'bonferroni'),
   bh_p = p.adjust(p_value, 'BH')
 ), by = .(autocorrelated, p_s, case, sim_num, sim)]
 
@@ -53,7 +53,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = any(holm_p < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>%
-    summarise(type = 'FWER\n(Holm)', value = mean(value)),
+    summarise(type = 'FWER\n(Bonferroni)', value = mean(value)),
   
   samples %>% 
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%

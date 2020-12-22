@@ -51,9 +51,9 @@ data_configs <- list(
 
 
 ##### data analysis pars #####
-
-data_conf <- data_configs$amnesia_aicha
-data_subset <- 240
+data_conf_name <- 'amnesia_aal'
+data_conf <- if(data_conf_name == 'simulation') NULL else data_configs[[amnesia_aal]]
+data_subset <- NULL
 
 if(is.null(data_conf)){
   sample_data <- create_samples(
@@ -95,5 +95,5 @@ gee_var <- compute_gee_variance(
 #   linkFun = linkFun, jack_healthy = TRUE, return_gee = F, ncores = ncores)
 # jacknife_inference <- infer_jacknife(results_jacknife)
 
-save.image('lib/data/envs/full_run_jacknife_simulated_data_multiplicative_link.RData')
+save.image(paste0('lib/data/envs/full_run_jacknife_', data_conf_name, '_multiplicative_link.RData'))
 

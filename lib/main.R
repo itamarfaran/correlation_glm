@@ -52,7 +52,7 @@ data_configs <- list(
 
 ##### data analysis pars #####
 data_conf_name <- 'amnesia_aal'
-data_conf <- if(data_conf_name == 'simulation') NULL else data_configs[[amnesia_aal]]
+data_conf <- if(data_conf_name == 'simulation') NULL else data_configs[[data_conf_name]]
 data_subset <- NULL
 
 if(is.null(data_conf)){

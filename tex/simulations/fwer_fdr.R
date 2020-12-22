@@ -36,7 +36,7 @@ samples <- rbind(
 samples[,z_value := (estimated_alpha - 1)/sd]
 samples[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 samples[,`:=`(
-  holm_p = p.adjust(p_value, 'bonferroni'),
+  holm_p = p.adjust(p_value, 'holm'),
   bh_p = p.adjust(p_value, 'BH')
 ), by = .(autocorrelated, p_s, case, sim_num, sim)]
 

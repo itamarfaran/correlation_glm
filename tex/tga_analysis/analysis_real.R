@@ -1,7 +1,4 @@
-source("lib/utils/general_functions.R")
-source("lib/utils/simulation_functions.R")
-source("lib/model/estimation_functions.R")
-source("lib/model/inference_functions.R")
+source("tex/simulations/aux_.R")
 
 linkFun <- linkFunctions$multiplicative_identity
 

@@ -38,10 +38,14 @@ if (file.exists(file)){
   
   test_corr_mat(sample_data)
   
-  results <- with(sample_data$samples, estimate_alpha(healthy_dt = healthy, sick_dt = sick, linkFun = linkFun))
+  results <- estimate_alpha(
+    healthy_dt = sample_data$samples$healthy,
+    sick_dt = sample_data$samples$sick,
+    linkFun = linkFun,
+    bias_correction = TRUE)
   
   gee_var <- with(sample_data$samples, compute_gee_variance(
-    healthy_dt = healthy, sick_dt = sick, cov_obj = results, est_mu = F
+    healthy_dt = healthy, sick_dt = sick, cov_obj = results, est_mu = T
   ))
   
   save(sample_data, results, gee_var, file = file)

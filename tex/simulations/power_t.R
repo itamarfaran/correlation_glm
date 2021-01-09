@@ -2,6 +2,7 @@ source('tex/simulations/aux_.R')
 
 n_sim <- 2*ncores
 p <- 32
+DO_CORRECT = TRUE
 
 create_power_comparison <- function(
   sim, n_sim, n, p, percent_alpha, range_alpha, ARMA = 0,
@@ -31,7 +32,11 @@ create_power_comparison <- function(
       healthy_dt = sample_$samples$healthy,
       sick_dt = sample_$samples$sick)
     
-    z_ <- (as.vector(results$alpha) - 1)/sqrt_diag(gee_vars)
+    if(DO_CORRECT){
+      z_ <- (as.vector(results$alpha) - 1)/sqrt_diag(gee_vars * 1.1)
+    } else{
+      z_ <- (as.vector(results$alpha) - 1)/sqrt_diag(gee_vars)
+    }
     p_ <- 2*pnorm(abs(z_), lower.tail = F)
     p_adj <- p.adjust(p_, method)
     
@@ -97,7 +102,7 @@ examples <- unique(
   )
 )
 
-file_loc <- 'tex/simulations/power_t.RData'
+file_loc <- if(DO_CORRECT) 'tex/simulations/power_t_correct.RData' else 'tex/simulations/power_t.RData'
 if(file.exists(file_loc)){
   load(file_loc)
 } else {
@@ -176,5 +181,10 @@ plt2 <- toplot_groupby %>%
   theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin())
 
 
-custom_ggsave('power_t1.png', plt1, width = 1.2, height = 1.2)
-custom_ggsave('power_t2.png', plt2, width = 1.2, height = 1.2)
+if(DO_CORRECT){
+  custom_ggsave('power_t1_correct.png', plt1, width = 1.2, height = 1.2)
+  custom_ggsave('power_t2_correct.png', plt2, width = 1.2, height = 1.2)
+} else {
+  custom_ggsave('power_t1.png', plt1, width = 1.2, height = 1.2)
+  custom_ggsave('power_t2.png', plt2, width = 1.2, height = 1.2)
+}

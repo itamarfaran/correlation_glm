@@ -6,6 +6,8 @@ sig_level = .05
 w <- 300
 h <- 300
 
+SD_CONST = 1.1
+
 load('tex/tga_analysis/analysis_tga_multiplicative_identity.RData')
 multiplicative_load <- list(
   estimates = results,
@@ -99,12 +101,22 @@ custom_ggsave('mannahtan_plot.png', mannahtan_plot, width = 2)
 
 
 ##### organize gee results #####
-end_results <- data.table(
-  index = 1:sample_data$p,
-  est_multiplicative = as.vector(multiplicative_load$estimates$alpha),
-  sd_multiplicative = sqrt_diag(multiplicative_load$variance),
-  est_quotent = as.vector(quotent_load$estimates$alpha),
-  sd_quotent = sqrt_diag(quotent_load$variance)
+add_na_columns <- function(df, indices){
+  for(i in indices) df[index >= i, index := index + 1]
+  df_out <- rbind(df, data.table(index = indices), fill = TRUE)
+  setorder(df_out, index)
+  return(df_out)
+}
+
+end_results <- add_na_columns(
+  data.table(
+    index = 1:sample_data$p,
+    est_multiplicative = as.vector(multiplicative_load$estimates$alpha),
+    sd_multiplicative = sqrt_diag(multiplicative_load$variance)*SD_CONST,
+    est_quotent = as.vector(quotent_load$estimates$alpha),
+    sd_quotent = sqrt_diag(quotent_load$variance)*SD_CONST
+  ),
+  c(21, 28, 75, 76)
 )
 
 end_results_long <- melt(end_results, id.vars = 'index')
@@ -119,7 +131,7 @@ end_results_long[,null_value := ifelse(
   )]
 end_results_long[,z_value := (est - null_value)/sd]
 end_results_long[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
-end_results_long[,p_adjusted := p.adjust(p_value, 'BH'), by = method]
+end_results_long[!is.na(est),p_adjusted := p.adjust(p_value, 'BH'), by = method]
 
 
 to_write <- end_results_long[,.(index, method, est = round(est, 2), p_adjusted = round(p_adjusted, 3))]
@@ -195,7 +207,7 @@ estimate_difference_corrmat_quot <- with(mod$estimates, linkFun$FUN(theta, alpha
 png('tex/tga_analysis/difference_model.png', w, h)
 corrplot(
   corr = estimate_difference_corrmat_quot, 
-  method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.15, .15))
+  method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35))
   #cl.lim = c(-.35, .35))
 dev.off()
 
@@ -241,7 +253,7 @@ find_bh_threshold <- function(pvalues, sig_level = .05){
 find_holmes_threshold <- function(pvalues, sig_level = .05){
   pvalues <- sort(pvalues)
   tresholds <- sig_level/(length(pvalues) + 1 - seq_along(pvalues))
-  s <- tresholds[min(which(pvalues > tresholds)) - 1]
+  threshold <- tresholds[min(which(pvalues > tresholds)) - 1]
   return(threshold)
 }
 
@@ -265,33 +277,45 @@ toplot_manhattan[,difference := case_when(
   TRUE ~ NA_character_
 )]
 
-alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, ymin = ci_low, ymax = ci_upp, color = difference), toplot_manhattan) + 
+alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, ymin = ci_low, ymax = ci_upp, shape = difference, fill = difference, size = difference)) + 
   geom_hline(yintercept = mod$estimates$linkFun$NULL_VAL, linetype = 2, color = 'darkgrey') + 
   geom_point() + 
+  # geom_text(aes(label = index)) + 
   labs(x = '', y = 'Estimate', color = '') +
   theme_user() + 
   theme(legend.position = 'none') +
-  scale_color_manual(values = c('Increase' = '#2ECC71', 'Decay' = '#E74C3C', 'Insignificant' = '#707B7C'))
+  scale_shape_manual(values = c('Increase' = 24, 'Decay' = 25, 'Insignificant' = 21)) + 
+  scale_fill_manual(values = c('Increase' = 'darkgrey', 'Decay' = 'darkgrey', 'Insignificant' = 'white')) + 
+  scale_size_manual(values = c('Increase' = 2.5, 'Decay' = 2.5, 'Insignificant' = 2))
+
 
 labels_dt <- data.table(
-  x = max(toplot_manhattan$index) - 10,
+  x = max(toplot_manhattan$index) - 20,
   y = c(
-    find_bh_threshold(toplot_manhattan$p_value),
-    find_holmes_threshold(toplot_manhattan$p_value)
+    find_bh_threshold(toplot_manhattan$p_value)*1.6,
+    find_holmes_threshold(toplot_manhattan$p_value)*0.6
     )
   )
 labels_dt[,label := paste0(c('BH', 'Bonferroni'))]
 
-alpha_manhattan_plot <- ggplot(toplot_manhattan, aes(x = index, y = p_value, color = difference)) + 
+alpha_manhattan_plot <- ggplot(toplot_manhattan, aes(x = index, y = p_value)) + 
   geom_hline(yintercept = find_bh_threshold(toplot_manhattan$p_value)) + 
   geom_hline(yintercept = find_bonferroni_threshold(toplot_manhattan$p_value)) + 
-  geom_point() + 
-  scale_y_continuous(trans = reverselog_trans(), labels = scales::number) + 
-  geom_label(aes(x = x, y = y, label = label), data = labels_dt, color = 'black') + 
+  geom_point(aes(shape = difference, fill = difference, size = difference)) + 
+  scale_y_continuous(
+    trans = reverselog_trans(),
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) + 
+  geom_label(aes(x = x, y = y, label = label), data = labels_dt, color = 'black') +
   labs(x = 'Index', y = 'P-value', color = '') +
   theme_user() + 
   theme(legend.position = 'none') + 
-  scale_color_manual(values = c('Increase' = '#2ECC71', 'Decay' = '#E74C3C', 'Insignificant' = '#707B7C'))
+  scale_shape_manual(values = c('Increase' = 24, 'Decay' = 25, 'Insignificant' = 21)) + 
+  scale_fill_manual(values = c('Increase' = 'darkgrey', 'Decay' = 'darkgrey', 'Insignificant' = 'white')) + 
+  scale_size_manual(values = c('Increase' = 2.5, 'Decay' = 2.5, 'Insignificant' = 2))
+
+alpha_manhattan_plot
 
 out <- arrangeGrob(alpha_estimate_plot, alpha_manhattan_plot, nrow = 2)
 custom_ggsave('alpha_manhattan.png', out, width = 1.5)

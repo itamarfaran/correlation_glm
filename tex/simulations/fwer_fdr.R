@@ -33,10 +33,14 @@ samples <- rbind(
   ))
 )
 
-samples[,z_value := (estimated_alpha - 1)/sd]
+save(samples, file = 'tex/simulations/fwer_fdr.RData')
+
+samples[,case := ifelse(case == 'Effect', 'Weak Null', 'Strong Null')]
+
+samples[,z_value := (estimated_alpha - 1)/(sd)]
 samples[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 samples[,`:=`(
-  holm_p = p.adjust(p_value, 'holm'),
+  holm_p = p.adjust(p_value, 'bon'),
   bh_p = p.adjust(p_value, 'BH')
 ), by = .(autocorrelated, p_s, case, sim_num, sim)]
 
@@ -46,8 +50,8 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = mean(p_value < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>% 
-    summarise(type = 'No Correction\n(False Positive Rate\nper Sample)', value = mean(value)),
-
+    summarise(type = 'No Correction\n(False Positive Rate)', value = mean(value)),
+  
   samples %>%
     filter(real_alpha == 1) %>%
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
@@ -65,15 +69,66 @@ out <- rbind(
   )
 
 
-save(samples, out, file = 'tex/simulations/fwer_fdr.RData')
 
-pl <- ggplot(out, aes(x = type, y = value)) + 
+pl1 <- ggplot(out, aes(x = type, y = value)) + 
   geom_boxplot(fill = 'lightgrey') +
   facet_grid(case~autocorrelated ) + 
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 
   labs(title = 'FDR & FWER', subtitle=paste0('Error Rate set to ', sig_level), y = 'Rate') + 
-  theme(axis.title.x=element_blank())
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-custom_ggsave('fwer_fdr.png', pl)
+custom_ggsave('fwer_fdr.png', pl1, .82, 1.25)
+
+
+
+
+
+
+
+samples[,z_value := (estimated_alpha - 1)/(sd*sqrt(1.1))]
+samples[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
+samples[,`:=`(
+  holm_p = p.adjust(p_value, 'bon'),
+  bh_p = p.adjust(p_value, 'BH')
+), by = .(autocorrelated, p_s, case, sim_num, sim)]
+
+out <- rbind(
+  samples %>%
+    filter(real_alpha == 1) %>%
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(value = mean(p_value < sig_level)) %>% 
+    group_by(autocorrelated, p_s, case, sim) %>% 
+    summarise(type = 'No Correction\n(False Positive Rate)', value = mean(value)),
+  
+  samples %>%
+    filter(real_alpha == 1) %>%
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(value = any(holm_p < sig_level)) %>% 
+    group_by(autocorrelated, p_s, case, sim) %>%
+    summarise(type = 'FWER\n(Bonferroni)', value = mean(value)),
+  
+  samples %>% 
+    group_by(autocorrelated, p_s, case, sim, sim_num) %>%
+    summarise(V = sum(bh_p < sig_level & real_alpha == 1),
+              R = sum(bh_p < sig_level)) %>% 
+    mutate(value = V/remove_zeros(R)) %>%
+    group_by(autocorrelated, p_s, case, sim) %>% 
+    summarise(type = 'FDR\n(BH)', value = mean(value))
+)
+
+
+
+pl2 <- ggplot(out, aes(x = type, y = value)) + 
+  geom_boxplot(fill = 'lightgrey') +
+  facet_grid(case~autocorrelated ) + 
+  geom_hline(yintercept = 0) + 
+  geom_hline(yintercept = sig_level, linetype = 3) + 
+  ylim(0, 0.2) + theme_user() + 
+  labs(title = 'FDR & FWER', subtitle=paste0('Error Rate set to ', sig_level, ', \nWith Thumb Rule Applied'), y = 'Rate') + 
+  theme(axis.title.x=element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+custom_ggsave('fwer_fdr_thumb.png', pl2, .82, 1.25)

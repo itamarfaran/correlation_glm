@@ -31,6 +31,8 @@ get_count_na_by_threshold <- function(na_mat){
 
 filter_columns_by_na_threshold <- function(array_, threshold){
   which_columns_keep <- which(get_percent_na(calculate_na_mat(array_)) <= threshold)
+  which_columns_to_drop <- which(get_percent_na(calculate_na_mat(array_)) > threshold)
+  print(which_columns_to_drop)  # todo: should be part of output!
   new_array_ <- array_[which_columns_keep, which_columns_keep, ]
   return(new_array_)
 }

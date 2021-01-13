@@ -12,7 +12,7 @@ out <- do.call(rbind, list(
   create_estimates(n_sim = n_sim, n = n, p = p, percent_alpha = percent_alpha, range_alpha = range_alpha, ARMA = 0.5)
   ))
 
-save(out, file = 'bias_small_sample.RData')
+save(out, file = 'tex/simulations/bias_small_sample.RData')
 
 
 p1 <- ggplot(out[type == 'Theta'], aes(x = Parameter, y = Estimate)) + 

@@ -13,6 +13,8 @@ toplot <- do.call(rbind, pbmclapply(seq_len(nrow(examples)), function(i) create_
   verbose = FALSE
   ), mc.cores = ncores))
 
+save(toplot, 'bias_function_n.RData')
+
 toplot_ <- copy(toplot)
 
 toplot[,`:=`(Bias = Estimate - Parameter, RMSE = (Estimate - Parameter)^2, p_factor = factor(p)),]

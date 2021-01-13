@@ -13,7 +13,7 @@ toplot <- do.call(rbind, pbmclapply(seq_len(nrow(examples)), function(i) create_
   verbose = FALSE
   ), mc.cores = ncores))
 
-save(toplot, 'bias_function_n.RData')
+save(toplot, file = 'bias_function_n.RData')
 
 toplot_ <- copy(toplot)
 

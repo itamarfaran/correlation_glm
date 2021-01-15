@@ -19,10 +19,13 @@ toplot <- data.table(theo = triangle2vector(cov_theo), emp = triangle2vector(cov
 toplot[, diff := theo - emp]
 
 toplot_samp <- toplot[sample(.N, 1250, prob = sqrt(abs(emp)))]
+correlation <- cor(toplot_samp)
+rsquared <- correlation['theo', 'emp'] ^ 2
 
 p1 <- ggplot(toplot_samp, aes(x = theo, y = emp)) + 
   geom_point(shape=21, alpha=0.5, fill='darkgrey') + 
   geom_abline(intercept = 0, slope = 1) + 
+  annotate('label', x = .005, y = -.01, label = TeX(paste0('$R^2$: ', round(rsquared, 3)), 'expression')) + 
   labs(
     # title='Empirical and Theoretical Covariance of the Correlation Matrix',
     x='Delta Method Derived Estimates',

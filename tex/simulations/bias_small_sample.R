@@ -31,6 +31,6 @@ p2 <- ggplot(out[type == 'Alpha'], mapping = aes(x = Parameter, y = Estimate, sh
   theme_user() + 
   theme(legend.position = 'bottom')
 
-out2 <- arrangeGrob(p1, p2, nrow=2)
-custom_ggsave('bias_small_sample.png', out2, 1.5, 1.2)
+out2 <- arrangeGrob(p1, p2, layout_matrix = matrix(c(1, 1, 1, 1, 2, 2, 2, 2, 2), nc=1))
+custom_ggsave('bias_small_sample.png', out2, 1.5, 1.4)
 

@@ -1,0 +1,373 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+PSD Proof
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\Theta\in\mathcal{C}_{p}$
+\end_inset
+
+, a matrix in the space of correlation matrices 
+\begin_inset Newline linebreak
+\end_inset
+
+
+\begin_inset Formula $\ensuremath{\mathcal{C}_{p}=\left\{ M:M\in\mathbb{M}_{p\times p}\left(\left[-1,1\right]\right),\,M\geq0,\,M_{ii}=1\forall i\right\} }$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha\in\mathbb{R}^{p}$
+\end_inset
+
+.
+ Then one has:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+x^{t}\left(\Theta\circ\alpha\alpha^{t}\right)x & =\sum_{i}\sum_{j}x_{i}\Theta_{ij}\alpha_{i}\alpha_{j}x_{j}\\
+ & =\sum_{i}\sum_{j}\alpha_{i}x_{i}\Theta_{ij}x_{j}\alpha_{j}\\
+ & =\tilde{x}^{t}\Theta\tilde{x}\geq0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\tilde{x}=x\circ\alpha$
+\end_inset
+
+.
+ However, The Hadamard link function used in this paper isn't simply 
+\begin_inset Formula $\Theta\circ\alpha\alpha^{t}$
+\end_inset
+
+, since 
+\begin_inset Formula $\Theta\circ\alpha\alpha^{t}\notin\mathcal{C}_{p}$
+\end_inset
+
+ as it's diagonal isn't equal to one.
+ In practice, 
+\begin_inset Formula $g$
+\end_inset
+
+ is defined as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g_{ij}\left(\Theta,\alpha\right)=\begin{cases}
+\Theta_{ij}\alpha_{i}\alpha_{j} & i\neq j\\
+1 & i=j
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+or
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+g\left(\Theta,\alpha\right)=\Theta\circ\alpha\alpha^{t}+I-D_{\alpha}^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $D_{\alpha}$
+\end_inset
+
+ is 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ diagonalized on a matrix (
+\begin_inset Formula $D_{\alpha,ii}=\alpha_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $0$
+\end_inset
+
+ on the off-diagonal).
+ Define the following:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\alpha_{M}=\underset{j}{\arg\max}\:\alpha_{j}^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\alpha_{m}=\underset{j}{\arg\min}\:\alpha_{j}^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\Theta=U\Lambda U^{t}$
+\end_inset
+
+, it's spectral decomposition with 
+\begin_inset Formula $\lambda_{1}\geq\lambda_{2}\geq...\geq\lambda_{p}\geq0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Also, recall that (1) 
+\begin_inset Formula $x^{t}\left(A\circ B\right)y=\text{tr}\left(D_{x}AD_{y}B^{t}\right)$
+\end_inset
+
+ and that (2) for 
+\begin_inset Formula $x^{t}D_{a}x$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x^{t}D_{a}x=\sum_{i}a_{i}x_{i}^{2}\geq\sum_{i}\min_{j}a_{j}\cdot x_{i}^{2}=\min_{j}a_{j}\cdot||x||^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and similarly, 
+\begin_inset Formula $\sum_{i}a_{i}x_{i}^{2}\leq\max_{j}a_{j}\cdot||x||^{2}$
+\end_inset
+
+, or 
+\begin_inset Formula $\max_{j}a_{j}\cdot||x||^{2}\geq x^{t}D_{a}x\geq\min_{j}a_{j}\cdot||x||^{2}$
+\end_inset
+
+.
+ Now, we wish to find the condition on which 
+\begin_inset Formula $g\left(\Theta,\alpha\right)$
+\end_inset
+
+ is Positive Semi-Definite: 
+\begin_inset Formula $x^{t}g\left(\Theta,\alpha\right)x\geq0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+x^{t}g\left(\Theta,\alpha\right)x & =x^{t}\left(\Theta\circ\alpha\alpha^{t}+I-D_{\alpha}^{2}\right)x\\
+ & =x^{t}\left(\Theta\circ\alpha\alpha^{t}\right)x+x^{t}x-x^{t}D_{\alpha}^{2}x
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, using (1), 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+x^{t}\left(\Theta\circ\alpha\alpha^{t}\right)x & =\text{tr}\left(D_{x}\Theta D_{x}\alpha\alpha^{t}\right)\\
+ & =\alpha^{t}D_{x}\Theta D_{x}\alpha\\
+ & =\alpha^{t}D_{x}U\Lambda U^{t}D_{x}\alpha
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And using (2),
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha^{t}D_{x}U\Lambda U^{t}D_{x}\alpha & \geq\lambda_{p}\cdot\alpha^{t}D_{x}UU^{t}D_{x}\alpha\\
+ & =\lambda_{p}\cdot\alpha^{t}D_{x}D_{x}\alpha\\
+ & =\lambda_{p}x^{t}D_{\alpha}^{2}x
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+putting all together yields:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+x^{t}\left(\Theta\circ\alpha\alpha^{t}\right)x+x^{t}x-x^{t}D_{\alpha}^{2}x & \geq\lambda_{p}x^{t}D_{\alpha}^{2}x+x^{t}x-x^{t}D_{\alpha}^{2}x\\
+ & \geq\lambda_{p}\alpha_{m}^{2}||x||^{2}+||x||^{2}-\alpha_{M}^{2}||x||^{2}\\
+ & \propto\lambda_{p}\alpha_{m}^{2}+1-\alpha_{M}^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So, for 
+\begin_inset Formula $x^{t}g\left(\Theta,\alpha\right)x\geq0$
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x^{t}g\left(\Theta,\alpha\right)x\geq0\iff\lambda_{p}\geq\frac{\alpha_{M}^{2}-1}{\alpha_{m}^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is easy to see that if 
+\begin_inset Formula $\alpha_{i}\in\left[-1,1\right]\,\forall\,i$
+\end_inset
+
+, 
+\begin_inset Formula $g\left(\Theta,\alpha\right)$
+\end_inset
+
+ is 
+\bar under
+always
+\bar default
+ Positive Semi Definite as 
+\begin_inset Formula $\frac{\alpha_{M}^{2}-1}{\alpha_{m}^{2}}\leq0$
+\end_inset
+
+.
+ However, depending on 
+\begin_inset Formula $\Theta$
+\end_inset
+
+'s eigenvalues, 
+\begin_inset Formula $\alpha_{M}$
+\end_inset
+
+ can be in the neighborhood of 
+\begin_inset Formula $1$
+\end_inset
+
+ from above as well.
+\end_layout
+
+\end_body
+\end_document

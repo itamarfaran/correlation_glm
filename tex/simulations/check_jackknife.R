@@ -2,7 +2,7 @@ source('tex/simulations/aux_.R')
 
 infer_jacknife_testing <- function(results, version_){
   if(class(version_) == 'numeric') version_ == as.character(version_)
-  sick_ind <- as.logical(results$is_sick)
+  sick_ind <- as.logical(results$is_diagnosed)
   
   n_s <- sum(sick_ind)
   n_h <- sum(!sick_ind)
@@ -50,16 +50,16 @@ samples <- create_samples(
 )
 
 estimates <- do.call(rbind, pbmclapply(1:n_sim, function(i){
-  out <- estimate_alpha(
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick,
+  out <- estimate_model(
+    control_arr = samples$samples[[i]]$healthy,
+    diagnosed_arr = samples$samples[[i]]$sick,
     verbose = FALSE)
   return(as.vector(out$alpha))
 }, mc.cores = ncores))
 
-jackknife_estimates <- estimate_alpha_jacknife(
-  healthy_dt = samples$samples[[1]]$healthy,
-  sick_dt = samples$samples[[1]]$sick,
+jackknife_estimates <- estimate_model_jacknife(
+  control_arr = samples$samples[[1]]$healthy,
+  diagnosed_arr = samples$samples[[1]]$sick,
   verbose = TRUE, ncores = ncores
 )
 

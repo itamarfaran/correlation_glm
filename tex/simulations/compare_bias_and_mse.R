@@ -12,7 +12,7 @@ ARMAdetails <- list(
   ARsick = c(0.5, 0.1), MAsick = c(0.5, 0.1),
   ARhealth = c(0.4, 0.2), MAhealth = c(0.4, 0.2)
 )
-sapply(ARMAdetails, check_invertability_arma)
+sapply(ARMAdetails, is_invertable_arma)
 
 patient_data <- prepare_corrmat_data(
   subset = 1:p,
@@ -27,15 +27,15 @@ sample_data <- create_samples(n_sim = n_sim, n_h = n_h, n_s = n_s, p = p, Tlengt
                               percent_alpha = 0.4, range_alpha = c(0.6, 0.8), real_theta = real_theta, ncores = ncores)
 
 estimate_fun <- function(i){
-  healthy_dt <- convert_corr_array_to_data_matrix_test(sample_data$samples[[i]]$healthy)
-  sick_dt <- convert_corr_array_to_data_matrix_test(sample_data$samples[[i]]$sick)
-  weight_matrix <- corrmat_covariance_from_dt(sick_dt)
+  healthy_dt <- convert_corr_array_to_data_matrix(sample_data$samples[[i]]$healthy)
+  sick_dt <- convert_corr_array_to_data_matrix(sample_data$samples[[i]]$sick)
+  weight_matrix <- corrmat_covariance_from_datamatrix(sick_dt)
   
-  ols <- inner_optim_loop(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = NULL, early_stop = early_stop, verbose = F)
+  ols <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = NULL, early_stop = early_stop, verbose = F)
   wls_warm_start <- inner_optim_loop(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
                                      alpha0 = ols$alpha, theta0 = ols$theta, verbose = F)
-  wls <- inner_optim_loop(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop, verbose = F)
-  wls_reg <- inner_optim_loop(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
+  wls <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop, verbose = F)
+  wls_reg <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
                               matrix_reg_config = list(method = 'increase_diag', const = 0.25), verbose = F)
   
   estimates <- data.table(

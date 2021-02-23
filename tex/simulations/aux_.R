@@ -1,8 +1,6 @@
-source("lib/utils/general_functions.R")
+source("lib/utils/ipak_and_prompt_for_cores.R")
 source("lib/utils/preprocess_functions.R")
 source("lib/utils/simulation_functions.R")
-source("lib/model/estimation_functions.R")
-source("lib/model/inference_functions.R")
 ipak('gridExtra', 'latex2exp')
 
 theme_user <- theme_bw
@@ -104,7 +102,7 @@ create_estimates <- function(n_sim, n, p, percent_alpha, range_alpha, ARMA = 0, 
   samples <- create_samples(n_sim = n_sim, n_h = n/2, n_s = n/2, p = p, Tlength = 115,
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
-  results <- estimate_alpha(samples$samples$healthy, samples$samples$sick, verbose=verbose)
+  results <- estimate_model(samples$samples$healthy, samples$samples$sick, verbose=verbose)
   
   theta_dt <- data.table(type = 'Theta', Estimate = results$theta, Parameter = triangle2vector(samples$real_theta))
   alpha_dt <- data.table(type = 'Alpha', Estimate = as.vector(results$alpha), Parameter = as.vector(samples$alpha))

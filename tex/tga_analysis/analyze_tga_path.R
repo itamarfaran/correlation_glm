@@ -1,5 +1,5 @@
 ##### source and load #####
-source("tex/simulations/aux.R")
+source("tex/simulations/aux_.R")
 ipak('ggExtra', 'plotly')
 
 w <- 300

@@ -1,24 +1,24 @@
 source("tex/simulations/aux_.R")
 
 linkFun <- list(
-  NAME = 'log_multiplicative_identity',
-  FUN = function(t, a, d) {
+  name = 'log_multiplicative_identity',
+  func = function(t, a, d) {
     a <- exp(a)
     a <- matrix(a, nc = d)
     a_mat <- a %*% t(a)
     diag(a_mat) <- 1
     vector2triangle(t, diag_value = 1)*a_mat
   },
-  INV = function(a) log(a),
-  CLEAN = function(dt, a, d){
+  inverse = function(a) log(a),
+  rev_func = function(datamatrix, a, d){
     a <- exp(a)
     a <- matrix(a, nc = d)
     a_mat <- a %*% t(a)
     diag(a_mat) <- 1
     a_vect <- triangle2vector(a_mat)
-    return(dt / (rep(1, nrow(dt)) %*% t(a_vect)))
+    return(datamatrix / (rep(1, nrow(datamatrix)) %*% t(a_vect)))
   },
-  NULL_VAL = 0
+  null_value = 0
 )
 
 
@@ -43,16 +43,16 @@ if (file.exists(file)){
     sick_index_name = conf[[desease_data]]$sick_index_name
   )
   
-  test_corr_mat(sample_data)
+  sapply(sample_data$samples, test_corr_mat)
   
-  results <- estimate_alpha(
-    healthy_dt = sample_data$samples$healthy,
-    sick_dt = sample_data$samples$sick,
-    linkFun = linkFun,
+  results <- estimate_model(
+    control_arr = sample_data$samples$healthy,
+    diagnosed_arr = sample_data$samples$sick,
+    LinkFunc = linkFun,
     bias_correction = FALSE)
   
   gee_var <- with(sample_data$samples, compute_gee_variance(
-    healthy_dt = healthy, sick_dt = sick, cov_obj = results, est_mu = T
+    control_arr = healthy, diagnosed_arr = sick, mod = results, est_mu = T
   ))
   
   save(sample_data, results, gee_var, file = file)

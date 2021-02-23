@@ -1,6 +1,6 @@
 source("tex/simulations/aux_.R")
 
-linkFun <- linkFunctions$multiplicative_identity
+linkFun <- LinkFunctions$multiplicative_identity
 
 
 conf <- list(
@@ -33,16 +33,16 @@ if (file.exists(file)){
     sick_index_name = conf[[desease_data]]$sick_index_name
   )
   
-  test_corr_mat(sample_data)
+  sapply(sample_data$samples, test_corr_mat)
   
-  results <- estimate_alpha(
-    healthy_dt = sample_data$samples$healthy,
-    sick_dt = sample_data$samples$sick,
-    linkFun = linkFun,
+  results <- estimate_model(
+    control_arr = sample_data$samples$healthy,
+    diagnosed_arr = sample_data$samples$sick,
+    LinkFunc = linkFun,
     bias_correction = TRUE)
   
   gee_var <- with(sample_data$samples, compute_gee_variance(
-    healthy_dt = healthy, sick_dt = sick, cov_obj = results, est_mu = T
+    control_arr = healthy, diagnosed_arr = sick, mod = results, est_mu = T
   ))
   
   save(sample_data, results, gee_var, file = file)

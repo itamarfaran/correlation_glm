@@ -1,4 +1,3 @@
-
 calculate_na_mat <- function(array_){
   na_mat <- matrix(0, nr=dim(array_)[1], nc=dim(array_)[2])
   for(i in seq_len(dim(array_)[3])){
@@ -95,18 +94,5 @@ prepare_corrmat_data <- function(link, corr_matrix_name, healthy_index_name, sic
   sample_data <- list(samples = list(healthy = healthy_dta, sick = sick_dta),
                       p = p, which_cols_na = which_cols_na, link = link)
   return(sample_data)
-}
-
-
-test_corr_mat <- function(dta){
-  which_not_pos <- which(!apply(with(dta$samples, abind(healthy, sick)), 3, is.positive.definite))
-  which_na <- list(
-    healthy = which(is.na(dta$healthy), arr.ind = TRUE),
-    sick = which(is.na(dta$sick), arr.ind = TRUE)
-  )
-  return(list(
-    which_not_positive_definite = which_not_pos,
-    which_na = which_na
-  ))
 }
 

@@ -1,13 +1,11 @@
-source('lib/utils/general_functions.R')
+source('lib/utils/ipak_and_prompt_for_cores.R')
 source('lib/utils/preprocess_functions.R')
 source('lib/utils/simulation_functions.R')
-source('lib/model/estimation_functions.R')
-source('lib/model/inference_functions.R')
 
 
 ##### simulation pars #####
 
-linkFun <- linkFunctions$multiplicative_identity
+linkFun <- LinkFunctions$multiplicative_identity
 p <- 32
 n_h <- 10
 n_s <- 10
@@ -17,7 +15,7 @@ ARMAdetails <- list(
   ARsick = c(0.5, 0.1), MAsick = c(0.5, 0.1),
   ARhealth = c(0.4, 0.2), MAhealth = c(0.4, 0.2)
 )
-sapply(ARMAdetails, check_invertability_arma)
+sapply(ARMAdetails, is_invertable_arma)
 
 
 ##### data analysis configs pars #####
@@ -51,7 +49,7 @@ data_configs <- list(
 
 
 ##### data analysis pars #####
-data_conf_name <- 'amnesia_aal'
+data_conf_name <- 'simulation'  # 'amnesia_aal'
 data_conf <- if(data_conf_name == 'simulation') NULL else data_configs[[data_conf_name]]
 data_subset <- NULL
 
@@ -75,25 +73,25 @@ if(is.null(data_conf)){
 
 ##### analysis #####
 
-test_corr_mat(sample_data)
+sapply(sample_data$samples, test_corr_mat)
 
-results <- estimate_alpha(
-  healthy_dt = sample_data$samples$healthy,
-  sick_dt = sample_data$samples$sick,
+results <- estimate_model(
+  control_arr = sample_data$samples$healthy,
+  diagnosed_arr = sample_data$samples$sick,
   early_stop = FALSE,
   matrix_reg_config = list(method = 'constant', const = 0.1)
   )
 
 gee_var <- compute_gee_variance(
-  healthy_dt = sample_data$samples$healthy,
-  sick_dt = sample_data$samples$sick,
-  cov_obj = results
+  mod = results,
+  control_arr = sample_data$samples$healthy,
+  diagnosed_arr = sample_data$samples$sick
   )
 
-# results_jacknife <- estimate_alpha_jacknife(
-#   healthy_dt = sample_data$samples$healthy, sick_dt = sample_data$samples$sick,
-#   linkFun = linkFun, jack_healthy = TRUE, return_gee = F, ncores = ncores)
-# jacknife_inference <- infer_jacknife(results_jacknife)
+results_jacknife <- estimate_model_jacknife(
+  control_arr = sample_data$samples$healthy, diagnosed_arr = sample_data$samples$sick,
+  LinkFunc = linkFun, jack_control = TRUE, return_gee = F, ncores = ncores)
+jacknife_inference <- infer_jackknife(results_jacknife)
 
 save.image(paste0('lib/data/envs/full_run_jacknife_', data_conf_name, '_multiplicative_link.RData'))
 

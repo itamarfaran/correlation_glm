@@ -7,7 +7,7 @@ timeit <- function(p, r){
                               ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL)
     
     t1 <- Sys.time()
-    results <- estimate_alpha(healthy_dt = samples$samples$healthy, sick_dt = samples$samples$sick, verbose = FALSE)
+    results <- estimate_model(control_arr = samples$samples$healthy, diagnosed_arr = samples$samples$sick, verbose = FALSE)
     t1 <- as.double(Sys.time() - t1, units = 'secs')
 
     t2 <- Sys.time()

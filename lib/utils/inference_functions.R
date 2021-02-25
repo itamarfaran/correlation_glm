@@ -86,7 +86,7 @@ wilks_test <- function(cov_obj, healthy_dt, sick_dt, dim_alpha = 1, linkFun){
                             sick.data = sick.dat,
                             dim_alpha = dim_alpha) -
                   minusloglik(theta = colMeans(rbind(healthy.dat, sick.dat)),
-                              alpha = rep(linkFun$NULL_VAL, length(cov_obj$alpha)),
+                              alpha = rep(linkFun$null_value, length(cov_obj$alpha)),
                               linkFun = linkFun,
                               healthy.data = healthy.dat,
                               sick.data = sick.dat,
@@ -138,7 +138,7 @@ build_hyp_test <- function(CovObj, VarMat, effectiveN, linkFun = linkFunctions$m
 
   res <- data.frame(Est. = CovObj$alpha)
   res$Std. <- const*alpha_sd
-  res$'Z-val' <- (res$Est. - linkFun$NULL_VAL)/res$Std.
+  res$'Z-val' <- (res$Est. - linkFun$null_value)/res$Std.
   res$'Lower' <- res$Est. - critical_value*alpha_sd
   res$'Upper' <- res$Est. + critical_value*alpha_sd
   

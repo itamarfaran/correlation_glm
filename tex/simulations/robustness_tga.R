@@ -37,7 +37,7 @@ for(try_ in seq_len(1000)){
 
 corrplot(corrmat_s_new - corrmat_h, is.corr = F)
 
-create_variance_estimates_custom_matrix <- function(n_sim, linkFun = linkFunctions$multiplicative_identity){
+create_variance_estimates_custom_matrix <- function(n_sim, linkFun = LinkFunctions$multiplicative_identity){
   if (ARMA == 0) ARMA <- NULL
   n_s <- ceiling(0.5*n)
   n_h <- n - n_s
@@ -46,16 +46,16 @@ create_variance_estimates_custom_matrix <- function(n_sim, linkFun = linkFunctio
                             real_theta = corrmat_h, real_sick = corrmat_s_new, linkFun = linkFun,
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
   results <- lapply(
-    1:n_sim, function(i) estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
-      linkFun = linkFun, verbose = FALSE)
+    1:n_sim, function(i) estimate_model(
+      control_arr = samples$samples[[i]]$healthy,
+      diagnosed_arr = samples$samples[[i]]$sick,
+      LinkFunc = linkFun, verbose = FALSE)
   )
   
   gee_vars <- sapply(1:n_sim, function(i) compute_gee_variance(
-    cov_obj = results[[i]],
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick
+    mod = results[[i]],
+    control_arr = samples$samples[[i]]$healthy,
+    diagnosed_arr = samples$samples[[i]]$sick
   ), simplify = 'array')
   
   sds <- lapply(1:n_sim, function(i) sqrt_diag(gee_vars[,,i]))
@@ -71,7 +71,7 @@ create_variance_estimates_custom_matrix <- function(n_sim, linkFun = linkFunctio
   is_null <- rep(TRUE, nrow(out))
   is_null[infected_regions] <- FALSE
   out[,`:=`(
-    z_value = (estimate - linkFun$NULL_VAL)/sd,
+    z_value = (estimate - linkFun$null_value)/sd,
     is_null = is_null
     )]
   

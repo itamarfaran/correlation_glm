@@ -6,7 +6,7 @@ DO_CORRECT = TRUE
 
 create_power_comparison <- function(
   sim, n_sim, n, p, percent_alpha, range_alpha, ARMA = 0,
-  method = 'BH', sig_level = .05, linkFun = linkFunctions$multiplicative_identity, ncores = 1){
+  method = 'BH', sig_level = .05, linkFun = LinkFunctions$multiplicative_identity, ncores = 1){
   
   fisher_z <- function(x) 0.5*log((1 + x)/(1 - x))
   
@@ -22,16 +22,16 @@ create_power_comparison <- function(
                               ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
                               linkFun = linkFun, enforce_min_alpha = TRUE, ncores = ncores)
     
-    results <- estimate_alpha(
-        healthy_dt = sample_$samples$healthy,
-        sick_dt = sample_$samples$sick,
-        linkFun = linkFun, verbose = FALSE)
+    results <- estimate_model(
+        control_arr = sample_$samples$healthy,
+        diagnosed_arr = sample_$samples$sick,
+        LinkFunc = linkFun, verbose = FALSE)
     
     gee_vars <- compute_gee_variance(
-      cov_obj = results,
-      healthy_dt = sample_$samples$healthy,
-      sick_dt = sample_$samples$sick)
-    
+      mod = results,
+      control_arr = sample_$samples$healthy,
+      diagnosed_arr = sample_$samples$sick)
+      
     if(DO_CORRECT){
       z_ <- (as.vector(results$alpha) - 1)/sqrt_diag(gee_vars * 1.1)
     } else{
@@ -40,7 +40,7 @@ create_power_comparison <- function(
     p_ <- 2*pnorm(abs(z_), lower.tail = F)
     p_adj <- p.adjust(p_, method)
     
-    to_reject_gee <- sample_$alpha != linkFun$NULL_VAL
+    to_reject_gee <- sample_$alpha != linkFun$null_value
     power_gee <- p_adj[to_reject_gee] < sig_level
     error_gee <- p_adj[!to_reject_gee] < sig_level
     
@@ -55,7 +55,7 @@ create_power_comparison <- function(
     diag(t_test_mat) <- 1
     
     pvals_t <- t_test_mat[lower.tri(t_test_mat)]
-    to_reject_t <- with(sample_, linkFun$FUN(triangle2vector(real_theta), alpha, d=1) != real_theta)
+    to_reject_t <- with(sample_, linkFun$func(triangle2vector(real_theta), alpha, d=1) != real_theta)
     to_reject_t <- to_reject_t[lower.tri(to_reject_t)]
     
     power_t <- pvals_t[to_reject_t] < sig_level

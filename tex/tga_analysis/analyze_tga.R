@@ -126,8 +126,8 @@ end_results_long[,variable := NULL]
 end_results_long <- dcast(end_results_long, index + method ~ type)[order(method, index)]
 end_results_long[,null_value := ifelse(
   method == 'quotent',
-  quotent_load$estimates$linkFun$NULL_VAL,
-  multiplicative_load$estimates$linkFun$NULL_VAL
+  quotent_load$estimates$linkFun$null_value,
+  multiplicative_load$estimates$linkFun$null_value
   )]
 end_results_long[,z_value := (est - null_value)/sd]
 end_results_long[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
@@ -278,7 +278,7 @@ toplot_manhattan[,difference := case_when(
 )]
 
 alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, ymin = ci_low, ymax = ci_upp, shape = difference, fill = difference, size = difference)) + 
-  geom_hline(yintercept = mod$estimates$linkFun$NULL_VAL, linetype = 2, color = 'darkgrey') + 
+  geom_hline(yintercept = mod$estimates$linkFun$null_value, linetype = 2, color = 'darkgrey') + 
   geom_point() + 
   # geom_text(aes(label = index)) + 
   labs(x = '', y = 'Estimate', color = '') +

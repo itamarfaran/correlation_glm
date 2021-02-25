@@ -124,18 +124,18 @@ create_variance_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alp
                             percent_alpha = percent_alpha, range_alpha = range_alpha,
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA, ncores = ncores)
   results <- pbmclapply(
-    1:n_sim, function(i) estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
+    1:n_sim, function(i) estimate_model(
+      control_arr = samples$samples[[i]]$healthy,
+      diagnosed_arr = samples$samples[[i]]$sick,
       verbose = FALSE), mc.cores = ncores
   )
   
   emp_cov <- var(t(do.call(cbind, transpose(results)$alpha)))
   
   gee_vars <- calculate_mean_matrix(simplify2array(pbmclapply(1:n_sim, function(i) compute_gee_variance(
-    cov_obj = results[[i]],
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick
+    mod = results[[i]],
+    control_arr = samples$samples[[i]]$healthy,
+    diagnosed_arr = samples$samples[[i]]$sick
   ), mc.cores = ncores)))
   
   out <- data.table(n = n, p = p, alpha = as.vector(samples$alpha), emp = sqrt_diag(emp_cov), est = sqrt_diag(gee_vars))
@@ -155,16 +155,16 @@ create_sample_estimates <- function(n_sim, n, p, p_s, percent_alpha, range_alpha
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA,
                             ncores = ncores)
   results <- pbmclapply(
-    1:n_sim, function(i) estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
+    1:n_sim, function(i) estimate_model(
+      control_arr = samples$samples[[i]]$healthy,
+      diagnosed_arr = samples$samples[[i]]$sick,
       verbose = FALSE), mc.cores = ncores
   )
   
   gee_vars <- pbmclapply(1:n_sim, function(i) compute_gee_variance(
-    cov_obj = results[[i]],
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick
+    mod = results[[i]],
+    control_arr = samples$samples[[i]]$healthy,
+    diagnosed_arr = samples$samples[[i]]$sick
   ), mc.cores = ncores)
   
   out <- data.table(

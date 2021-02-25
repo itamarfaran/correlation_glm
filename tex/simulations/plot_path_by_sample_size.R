@@ -1,5 +1,7 @@
 source("tex/simulations/aux_.R")
 
+#todo: incomatible with corrfuncs
+
 ##### definitions #####
 p <- 35
 linkFun <- linkFunctions$multiplicative_identity

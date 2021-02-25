@@ -15,16 +15,16 @@ create_variance_estimates_different_link <- function(n_sim, simulate_link, name_
                             percent_alpha = percent_alpha, range_alpha = range_alpha, linkFun = simulate_link,
                             ARsick = ARMA, ARhealth = ARMA, MAsick = ARMA, MAhealth = ARMA)
   results <- lapply(
-    1:n_sim, function(i) estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
-      linkFun = estimate_link, verbose = FALSE)
+    1:n_sim, function(i) estimate_model(
+      control_arr = samples$samples[[i]]$healthy,
+      diagnosed_arr = samples$samples[[i]]$sick,
+      LinkFunc = estimate_link, verbose = FALSE)
   )
   
   gee_vars <- sapply(1:n_sim, function(i) compute_gee_variance(
-    cov_obj = results[[i]],
-    healthy_dt = samples$samples[[i]]$healthy,
-    sick_dt = samples$samples[[i]]$sick
+    mod = results[[i]],
+    control_arr = samples$samples[[i]]$healthy,
+    diagnosed_arr = samples$samples[[i]]$sick
   ), simplify = 'array')
   
   sds <- lapply(1:n_sim, function(i) sqrt_diag(gee_vars[,,i]))
@@ -40,8 +40,8 @@ create_variance_estimates_different_link <- function(n_sim, simulate_link, name_
   out[,`:=`(
     simulate_link = name_sim, 
     estimae_link = name_est,
-    z_value = (estimate - estimate_link$NULL_VAL)/sd,
-    is_null = real == simulate_link$NULL_VAL
+    z_value = (estimate - estimate_link$null_value)/sd,
+    is_null = real == simulate_link$null_value
     )]
   
   return(out)
@@ -49,8 +49,8 @@ create_variance_estimates_different_link <- function(n_sim, simulate_link, name_
 
 res <- create_variance_estimates_different_link(
   20,
-  linkFunctions$multiplicative_identity, 'additive',
-  linkFunctions$additive_quotent, 'quotent'
+  LinkFunctions$multiplicative_identity, 'additive',
+  LinkFunctions$additive_quotent, 'quotent'
   )
 
 res[,`:=`(

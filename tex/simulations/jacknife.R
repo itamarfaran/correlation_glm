@@ -22,20 +22,20 @@ for(i in seq_len(n_repeat)){
   )
   
   estimates <- do.call(rbind, pbmclapply(1:n_sim, function(i){
-    out <- estimate_alpha(
-      healthy_dt = samples$samples[[i]]$healthy,
-      sick_dt = samples$samples[[i]]$sick,
+    out <- estimate_model(
+      control_arr = samples$samples[[i]]$healthy,
+      diagnosed_arr = samples$samples[[i]]$sick,
       verbose = FALSE)
     return(as.vector(out$alpha))
   }, mc.cores = ncores))
   
-  jackknife_estimates <- estimate_alpha_jacknife(
-    healthy_dt = samples$samples[[1]]$healthy,
-    sick_dt = samples$samples[[1]]$sick,
+  jackknife_estimates <- estimate_model_jacknife(
+    control_arr = samples$samples[[1]]$healthy,
+    diagnosed_arr = samples$samples[[1]]$sick,
     verbose = TRUE, ncores = ncores
   )
   
-  jackknife_inference <- infer_jacknife(jackknife_estimates)
+  jackknife_inference <- infer_jackknife(jackknife_estimates)
   
   
   sds_dt <- data.table(

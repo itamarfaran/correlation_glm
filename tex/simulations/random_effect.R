@@ -3,7 +3,7 @@ source('tex/simulations/aux_.R')
 corr_mat <- force_symmetry(build_parameters(12, 0, 0:1)$corr_mat)
 
 arma_vec <- c(-.8, -.5, -.2, 0, .2, .5, .8)
-rand_vec <- c(-1, 10, 50, 100, 200, 500, 1000, Inf)
+rand_vec <- c(10, 50, 100, 200, 500, 1000, Inf)
 examples <- data.table(expand.grid(
   df = 12*(1:10),
   sample_size = 20*(1:6),
@@ -13,12 +13,12 @@ examples <- data.table(expand.grid(
 ))
 simulate_rms <- Vectorize(function(df, sample_size, AR, MA, random_effect, ncores = 1){
   create_correlation_matrices(
-    real_corr = corr_mat,
+    n = 40,
     df = 100,
-    sample_size = 40,
+    Sigma = corr_mat,
     AR = 0.5,
     MA = -0.2,
-    random_effect = -1,
+    random_effect = random_effect,
     ncores = ncores) %>% 
     calculate_mean_matrix() %>% 
     (function(x) {diag(x) <- 1; x}) %>% 

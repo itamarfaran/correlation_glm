@@ -43,7 +43,7 @@ out <- data.table(
   estimate = as.vector(results$alpha),
   sd = sqrt_diag(gee_var)
 )
-out[,z_value := (estimate - linkFun$NULL_VAL)/sd]
+out[,z_value := (estimate - linkFun$null_value)/sd]
 out[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 out[,p_adjusted := p.adjust(p_value, 'BH')]
 out[,index := 1:.N]

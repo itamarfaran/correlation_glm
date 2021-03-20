@@ -34,7 +34,7 @@ build_parameters <- function(p, percent_alpha, range_alpha, dim_alpha = 1, loc_s
 
 create_samples <- function(n_sim = 1, n_h, n_s, p, Tlength = 100,
                            percent_alpha = 0, range_alpha = 0:1, enforce_min_alpha=FALSE, dim_alpha = 1, loc_scale = c(0,1),
-                           linkFun = corrfuncs::LinkFunctions$multiplicative_identity,
+                           linkFun = corrpops::LinkFunctions$multiplicative_identity,
                            real_theta = NULL, real_sick = NULL,
                            ARsick = NULL, ARhealth = NULL, MAsick = NULL, MAhealth = NULL, random_effect = NULL,
                            seed = NULL, ncores = 1){

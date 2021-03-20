@@ -1,6 +1,6 @@
 source("tex/simulations/aux_.R")
 
-# todo: incompatible with corrfuncs
+# todo: incompatible with corrpops
 
 linkFun <- linkFunctions$multiplicative_identity
 p <- 32
@@ -33,11 +33,11 @@ estimate_fun <- function(i){
   sick_dt <- convert_corr_array_to_data_matrix(sample_data$samples[[i]]$sick)
   weight_matrix <- corrmat_covariance_from_datamatrix(sick_dt)
   
-  ols <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = NULL, early_stop = early_stop, verbose = F)
+  ols <- corrpops:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = NULL, early_stop = early_stop, verbose = F)
   wls_warm_start <- inner_optim_loop(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
                                      alpha0 = ols$alpha, theta0 = ols$theta, verbose = F)
-  wls <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop, verbose = F)
-  wls_reg <- corrfuncs:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
+  wls <- corrpops:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop, verbose = F)
+  wls_reg <- corrpops:::optimiser(healthy_dt = healthy_dt, sick_dt = sick_dt, weight_matrix = weight_matrix, early_stop = early_stop,
                               matrix_reg_config = list(method = 'increase_diag', const = 0.25), verbose = F)
   
   estimates <- data.table(

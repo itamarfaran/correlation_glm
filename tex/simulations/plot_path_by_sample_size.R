@@ -1,6 +1,6 @@
 source("tex/simulations/aux_.R")
 
-#todo: incomatible with corrfuncs
+#todo: incomatible with corrpops
 
 ##### definitions #####
 p <- 35

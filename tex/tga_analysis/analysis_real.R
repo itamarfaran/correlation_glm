@@ -21,7 +21,7 @@ conf <- list(
   )
 )
 desease_data <- 'TGA'
-file <- paste0('tex/tga_analysis/analysis_', tolower(desease_data), '_', linkFun$NAME, '.RData')
+file <- paste0('tex/tga_analysis/analysis_', tolower(desease_data), '_', linkFun$name, '.RData')
 
 if (file.exists(file)){
   load(file)
@@ -57,4 +57,15 @@ out[,z_value := (estimate - linkFun$null_value)/sd]
 out[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 out[,p_adjusted := p.adjust(p_value, 'BH')]
 out[,index := 1:.N]
-print(out[p_adjusted < .05])
+
+
+sorted_pvalues <- sort(out$p_value)
+m <- length(sorted_pvalues)
+R <- max(which(sorted_pvalues <= 1:m * .05 / m))
+confidence_level <- 1 - R * .05 / m / 2
+out[p_adjusted < .05, ci_pm := qnorm(confidence_level)*sd]
+
+out[, ci_lower := estimate - ci_pm]
+out[, ci_upper := estimate + ci_pm]
+
+print(out[p_adjusted < .05 & estimate < 1])

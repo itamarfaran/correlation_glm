@@ -39,7 +39,8 @@ corrplot(
   method = 'color', tl.pos = "n")
 dev.off()
 
-col_pal <- colorRampPalette(c('#E3C000', '#B04500', '#000000', '#003672', '#00DD0A'))
+# col_pal <- colorRampPalette(c('#9c0000', '#d6882f', '#fffff7', '#83bd53', '#096915'))
+col_pal <- colorRampPalette(c('#EA6408', '#DF8700', '#ffffff', '#A76FA6', '#6E246B'))
 
 empirical_difference_corrmat <- with(sample_data$samples, calculate_mean_matrix(sick) - calculate_mean_matrix(healthy))
 png('tex/tga_analysis/difference_explanatory.png', w, h)

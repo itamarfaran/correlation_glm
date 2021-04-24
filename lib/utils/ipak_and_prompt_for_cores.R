@@ -5,7 +5,7 @@ ipak <- function(..., only_install = FALSE){
   if(!only_install) sapply(pkg, require, character.only = TRUE)
 }
 
-packages <- c("abind", "corrplot", "data.table", "Matrix", "matrixcalc",
+packages <- c("abind", "corrplot", "data.table", "devtools", "Matrix", "matrixcalc",
               "mvtnorm", "numDeriv", "parallel", "plotly", "profvis", "progress",
               "Rcpp", "R.matlab", "stats4", "tidyverse", "GGally", "pbmcapply", "pbapply")
 ipak(packages)

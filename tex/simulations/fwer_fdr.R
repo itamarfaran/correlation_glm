@@ -50,7 +50,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = mean(p_value < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>% 
-    summarise(type = 'No Correction\n(False Positive Rate)', value = mean(value)),
+    summarise(type = 'FPR', value = mean(value)),
   
   samples %>%
     filter(real_alpha == 1) %>%
@@ -66,7 +66,8 @@ out <- rbind(
     mutate(value = V/remove_zeros(R)) %>%
     group_by(autocorrelated, p_s, case, sim) %>% 
     summarise(type = 'FDR\n(BH)', value = mean(value))
-  )
+  ) %>%
+  mutate(type = factor(type, levels = c('FPR', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
 
 
 
@@ -76,7 +77,7 @@ pl1 <- ggplot(out, aes(x = type, y = value)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 
-  labs(title = 'FDR & FWER', subtitle=paste0('Error Rate set to ', sig_level), y = 'Rate') + 
+  labs(title = 'FDR & FWER', subtitle=paste0('Without Variance Inflation'), y = 'Rate') + 
   theme(axis.title.x=element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
@@ -101,7 +102,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = mean(p_value < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>% 
-    summarise(type = 'No Correction\n(False Positive Rate)', value = mean(value)),
+    summarise(type = 'FPR', value = mean(value)),
   
   samples %>%
     filter(real_alpha == 1) %>%
@@ -117,7 +118,8 @@ out <- rbind(
     mutate(value = V/remove_zeros(R)) %>%
     group_by(autocorrelated, p_s, case, sim) %>% 
     summarise(type = 'FDR\n(BH)', value = mean(value))
-)
+) %>%
+  mutate(type = factor(type, levels = c('FPR', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
 
 
 
@@ -127,7 +129,7 @@ pl2 <- ggplot(out, aes(x = type, y = value)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 
-  labs(title = 'FDR & FWER', subtitle=paste0('Error Rate set to ', sig_level, ', \nWith Thumb Rule Applied'), y = 'Rate') + 
+  labs(title = 'FDR & FWER', subtitle=paste0('With Variance Inflation of 21%'), y = 'Rate') + 
   theme(axis.title.x=element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 

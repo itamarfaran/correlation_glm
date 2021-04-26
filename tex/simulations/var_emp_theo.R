@@ -21,7 +21,6 @@ p1 <- ggplot(toplot[case == 'No Effect' & autocorrelated == 'Not Autocorrelated'
   theme_user() + 
   labs(
     title = 'GEE Estimate of Variance',
-    subtitle = 'Null cases, No auto-correlation',
     x = 'Empirical Variance', y = 'GEE Estimated Variance'
     )
 
@@ -35,11 +34,21 @@ p2 <- ggplot(toplot[case == 'Effect' & autocorrelated == 'Autocorrelated'],
   theme(legend.position = 'bottom') + 
   labs(
     title = 'GEE Estimate of Variance',
-    subtitle = 'Non null cases, With auto-correlation',
     x = 'Empirical Variance', y = 'GEE Estimated Variance',
     shape = '\u03B1 Value:'
   )
+
+toplot[,bias:=est - emp]
+toplot[,per_bias:=est/emp - 1]
+p3 <- ggplot(toplot, aes(x='.',y=per_bias)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot() +
+  scale_y_continuous(labels = scales::percent) + 
+  theme_user() +
+  labs(title=TeX('\\hat{V}_{gee} / V - 1'), x='', y='')
+
+out2 <- arrangeGrob(p2, p3, layout_matrix = matrix(c(1, 1, 1, 2), nr=1))
 save(toplot, file = 'tex/simulations/var_emp_theo.RData')
 
 custom_ggsave('variance_emp_theo_null.png', p1, width=2, height=1.2)
-custom_ggsave('variance_emp_theo_nonnull.png', p2, width=2, height=1.2)
+custom_ggsave('variance_emp_theo_nonnull.png', out2, width=2, height=1.2)

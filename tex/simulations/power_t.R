@@ -147,7 +147,7 @@ toplot_groupby[,alpha_inv := 1 - min_alpha]
 # todo: minimal decay (1-alpha) in axis
 plt1 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), percent_alpha == .1) %>% 
-  mutate(rate = ifelse(rate == 'power', 'Statistical Power', 'Prob. to Reject Global Null')) %>%
+  mutate(rate = ifelse(rate == 'power', '% of Rejections', 'At Least One Rejection')) %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
@@ -157,15 +157,17 @@ plt1 <- toplot_groupby %>%
   scale_color_manual(values = c('darkgrey', 'black')) + 
   # geom_errorbar(width = .01) + 
   facet_grid(rate ~ .) + 
-  labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'),
-       y = 'Rate', col = 'Sample Size', linetype = 'Method', shape = 'Method') +
+  labs(title='Effect of Sample Size',
+       x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'),
+       y = 'Power', col = 'Sample Size', linetype = 'Method', shape = 'Method') +
   theme_user() +
-  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin())
+  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin()) +
+  guides(linetype = FALSE)
 
 
 plt2 <- toplot_groupby %>%
   filter(rate %in% c('power', '1rejected'), n == 100) %>% 
-  mutate(rate = ifelse(rate == 'power', 'Statistical Power', 'Prob. to Reject Global Null')) %>%
+  mutate(rate = ifelse(rate == 'power', '% of Rejections', 'At Least One Rejection')) %>%
   # mutate(value = ifelse(value == 0, 10^-5, value),
   #        lower = ifelse(lower == 0, 10^-5, lower),
   #        upper = ifelse(upper == 0, 10^-5, upper)) %>% 
@@ -175,10 +177,12 @@ plt2 <- toplot_groupby %>%
   scale_color_manual(values = c('darkgrey', 'black')) + 
   # geom_errorbar(width = .01) + 
   facet_grid(rate ~ .) + 
-  labs(x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'), 
-       y = 'Rate', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method', shape = 'Method') +
+  labs(title=TeX('Effect of Proportion of Non-Null $\\alpha_{j}$'),
+       x = TeX('Maximal Decay Effect ($\\max_j \\[ 1-\\alpha_{j}\\]$)'), 
+       y = 'Power', col = TeX('% of Non-Null $\\alpha$-s'), linetype = 'Method', shape = 'Method') +
   theme_user() +
-  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin())
+  theme(legend.position = 'bottom', legend.box = 'vertical', legend.margin = margin()) +
+  guides(linetype = FALSE)
 
 
 if(DO_CORRECT){

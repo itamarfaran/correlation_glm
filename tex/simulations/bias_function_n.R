@@ -34,6 +34,7 @@ S_sqrt_trans <- function() scales::trans_new("S_sqrt",S_sqrt,IS_sqrt)
 p <- ggplot(toplot[type == 'Alpha'], mapping = aes(x = n, fill = p_factor, y = Bias, group = interaction(n, p))) + 
   geom_hline(yintercept = 0) +
   geom_boxplot() +
+  scale_x_continuous(breaks = unique(toplot$n)) + 
   scale_y_continuous(trans="S_sqrt") +
   # scale_fill_gradient(low='#606060', high='#E0E0E0') + 
   scale_fill_brewer(palette = 'Greys') + 

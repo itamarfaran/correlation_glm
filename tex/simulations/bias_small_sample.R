@@ -30,7 +30,10 @@ p2 <- ggplot(out[type == 'Alpha'], mapping = aes(x = Parameter, y = Estimate, sh
   # facet_grid(. ~ autocorrelated) + 
   geom_abline(intercept = 0, slope = 1) + 
   ggtitle('Alpha') + 
-  theme_user()
+  theme_user() + 
+  theme(legend.position = c(.8,.2),
+        legend.background = element_rect(linetype="solid", colour ="black"))
 
-out2 <- arrangeGrob(p1, p2, layout_matrix = matrix(c(1, 1, 2, 2, 2), nr=1))
+out2 <- arrangeGrob(p1, p2, layout_matrix = matrix(c(1, 2), nr=1))
+plot(out2)
 custom_ggsave('bias_small_sample.png', out2, 2, 1)

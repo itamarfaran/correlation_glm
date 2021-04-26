@@ -1,8 +1,8 @@
 source('tex/simulations/aux_.R')
 
 n_repeat <- 5
-n_list <- c(40, 60, 80)
-p_list <- c(24, 32, 40)
+n_list <- c(40, 80, 120)
+p_list <- c(25, 40, 55)
 
 n_sim <- ncores
 range_alpha <- c(0.7, 1.1)
@@ -64,8 +64,7 @@ plt <- ggplot(sds_dt, aes(x = empiric, y = jackknife)) +
   facet_grid(p ~ n, labeller = label_both) + 
   theme_user() + 
   labs(
-    title = 'GEE Jackknife Estimate of Variance',
-    subtitle = 'Non null cases, With auto-correlation',
+    title = 'Jackknife Estimate of Variance',
     x = 'Empirical Variance', y = 'Jackknife Estimated Variance'
     )
 

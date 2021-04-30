@@ -20,8 +20,8 @@ p1 <- ggplot(toplot[case == 'No Effect' & autocorrelated == 'Not Autocorrelated'
   geom_abline(slope = 1, intercept = 0) + 
   theme_user() + 
   labs(
-    title = 'GEE Estimate of Variance',
-    x = 'Empirical Variance', y = 'GEE Estimated Variance'
+    title = 'GEE Framework for Variance',
+    x = 'Empirical Standard Deviations', y = 'GEE Estimated Standard Deviations'
     )
 
 
@@ -33,9 +33,8 @@ p2 <- ggplot(toplot[case == 'Effect' & autocorrelated == 'Autocorrelated'],
   theme_user() + 
   theme(legend.position = 'bottom') + 
   labs(
-    title = 'GEE Estimate of Variance',
-    x = 'Empirical Variance', y = 'GEE Estimated Variance',
-    shape = '\u03B1 Value:'
+    title = 'GEE Framework for Variance',
+    x = 'Empirical Standard Deviations', y = 'GEE Estimated Standard Deviations'
   )
 
 toplot[,bias:=est - emp]
@@ -45,7 +44,7 @@ p3 <- ggplot(toplot, aes(x='.',y=per_bias)) +
   geom_boxplot() +
   scale_y_continuous(labels = scales::percent) + 
   theme_user() +
-  labs(title=TeX('\\hat{V}_{gee} / V - 1'), x='', y='')
+  labs(title=TeX('StD Bias'), x='', y='')
 
 out2 <- arrangeGrob(p2, p3, layout_matrix = matrix(c(1, 1, 1, 2), nr=1))
 save(toplot, file = 'tex/simulations/var_emp_theo.RData')

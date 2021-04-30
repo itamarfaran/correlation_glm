@@ -134,6 +134,18 @@ end_results_long[,z_value := (est - null_value)/sd]
 end_results_long[,p_value := 2*pnorm(abs(z_value), lower.tail = F)]
 end_results_long[!is.na(est),p_adjusted := p.adjust(p_value, 'BH'), by = method]
 
+for(meth in end_results_long[,unique(method)]){
+  sorted_pvalues <- sort(end_results_long[method == meth, p_value])
+  m <- length(sorted_pvalues)
+  R <- max(which(sorted_pvalues <= 1:m * .05 / m))
+  confidence_level <- 1 - R * .05 / m / 2
+  end_results_long[p_adjusted < .05, ci_pm := qnorm(confidence_level)*sd]
+  end_results_long[, ci_lower := est - ci_pm]
+  end_results_long[, ci_upper := est + ci_pm]
+}
+
+
+
 
 to_write <- end_results_long[,.(index, method, est = round(est, 2), p_adjusted = round(p_adjusted, 3))]
 to_write[,p_adjusted := case_when(
@@ -174,9 +186,10 @@ estimates_plt <- dcast(end_results_long[,.(index, method, est)], index ~ method)
   geom_hline(yintercept = 0, linetype = 1, size = 1, col = 'darkgrey') + 
   geom_point(alpha = 0.8, shape = 21, color = 'black', fill = 'grey') + 
   labs(
-    title = 'Estimates under Different Link Functions',
-    x = TeX('$\\Lambda_{d,ij}=\\Theta_{ij}\\alpha_{i}\\alpha_{j}$'),
-    y = TeX('$\\Lambda_{d,ij}=\\Theta_{ij}/\\left(1+\\alpha_{i}+\\alpha_{j}\\right)$')
+    title = 'Estimates',
+    subtitle = 'Under Different Link Functions',
+    x = TeX('$\\Lambda^D_{ij}=\\Theta_{ij}\\alpha_{i}\\alpha_{j}$'),
+    y = TeX('$\\Lambda^D_{ij}=\\Theta_{ij}/\\left(1+\\alpha_{i}+\\alpha_{j}\\right)$')
   ) + 
   theme_user()
 
@@ -188,9 +201,10 @@ zscores_plt <- dcast(end_results_long[,.(index, method, z_value)], index ~ metho
   geom_point(alpha = 0.8, shape = 21, color = 'black', fill = 'grey') + 
   xlim(-5, 5) + ylim(-5, 5) + 
   labs(
-    title = 'Z-Scores under Different Link Functions',
-    x = TeX('$\\Lambda_{d,ij}=\\Theta_{ij}\\alpha_{i}\\alpha_{j}$'),
-    y = TeX('$\\Lambda_{d,ij}=\\Theta_{ij}/\\left(1+\\alpha_{i}+\\alpha_{j}\\right)$')
+    title = 'Z-Scores',
+    subtitle = 'Under Different Link Functions',
+    x = TeX('$\\Lambda^D_{ij}=\\Theta_{ij}\\alpha_{i}\\alpha_{j}$'),
+    y = TeX('$\\Lambda^D_{ij}=\\Theta_{ij}/\\left(1+\\alpha_{i}+\\alpha_{j}\\right)$')
   ) + 
   theme_user()
 
@@ -266,8 +280,8 @@ toplot_manhattan <- end_results_long[method == mod_name]
 
 sum_rejected <- toplot_manhattan[,sum(p_adjusted <= sig_level)]
 toplot_manhattan[,`:=`(
-  ci_low = est - qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
-  ci_upp = est + qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
+  # ci_low = est - qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
+  # ci_upp = est + qnorm(1 - sig_level/sum_rejected/2)*sd*(p_adjusted <= sig_level),
   is_significant = ifelse(p_adjusted <= sig_level, 'Significant', 'Insignificant'),
   difference = sign(z_value*(p_adjusted <= sig_level))
 )]
@@ -278,15 +292,16 @@ toplot_manhattan[,difference := case_when(
   TRUE ~ NA_character_
 )]
 
-alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, ymin = ci_low, ymax = ci_upp, shape = difference, fill = difference, size = difference)) + 
-  geom_hline(yintercept = mod$estimates$linkFun$null_value, linetype = 2, color = 'darkgrey') + 
+alpha_estimate_plot <- ggplot(toplot_manhattan, aes(x = index, y = est, shape = difference, fill = difference, size = difference)) + 
+  geom_hline(yintercept = mod$estimates$linkFun$NULL_VAL, linetype = 2, color = 'darkgrey') + 
+  geom_linerange(aes(x = index, ymin = ci_lower, ymax = ci_upper), inherit.aes = F) + 
   geom_point() + 
   # geom_text(aes(label = index)) + 
   labs(x = '', y = 'Estimate', color = '') +
   theme_user() + 
   theme(legend.position = 'none') +
   scale_shape_manual(values = c('Increase' = 24, 'Decay' = 25, 'Insignificant' = 21)) + 
-  scale_fill_manual(values = c('Increase' = 'darkgrey', 'Decay' = 'darkgrey', 'Insignificant' = 'white')) + 
+  scale_fill_manual(values = c('Increase' = 'black', 'Decay' = 'black', 'Insignificant' = 'white')) + 
   scale_size_manual(values = c('Increase' = 2.5, 'Decay' = 2.5, 'Insignificant' = 2))
 
 
@@ -313,7 +328,7 @@ alpha_manhattan_plot <- ggplot(toplot_manhattan, aes(x = index, y = p_value)) +
   theme_user() + 
   theme(legend.position = 'none') + 
   scale_shape_manual(values = c('Increase' = 24, 'Decay' = 25, 'Insignificant' = 21)) + 
-  scale_fill_manual(values = c('Increase' = 'darkgrey', 'Decay' = 'darkgrey', 'Insignificant' = 'white')) + 
+  scale_fill_manual(values = c('Increase' = 'black', 'Decay' = 'black', 'Insignificant' = 'white')) + 
   scale_size_manual(values = c('Increase' = 2.5, 'Decay' = 2.5, 'Insignificant' = 2))
 
 alpha_manhattan_plot

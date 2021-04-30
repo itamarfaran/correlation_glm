@@ -77,7 +77,7 @@ pl1 <- ggplot(out, aes(x = type, y = value)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 
-  labs(title = 'FDR & FWER', subtitle=paste0('Without Variance Inflation'), y = 'Rate') + 
+  labs(title = 'FDR & FWER', subtitle=paste0('Without StD Inflation'), y = 'Rate') + 
   theme(axis.title.x=element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
@@ -129,7 +129,7 @@ pl2 <- ggplot(out, aes(x = type, y = value)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
   ylim(0, 0.2) + theme_user() + 
-  labs(title = 'FDR & FWER', subtitle=paste0('With Variance Inflation of 21%'), y = 'Rate') + 
+  labs(title = 'FDR & FWER', subtitle=paste0('With StD Inflation of 10%'), y = 'Rate') + 
   theme(axis.title.x=element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 

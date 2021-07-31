@@ -324,7 +324,7 @@ alpha_manhattan_plot <- ggplot(toplot_manhattan, aes(x = index, y = p_value)) +
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) + 
   geom_label(aes(x = x, y = y, label = label), data = labels_dt, color = 'black') +
-  labs(x = 'Index', y = 'P-value', color = '') +
+  labs(x = 'Brain Region Index (AAL Atlas)', y = 'P-value', color = '') +
   theme_user() + 
   theme(legend.position = 'none') + 
   scale_shape_manual(values = c('Increase' = 24, 'Decay' = 25, 'Insignificant' = 21)) + 

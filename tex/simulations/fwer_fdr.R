@@ -72,7 +72,7 @@ out <- rbind(
 
 
 pl1 <- ggplot(out, aes(x = type, y = value)) + 
-  geom_boxplot(fill = 'lightgrey') +
+  geom_boxplot(fill = 'lightgrey', outlier.shape = NA) +
   facet_grid(case~autocorrelated ) + 
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 
@@ -124,7 +124,7 @@ out <- rbind(
 
 
 pl2 <- ggplot(out, aes(x = type, y = value)) + 
-  geom_boxplot(fill = 'lightgrey') +
+  geom_boxplot(fill = 'lightgrey', outlier.shape = NA) +
   facet_grid(case~autocorrelated ) + 
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = sig_level, linetype = 3) + 

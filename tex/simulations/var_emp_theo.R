@@ -41,7 +41,7 @@ toplot[,bias:=est - emp]
 toplot[,per_bias:=est/emp - 1]
 p3 <- ggplot(toplot, aes(x='.',y=per_bias)) +
   geom_hline(yintercept = 0) +
-  geom_boxplot() +
+  geom_boxplot(outlier.shape = NA) +
   scale_y_continuous(labels = scales::percent) + 
   theme_user() +
   labs(title=TeX('StD Bias'), x='', y='')

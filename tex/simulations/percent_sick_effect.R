@@ -14,7 +14,7 @@ toplot <- do.call(rbind, pbmclapply(seq_len(nrow(examples)), function(i) create_
 toplot[,`:=`(ratio = est/emp)]
 p <- ggplot(toplot, aes(x = p_s, y = ratio, group = p_s)) + 
   geom_hline(yintercept = 1, size = 1, linetype = 3) + 
-  geom_boxplot(alpha = 0.2, fill = 'grey') + 
+  geom_boxplot(alpha = 0.2, fill = 'grey', outlier.shape = NA) + 
   scale_y_continuous(labels = function(x) paste0('x', x)) + 
   facet_grid(autocorrelated ~ .) + 
   theme_user() + 

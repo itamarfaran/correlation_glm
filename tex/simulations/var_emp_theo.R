@@ -33,7 +33,7 @@ p2 <- ggplot(toplot[case == 'Effect' & autocorrelated == 'Autocorrelated'],
   theme_user() + 
   theme(legend.position = 'bottom') + 
   labs(
-    title = 'GEE Framework for Variance',
+    title = 'GEE Estimates for Standard Deviations',
     x = 'Empirical Standard Deviations', y = 'GEE Estimated Standard Deviations'
   )
 
@@ -44,7 +44,7 @@ p3 <- ggplot(toplot, aes(x='.',y=per_bias)) +
   geom_boxplot(outlier.shape = NA) +
   scale_y_continuous(labels = scales::percent) + 
   theme_user() +
-  labs(title=TeX('StD Bias'), x='', y='')
+  labs(title=TeX('Bias of SD Estimate'), x='', y='')
 
 out2 <- arrangeGrob(p2, p3, layout_matrix = matrix(c(1, 1, 1, 2), nr=1))
 save(toplot, file = 'tex/simulations/var_emp_theo.RData')

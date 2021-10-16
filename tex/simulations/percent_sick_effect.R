@@ -19,7 +19,7 @@ p <- ggplot(toplot, aes(x = p_s, y = ratio, group = p_s)) +
   facet_grid(autocorrelated ~ .) + 
   theme_user() + 
   labs(
-    title = 'Effect of % Diagnosed Subjects on Variance Estimation',
+    title = 'Effect of Relative Group Sizes on the Bias of the SD Estimate',
     x = TeX('$n_{d}/\\left(n_{d}+n_{h}\\right)$'), y = 'Ratio Between Estimated & Empirical\nStandard Deviations'
   )
 

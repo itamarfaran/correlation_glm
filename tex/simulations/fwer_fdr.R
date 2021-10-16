@@ -50,7 +50,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = mean(p_value < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>% 
-    summarise(type = 'FPR', value = mean(value)),
+    summarise(type = 'Per-\nComp.', value = mean(value)),
   
   samples %>%
     filter(real_alpha == 1) %>%
@@ -67,7 +67,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim) %>% 
     summarise(type = 'FDR\n(BH)', value = mean(value))
   ) %>%
-  mutate(type = factor(type, levels = c('FPR', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
+  mutate(type = factor(type, levels = c('Per-\nComp.', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
 
 
 
@@ -102,7 +102,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim, sim_num) %>%
     summarise(value = mean(p_value < sig_level)) %>% 
     group_by(autocorrelated, p_s, case, sim) %>% 
-    summarise(type = 'FPR', value = mean(value)),
+    summarise(type = 'Per-\nComp.', value = mean(value)),
   
   samples %>%
     filter(real_alpha == 1) %>%
@@ -119,7 +119,7 @@ out <- rbind(
     group_by(autocorrelated, p_s, case, sim) %>% 
     summarise(type = 'FDR\n(BH)', value = mean(value))
 ) %>%
-  mutate(type = factor(type, levels = c('FPR', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
+  mutate(type = factor(type, levels = c('Per-\nComp.', 'FWER\n(Bonferroni)', 'FDR\n(BH)', ordered=TRUE)))
 
 
 

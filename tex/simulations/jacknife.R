@@ -64,7 +64,7 @@ plt <- ggplot(sds_dt, aes(x = empiric, y = jackknife)) +
   facet_grid(p ~ n, labeller = label_both) + 
   theme_user() + 
   labs(
-    title = 'Jackknife Framework for Variance',
+    title = 'Jackknife Estimates for Standard Deviations',
     x = 'Empirical Standard Deviations', y = 'Jackknife Estimated Standard Deviations'
   )
 

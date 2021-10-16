@@ -24,7 +24,7 @@ quotent_load <- list(
 png('tex/tga_analysis/control_explanatory.png', w, h)
 corrplot(
   corr = calculate_mean_matrix(sample_data$samples$healthy), 
-  title = 'Average Correlation Matrix in Control Group', mar=c(0, 0, 1, 0), tl.offset = 1,
+  title = 'Average Correlation Matrix\nin Control Group', mar=c(0, 0, 2, 0), tl.offset = 1,
   method = 'color', tl.pos = "n")
 dev.off()
 
@@ -37,7 +37,7 @@ dev.off()
 png('tex/tga_analysis/diagnosed_explanatory.png', w, h)
 corrplot(
   corr = calculate_mean_matrix(sample_data$samples$sick), 
-  title = 'Average Correlation Matrix in Patient Group', mar=c(0, 0, 1, 0), tl.offset = 1,
+  title = 'Average Correlation Matrix\nin Patient Group', mar=c(0, 0, 2, 0), tl.offset = 1,
   method = 'color', tl.pos = "n")
 dev.off()
 
@@ -48,7 +48,7 @@ empirical_difference_corrmat <- with(sample_data$samples, calculate_mean_matrix(
 png('tex/tga_analysis/difference_explanatory.png', w, h)
 corrplot(
   corr = empirical_difference_corrmat, 
-  title = 'Difference Between Average Correlation Matrices of Groups', mar=c(0, 0, 1, 0), tl.offset = 1,
+  title = 'Difference Between Average Correlation\nMatrices of Groups', mar=c(0, 0, 2, 0), tl.offset = 1,
   method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35))
 dev.off()
 
@@ -222,7 +222,7 @@ estimate_difference_corrmat_quot <- with(mod$estimates, linkFun$FUN(theta, alpha
 png('tex/tga_analysis/difference_model.png', w, h)
 corrplot(
   corr = estimate_difference_corrmat_quot, 
-  title = 'Model Estimated Differences Between Expected Correlation Matrices of Groups', mar=c(0, 0, 1, 0), tl.offset = 1,
+  title = 'Model Estimated Differences Between\nMean Correlation Matrices of Groups', mar=c(0, 0, 2, 0), tl.offset = 1,
   method = 'color', is.corr = F, tl.pos = "n", col = col_pal(100), cl.lim = c(-.35, .35))
   #cl.lim = c(-.35, .35))
 dev.off()

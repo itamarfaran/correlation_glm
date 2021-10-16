@@ -44,7 +44,7 @@ p3 <- ggplot(toplot, aes(x='.',y=per_bias)) +
   geom_boxplot(outlier.shape = NA) +
   scale_y_continuous(labels = scales::percent) + 
   theme_user() +
-  labs(title=TeX('Bias of SD Estimate'), x='', y='')
+  labs(title=TeX('Bias in SD'), x='', y='')
 
 out2 <- arrangeGrob(p2, p3, layout_matrix = matrix(c(1, 1, 1, 2), nr=1))
 save(toplot, file = 'tex/simulations/var_emp_theo.RData')
